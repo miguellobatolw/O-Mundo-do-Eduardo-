@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O Mundo do Eduardo</title>
+<style>
+  :root{
+    --areia:#F2EDE4;
+    --areia-clara:#FAF7F1;
+    --petroleo:#3A6B70;
+    --petroleo-claro:#5C8C90;
+    --salva:#8FAE9A;
+    --salva-clara:#C9DBCD;
+    --amarelo-suave:#E8C468;
+    --coral-suave:#D98E73;
+    --texto:#2E3D3E;
+    --texto-suave:#5A6B6C;
+    --branco:#FFFFFF;
+    --sombra: 0 4px 14px rgba(58,107,112,0.12);
+    --raio: 22px;
+    --raio-grande: 28px;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    height:100dvh;
+    background:var(--areia);
+    font-family:'Atkinson', 'Verdana', sans-serif;
+    color:var(--texto);
+    overflow:hidden;
+  }
+
+  @font-face{
+    font-family:'Atkinson';
+    src: local('Atkinson Hyperlegible');
+  }
+
+  #app{
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    zoom:var(--escala-texto, 1); /* ajustado via JS: botão A- / A+ no cabeçalho */
+  }
+
+  /* ===== Topo ===== */
+  header{
+    flex-shrink:0;
+    background:var(--areia-clara);
+    padding:18px 20px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:2px solid var(--salva-clara);
+  }
+  .saudacao{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .avatar{
+    width:52px;height:52px;
+    border-radius:50%;
+    background:linear-gradient(145deg, var(--salva-clara), var(--petroleo-claro));
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    box-shadow:var(--sombra);
+    flex-shrink:0;
+    cursor:pointer;
+    transition:transform .3s ease, box-shadow .3s ease;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:manipulation;
+  }
+  .avatar.a-premir{
+    transform:scale(1.18);
+    box-shadow:0 0 0 8px rgba(58,107,112,0.18);
+  }
+  .saudacao-texto h1{
+    margin:0;
+    font-size:19px;
+    font-weight:700;
+    color:var(--petroleo);
+    letter-spacing:.2px;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:manipulation;
+  }
+  .saudacao-texto p{
+    margin:2px 0 0;
+    font-size:13px;
+    color:var(--texto-suave);
+  }
+  .btn-calma{
+    background:var(--petroleo);
+    color:white;
+    border:none;
+    border-radius:100px;
+    padding:10px 16px;
+    font-size:13px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    box-shadow:var(--sombra);
+  }
+  .btn-calma:active{transform:scale(0.96);}
+  .btn-engrenagem{
+    font-size:18px;
+    color:var(--texto-suave);
+    opacity:.5;
+    padding:8px;
+    cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:manipulation;
+    transition:transform .3s ease, opacity .3s ease;
+  }
+  .btn-engrenagem.a-premir{
+    transform:scale(1.25) rotate(45deg);
+    opacity:1;
+  }
+  .btn-texto-maior{
+    background:var(--salva-clara);
+    color:var(--petroleo);
+    border:none;
+    border-radius:100px;
+    width:36px;height:36px;
+    font-size:14px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .btn-texto-maior:active{ transform:scale(0.92); }
+
+  /* ===== Corpo ===== */
+  main{
+    flex:1;
+    overflow-y:auto;
+    padding:18px 18px 100px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .ecra{ display:none; animation:surgir .35s ease; }
+  .ecra.ativo{ display:block; }
+  @keyframes surgir{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .titulo-secao{
+    font-size:22px;
+    font-weight:800;
+    color:var(--petroleo);
+    margin:4px 0 4px;
+  }
+  .subtitulo-secao{
+    font-size:14px;
+    color:var(--texto-suave);
+    margin:0 0 18px;
+  }
+
+  /* ===== Cartões da grelha inicial ===== */
+  .grelha{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:6px;
+  }
+  .cartao{
+    background:var(--branco);
+    border-radius:var(--raio-grande);
+    padding:20px 14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:8px;
+    box-shadow:var(--sombra);
+    border:2px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .cartao:active{ transform:scale(0.96); }
+  .cartao .icone{
+    width:56px;height:56px;
+    border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;
+  }
+  .cartao span.nome{ font-weight:700; font-size:15px; color:var(--texto); }
+  .cartao span.legenda{ font-size:11.5px; color:var(--texto-suave); }
+
+  .c-rotina .icone{ background:#E7EFE9; }
+  .c-atividades .icone{ background:#FBEFDD; }
+  .c-escola .icone{ background:#E4EEF0; }
+  .c-jogos .icone{ background:#F3E3E0; }
+  .c-videos .icone{ background:#EAE5F1; }
+  .c-curiosidades .icone{ background:#FCEFD9; }
+  .c-conquistas .icone{ background:#FFF3D6; }
+
+  /* ===== Rotina visual (Horário) ===== */
+  .bloco-rotina{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+    box-shadow:var(--sombra);
+    border-left:6px solid var(--salva-clara);
+    position:relative;
+    transition:padding .25s ease, opacity .25s ease, margin .25s ease;
+  }
+  .bloco-rotina.feito{
+    opacity:.6;
+    padding:7px 14px;
+    margin-bottom:6px;
+    box-shadow:none;
+  }
+  .bloco-rotina.agora{ border-left-color:var(--amarelo-suave); background:#FFFBF0; }
+  .bloco-rotina.feito .hora{ display:none; }
+  .bloco-rotina.feito .icone-rotina{
+    width:26px; height:26px; font-size:14px; border-radius:8px;
+  }
+  .bloco-rotina.feito .info .t{ font-size:13px; font-weight:600; }
+  .bloco-rotina.feito .info .d{ display:none; }
+  .bloco-rotina.feito .btn-ouvir-rotina{ width:24px; height:24px; font-size:11px; }
+  .bloco-rotina.feito .check-rotina{ width:24px; height:24px; font-size:12px; }
+  .bloco-rotina .hora{
+    font-size:12px; font-weight:700; color:var(--petroleo);
+    width:40px; flex-shrink:0;
+  }
+  .bloco-rotina .icone-rotina{
+    width:40px;height:40px;border-radius:14px;
+    background:var(--salva-clara);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px; flex-shrink:0;
+    transition:width .25s ease, height .25s ease, font-size .25s ease;
+  }
+  .bloco-rotina .info{ flex:1; min-width:0; }
+  .bloco-rotina .info .t{ font-weight:700; font-size:15px; }
+  .bloco-rotina .info .d{ font-size:12px; color:var(--texto-suave); }
+  .bloco-rotina.agora .icone-rotina{
+    width:52px; height:52px; font-size:28px;
+  }
+  .bloco-rotina.agora .info .t{ font-size:17px; }
+  .btn-ouvir-rotina{
+    width:30px;height:30px;border-radius:50%;
+    border:none;
+    background:var(--salva-clara);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+    flex-shrink:0; cursor:pointer;
+    padding:0;
+  }
+  .btn-ouvir-rotina:active{ transform:scale(0.92); }
+  .check-rotina{
+    width:30px;height:30px;border-radius:50%;
+    border:2px solid var(--salva);
+    background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px; color:transparent;
+    flex-shrink:0; cursor:pointer;
+  }
+  .bloco-rotina.feito .check-rotina{
+    background:var(--salva); color:white; border-color:var(--salva);
+  }
+
+  /* ===== Listas de atividades / escola ===== */
+  .lista-item{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+    box-shadow:var(--sombra);
+    cursor:pointer;
+  }
+  .lista-item:active{ transform:scale(0.98); }
+  .lista-item .icone-item{
+    width:48px;height:48px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px; flex-shrink:0;
+  }
+  .lista-item .txt{ flex:1; }
+  .lista-item .txt .t{ font-weight:700; font-size:15px; }
+  .lista-item .txt .d{ font-size:12.5px; color:var(--texto-suave); margin-top:2px;}
+  .seta{ color:var(--salva); font-size:18px; }
+
+  .etiqueta{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:100px;
+    margin-top:5px;
+  }
+  .et-facil{ background:#E7F1E8; color:#4C7A56; }
+  .et-medio{ background:#FCEFD9; color:#A9762B; }
+  .et-dificil{ background:#F5E1DE; color:#B15C42; }
+
+  /* ===== Botão voltar ===== */
+  .voltar{
+    display:flex; align-items:center; gap:8px;
+    background:none; border:none;
+    color:var(--petroleo); font-weight:700; font-size:14px;
+    padding:6px 0 14px; cursor:pointer;
+  }
+
+  /* ===== Navegação inferior ===== */
+  nav{
+    position:absolute; bottom:0; left:0; right:0;
+    background:var(--areia-clara);
+    border-top:2px solid var(--salva-clara);
+    display:flex;
+    justify-content:space-around;
+    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+  }
+  .nav-btn{
+    background:none; border:none;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--texto-suave);
+    font-size:10.5px; font-weight:700;
+    padding:6px 8px;
+    cursor:pointer;
+    border-radius:14px;
+  }
+  .nav-btn .ni{ font-size:20px; }
+  .nav-btn.ativo{ color:var(--petroleo); background:var(--salva-clara); }
+
+  /* ===== Painel de atividade (jogo / vídeo / exercício) ===== */
+  .painel{
+    background:var(--branco);
+    border-radius:var(--raio-grande);
+    padding:22px;
+    box-shadow:var(--sombra);
+    text-align:center;
+  }
+  .painel .icone-grande{
+    font-size:56px;
+    width:96px;height:96px;
+    border-radius:28px;
+    background:var(--salva-clara);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+  }
+  .painel h2{ margin:0 0 8px; font-size:19px; color:var(--petroleo); }
+  .painel p.desc{ color:var(--texto-suave); font-size:13.5px; margin:0 0 20px; line-height:1.5; }
+  .btn-primario{
+    background:var(--petroleo);
+    color:white; border:none;
+    padding:14px 22px; border-radius:100px;
+    font-size:15px; font-weight:700;
+    width:100%; cursor:pointer;
+  }
+  .btn-primario:active{ transform:scale(0.97); }
+  .btn-secundario{
+    background:var(--salva-clara);
+    color:var(--petroleo);
+    border:none;
+    padding:14px 22px; border-radius:100px;
+    font-size:15px; font-weight:700;
+    width:100%; margin-top:10px; cursor:pointer;
+  }
+
+  /* ===== Jogo: memória ===== */
+  .grelha-memoria{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin:6px 0 18px;
+  }
+  .carta{
+    aspect-ratio:1/1;
+    background:var(--petroleo);
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    cursor:pointer;
+    color:transparent;
+    box-shadow:var(--sombra);
+    transition:transform .2s;
+    user-select:none;
+  }
+  .carta.virada{ background:var(--branco); color:var(--texto); border:2px solid var(--salva-clara); }
+  .carta.par{ background:var(--salva-clara); color:var(--texto); }
+  .estado-jogo{ font-size:14px; color:var(--texto-suave); margin-bottom:10px; }
+
+  /* ===== Quiz ===== */
+  .pergunta{ font-size:16px; font-weight:700; margin-bottom:16px; line-height:1.4; }
+  .opcao{
+    background:var(--areia-clara);
+    border:2px solid var(--salva-clara);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+    font-size:14.5px;
+    text-align:left;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .marca-opcao{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--salva-clara);
+    color:var(--petroleo);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;
+    flex-shrink:0;
+  }
+  .opcao.certa .marca-opcao{ background:#6FA37E; color:white; }
+  .opcao.errada .marca-opcao{ background:#D98E73; color:white; }
+  .opcao.certa{ background:#E1F0E4; border-color:#6FA37E; }
+  .opcao.errada{ background:#F6E2DE; border-color:#D98E73; }
+  .progresso-quiz{
+    height:8px; background:var(--salva-clara);
+    border-radius:100px; overflow:hidden; margin-bottom:18px;
+  }
+  .progresso-quiz .barra{ height:100%; background:var(--petroleo); border-radius:100px; transition:width .3s; }
+
+  /* ===== Enciclopédia visual (páginas de conhecimento narradas) ===== */
+  .pagina-tema{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .pagina-emoji{
+    font-size:64px;
+    width:110px;height:110px;
+    border-radius:50%;
+    background:var(--salva-clara);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+  }
+  .pagina-texto{
+    font-size:15px;
+    line-height:1.65;
+    color:var(--texto);
+    text-align:left;
+    margin:0;
+  }
+  .nav-paginas{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:16px;
+    gap:8px;
+  }
+  .btn-pagina{
+    background:var(--salva-clara);
+    color:var(--petroleo);
+    border:none;
+    padding:12px 16px;
+    border-radius:100px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .btn-pagina:disabled{
+    opacity:.4;
+    cursor:default;
+  }
+  .pagina-contador{
+    font-size:12.5px;
+    color:var(--texto-suave);
+    font-weight:700;
+  }
+
+  /* ===== Reforço positivo (overlay) ===== */
+  .overlay-yay{
+    position:fixed; inset:0;
+    background:rgba(58,107,112,0.92);
+    display:none;
+    align-items:center; justify-content:center;
+    flex-direction:column;
+    color:white;
+    text-align:center;
+    z-index:50;
+    padding:24px;
+  }
+  .overlay-yay.mostrar{ display:flex; }
+  #canvas-confetis{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index:1;
+  }
+  .overlay-yay .emoji, .overlay-yay h2, .overlay-yay p, .overlay-yay #yay-medalha, .overlay-yay button{
+    position:relative; z-index:2;
+  }
+  .overlay-yay .emoji{ font-size:64px; margin-bottom:14px; }
+  .overlay-yay h2{ margin:0 0 6px; font-size:22px; }
+  .overlay-yay p{ margin:0 0 24px; font-size:14px; opacity:.9; }
+  .overlay-yay button{
+    background:var(--amarelo-suave); color:var(--texto);
+    border:none; padding:14px 26px; border-radius:100px;
+    font-size:15px; font-weight:800; cursor:pointer;
+  }
+
+  /* ===== Modo calma ===== */
+  .overlay-calma{
+    position:fixed; inset:0;
+    background:linear-gradient(160deg,#2C4A4D,#3A6B70 60%,#5C8C90);
+    display:none;
+    align-items:center; justify-content:center;
+    flex-direction:column;
+    z-index:60;
+    color:white;
+    text-align:center;
+    padding:30px;
+  }
+  .overlay-calma.mostrar{ display:flex; }
+  .circulo-respirar{
+    width:150px;height:150px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.14);
+    border:2px solid rgba(255,255,255,0.4);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+    margin-bottom:26px;
+    animation:respirar 6s ease-in-out infinite;
+  }
+  @keyframes respirar{
+    0%,100%{ transform:scale(0.75); }
+    50%{ transform:scale(1.15); }
+  }
+  .overlay-calma p{ font-size:14px; opacity:.85; max-width:280px; line-height:1.6; margin-bottom:26px;}
+  .overlay-calma button{
+    background:white; color:var(--petroleo);
+    border:none; padding:13px 24px; border-radius:100px;
+    font-size:14px; font-weight:800; cursor:pointer;
+  }
+
+  /* ===== Progresso do dia (rotina) ===== */
+  .progresso-dia{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px 16px;
+    box-shadow:var(--sombra);
+    margin-bottom:16px;
+  }
+  .progresso-dia .linha-topo{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:8px;
+  }
+  .progresso-dia .texto{ font-size:13px; font-weight:700; color:var(--petroleo); }
+  .progresso-dia .streak{
+    font-size:12px; font-weight:700; color:var(--coral-suave);
+    display:flex; align-items:center; gap:4px;
+  }
+  .progresso-dia .barra-fundo{
+    height:12px; background:var(--salva-clara);
+    border-radius:100px; overflow:hidden;
+  }
+  .progresso-dia .barra-preenchida{
+    height:100%; background:var(--petroleo);
+    border-radius:100px;
+    transition:width .5s ease;
+  }
+
+  /* Pulso curto no check da rotina ao marcar como feito */
+  @keyframes pulso-check{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.35); }
+    100%{ transform:scale(1); }
+  }
+  .check-rotina.a-pulsar{ animation:pulso-check .4s ease; }
+
+  /* Conquistas */
+  .estrelas-topo{
+    display:flex; align-items:center; gap:8px;
+    background:var(--branco);
+    border-radius:100px;
+    padding:8px 14px;
+    box-shadow:var(--sombra);
+    font-size:13px; font-weight:700;
+    color:var(--petroleo);
+    width:fit-content;
+    margin-bottom:18px;
+  }
+  .medalha{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:16px;
+    display:flex; align-items:center; gap:14px;
+    box-shadow:var(--sombra);
+    margin-bottom:12px;
+  }
+  .medalha .m-icone{
+    width:48px;height:48px; border-radius:50%;
+    background:var(--amarelo-suave);
+    display:flex; align-items:center;justify-content:center;
+    font-size:24px; flex-shrink:0;
+  }
+  .medalha.bloqueada{ opacity:.4; }
+  .medalha.bloqueada .m-icone{ background:var(--salva-clara); }
+
+  /* ===== Configuração (edição da rotina) ===== */
+  .bloco-config{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px;
+    margin-bottom:12px;
+    box-shadow:var(--sombra);
+  }
+  .bloco-config .linha{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .bloco-config input{
+    font-family:inherit;
+    border:2px solid var(--salva-clara);
+    border-radius:12px;
+    padding:10px;
+    font-size:13.5px;
+    color:var(--texto);
+    background:var(--areia-clara);
+    width:100%;
+  }
+  .bloco-config input:focus{ outline:none; border-color:var(--petroleo-claro); }
+  .bloco-config .campo-hora{ max-width:90px; flex-shrink:0; }
+  .bloco-config .campo-icone{ max-width:56px; flex-shrink:0; text-align:center; }
+  .btn-remover-bloco{
+    background:none;
+    border:none;
+    color:var(--coral-suave);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    padding:4px 0;
+  }
+
+  /* ===== Aviso de transição (previsibilidade) ===== */
+  .aviso-transicao{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#FFFBF0;
+    border:2px solid var(--amarelo-suave);
+    border-radius:var(--raio);
+    padding:12px 14px;
+    margin-bottom:12px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--texto);
+    animation:surgir .35s ease;
+  }
+  .aviso-transicao .icone-aviso{ font-size:20px; flex-shrink:0; }
+  .aviso-transicao strong{ color:var(--petroleo); }
+
+  ::-webkit-scrollbar{ width:0; }
+
+  /* ===== Preferência de movimento reduzido (sensibilidade sensorial) =====
+     Aplica-se automaticamente se o sistema operativo tiver essa opção ativa,
+     e também quando o interruptor manual "Efeitos calmos" está ligado (classe .movimento-reduzido no body). */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+    }
+    .circulo-respirar{ animation:none !important; }
+    .ecra{ animation:none !important; }
+  }
+  body.movimento-reduzido .circulo-respirar{ animation:none; }
+  body.movimento-reduzido .ecra{ animation:none; }
+  body.movimento-reduzido *{ transition-duration:0.01ms !important; }
+
+  /* ===== Interruptor "Efeitos calmos" (Definições) ===== */
+  .linha-definicao{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px 16px;
+    box-shadow:var(--sombra);
+    margin-bottom:12px;
+  }
+  .linha-definicao .txt-def{ flex:1; padding-right:12px; }
+  .linha-definicao .txt-def .t{ font-weight:700; font-size:14.5px; color:var(--texto); }
+  .linha-definicao .txt-def .d{ font-size:12px; color:var(--texto-suave); margin-top:2px; }
+  .interruptor{
+    position:relative; width:48px; height:28px; flex-shrink:0;
+    background:var(--salva-clara); border-radius:100px; cursor:pointer;
+    border:none; padding:0; transition:background .2s ease;
+  }
+  .interruptor .bola{
+    position:absolute; top:3px; left:3px; width:22px; height:22px;
+    border-radius:50%; background:var(--branco); box-shadow:var(--sombra);
+    transition:transform .2s ease;
+  }
+  .interruptor.ligado{ background:var(--petroleo); }
+  .interruptor.ligado .bola{ transform:translateX(20px); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <header>
+    <div class="saudacao">
+      <div class="avatar" id="avatar-calma">🦕</div>
+      <div class="saudacao-texto">
+        <h1 id="saudacao-nome">Olá, Eduardo!</h1>
+        <p id="data-hoje">A carregar...</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-calma" onclick="abrirCalma()">🌿 Calma</button>
+      <button class="btn-texto-maior" id="btn-texto-maior" onclick="alternarTamanhoTexto()" aria-label="Aumentar ou diminuir o tamanho do texto" title="Tamanho do texto">A<span style="font-size:0.7em;">+</span></button>
+      <div class="btn-engrenagem" id="btn-engrenagem-videos">⚙️</div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ===================== INÍCIO ===================== -->
+    <section class="ecra ativo" id="ecra-inicio">
+      <div class="titulo-secao">O que vamos fazer?</div>
+      <div class="subtitulo-secao">Escolhe uma atividade</div>
+      <div class="grelha">
+        <div class="cartao c-rotina" onclick="irPara('rotina')">
+          <div class="icone">📅</div>
+          <span class="nome">O Meu Dia</span>
+          <span class="legenda">Horário de hoje</span>
+        </div>
+        <div class="cartao c-escola" onclick="irPara('escola')">
+          <div class="icone">📚</div>
+          <span class="nome">Escola</span>
+          <span class="legenda">Trabalhos de casa</span>
+        </div>
+        <div class="cartao c-atividades" onclick="irPara('atividades')">
+          <div class="icone">🎨</div>
+          <span class="nome">Atividades</span>
+          <span class="legenda">Coisas para fazer</span>
+        </div>
+        <div class="cartao c-jogos" onclick="irPara('jogos')">
+          <div class="icone">🎮</div>
+          <span class="nome">Jogos</span>
+          <span class="legenda">Divertir e aprender</span>
+        </div>
+        <div class="cartao c-videos" onclick="irPara('videos')">
+          <div class="icone">🎬</div>
+          <span class="nome">Vídeos</span>
+          <span class="legenda">Vídeos para ver</span>
+        </div>
+        <div class="cartao c-curiosidades" onclick="irPara('curiosidades')">
+          <div class="icone">📖</div>
+          <span class="nome">Curiosidades</span>
+          <span class="legenda">Aprende coisas novas</span>
+        </div>
+        <div class="cartao c-conquistas" onclick="irPara('conquistas')">
+          <div class="icone">⭐</div>
+          <span class="nome">As Minhas Estrelas</span>
+          <span class="legenda"><span id="total-estrelas">0</span> estrelas</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ROTINA ===================== -->
+    <section class="ecra" id="ecra-rotina">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">O Meu Dia</div>
+      <div class="subtitulo-secao">Toca no círculo quando terminares</div>
+      <div class="progresso-dia">
+        <div class="linha-topo">
+          <span class="texto" id="progresso-dia-texto">0 de 0 feitas</span>
+          <span class="streak" id="progresso-dia-streak" style="display:none;">🔥 <span id="streak-numero">0</span> dias seguidos</span>
+        </div>
+        <div class="barra-fundo"><div class="barra-preenchida" id="progresso-dia-barra" style="width:0%"></div></div>
+      </div>
+      <div id="lista-rotina"></div>
+    </section>
+
+    <!-- ===================== ESCOLA ===================== -->
+    <section class="ecra" id="ecra-escola">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Escola</div>
+      <div class="subtitulo-secao">Trabalhos e fichas para praticar</div>
+      <div id="lista-escola"></div>
+    </section>
+
+    <!-- ===================== ATIVIDADES ===================== -->
+    <section class="ecra" id="ecra-atividades">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Atividades</div>
+      <div class="subtitulo-secao">Escolhe algo calmo para fazer</div>
+      <div id="lista-atividades"></div>
+    </section>
+
+    <!-- ===================== JOGOS ===================== -->
+    <section class="ecra" id="ecra-jogos">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Jogos</div>
+      <div class="subtitulo-secao">Sem pressa, sem tempo a contar</div>
+      <div id="lista-jogos"></div>
+    </section>
+
+    <!-- ===================== VÍDEOS ===================== -->
+    <section class="ecra" id="ecra-videos">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Vídeos</div>
+      <div class="subtitulo-secao">Vídeos para ver</div>
+      <div id="bloco-videos-reais" style="display:none;">
+        <div id="lista-videos-reais"></div>
+      </div>
+    </section>
+
+    <!-- ===================== CURIOSIDADES ===================== -->
+    <section class="ecra" id="ecra-curiosidades">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Curiosidades</div>
+      <div class="subtitulo-secao">Aprende coisas novas sobre o mundo</div>
+      <div id="lista-videos"></div>
+    </section>
+
+    <!-- ===================== CONQUISTAS ===================== -->
+    <section class="ecra" id="ecra-conquistas">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">As Minhas Estrelas</div>
+      <div class="estrelas-topo">⭐ <span id="total-estrelas-2">0</span> estrelas ao todo</div>
+      <div id="lista-medalhas"></div>
+    </section>
+
+    <!-- ===================== PÁGINA DE DETALHE (dinâmica) ===================== -->
+    <section class="ecra" id="ecra-detalhe">
+      <button class="voltar" id="voltar-detalhe">← Voltar</button>
+      <div id="conteudo-detalhe"></div>
+    </section>
+
+    <!-- ===================== CONFIGURAÇÃO (só para pais/cuidador) ===================== -->
+    <section class="ecra" id="ecra-config">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Configuração da Rotina</div>
+      <div class="subtitulo-secao">Ajusta os horários e tarefas do dia do Eduardo</div>
+
+      <div class="linha-definicao">
+        <div class="txt-def">
+          <div class="t">🌿 Efeitos calmos</div>
+          <div class="d">Reduz confetis e som de ovação ao ganhar estrelas. Fica mais discreto.</div>
+        </div>
+        <button class="interruptor" id="interruptor-efeitos-calmos" onclick="alternarEfeitosCalmos()" aria-label="Ativar ou desativar efeitos calmos">
+          <div class="bola"></div>
+        </button>
+      </div>
+
+      <div id="lista-config"></div>
+      <button class="btn-secundario" id="btn-add-bloco" style="margin-top:6px;">+ Adicionar bloco</button>
+      <button class="btn-primario" id="btn-guardar-config" style="margin-top:14px;">Guardar alterações</button>
+      <p id="msg-config" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+    </section>
+
+    <!-- ===================== GESTÃO DE VÍDEOS (área escondida, acesso próprio) ===================== -->
+    <section class="ecra" id="ecra-gestao-videos">
+      <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
+      <div class="titulo-secao">Gerir Vídeos</div>
+      <div class="subtitulo-secao">Adiciona links do YouTube, Vimeo ou ficheiros de vídeo</div>
+      <div id="lista-gestao-videos"></div>
+      <button class="btn-secundario" id="btn-add-video" style="margin-top:6px;">+ Adicionar vídeo</button>
+      <button class="btn-primario" id="btn-guardar-videos" style="margin-top:14px;">Guardar alterações</button>
+      <p id="msg-gestao-videos" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+    </section>
+
+  </main>
+
+  <nav>
+    <button class="nav-btn ativo" data-nav="inicio" onclick="irPara('inicio')"><span class="ni">🏠</span>Início</button>
+    <button class="nav-btn" data-nav="rotina" onclick="irPara('rotina')"><span class="ni">📅</span>O Dia</button>
+    <button class="nav-btn" data-nav="escola" onclick="irPara('escola')"><span class="ni">📚</span>Escola</button>
+    <button class="nav-btn" data-nav="jogos" onclick="irPara('jogos')"><span class="ni">🎮</span>Jogos</button>
+    <button class="nav-btn" data-nav="curiosidades" onclick="irPara('curiosidades')"><span class="ni">📖</span>Curiosidades</button>
+  </nav>
+
+</div>
+
+<!-- Overlay de reforço positivo -->
+<div class="overlay-yay" id="overlay-yay">
+  <canvas id="canvas-confetis"></canvas>
+  <div class="emoji">🌟</div>
+  <h2 id="yay-titulo">Muito bem, Eduardo!</h2>
+  <p id="yay-texto">Ganhaste uma estrela nova.</p>
+  <div id="yay-medalha" style="display:none;margin:-10px 0 20px;font-size:14px;font-weight:700;"></div>
+  <button onclick="fecharYay()">Continuar</button>
+</div>
+
+<!-- Overlay modo calma -->
+<div class="overlay-calma" id="overlay-calma">
+  <div class="circulo-respirar" id="circulo-respirar">Respira</div>
+  <p>Inspira devagar enquanto o círculo cresce.<br>Expira devagar enquanto ele encolhe.<br>Está tudo bem. Não há pressa.</p>
+  <button onclick="fecharCalma()">Já estou melhor</button>
+</div>
+
+<script>
+window.APP_VERSION = '1.5.5';
+
+/* ======================= DADOS ======================= */
+
+const rotinaHoje = [
+  {hora:"08:00", icone:"🌅", t:"Acordar e vestir", d:"Roupa já escolhida ontem à noite", feito:true},
+  {hora:"08:30", icone:"🥣", t:"Pequeno-almoço", d:"Cereais + leite, no lugar habitual", feito:true},
+  {hora:"09:00", icone:"🎒", t:"Escola", d:"Aulas da manhã", feito:false},
+  {hora:"13:00", icone:"🍽️", t:"Almoço", d:"", feito:false},
+  {hora:"15:00", icone:"📖", t:"Trabalhos de casa", d:"20 minutos, com pausa a meio", feito:false},
+  {hora:"16:00", icone:"🎮", t:"Tempo livre", d:"Jogos ou atividade à escolha", feito:false},
+  {hora:"19:00", icone:"🛁", t:"Banho e jantar", d:"", feito:false},
+  {hora:"21:00", icone:"🌙", t:"Hora de dormir", d:"Luz suave, sem ecrãs", feito:false},
+];
+
+const escolaItens = [
+  {icone:"➗", cor:"#E4EEF0", t:"Matemática — Frações", d:"Ficha de treino, 8 exercícios", nivel:"medio", tipo:"quiz", dados:"matematica"},
+  {icone:"📗", cor:"#E7F1E8", t:"Português — Leitura", d:"Ler o texto e responder", nivel:"facil", tipo:"quiz", dados:"portugues"},
+  {icone:"🌍", cor:"#FBEFDD", t:"Estudo do Meio — Portugal", d:"Distritos e capitais", nivel:"dificil", tipo:"quiz", dados:"geografia"},
+  {icone:"🔬", cor:"#F3E3E0", t:"Ciências — O Sistema Solar", d:"Vídeo + perguntas", nivel:"facil", tipo:"quiz", dados:"ciencias"},
+];
+
+const atividadesItens = [
+  {icone:"🎨", cor:"#FBEFDD", t:"Pintura Livre", d:"Escolhe cores e desenha à vontade", tipo:"pintura"},
+  {icone:"🧩", cor:"#E4EEF0", t:"Puzzle Sensorial", d:"Encaixa as peças com calma", tipo:"info"},
+  {icone:"🎵", cor:"#EAE5F1", t:"Sons Relaxantes", d:"Chuva, ondas do mar, floresta", tipo:"sons"},
+  {icone:"📋", cor:"#E7F1E8", t:"Quadro de Emoções", d:"Como te sentes agora?", tipo:"emocoes"},
+  {icone:"🧘", cor:"#F3E3E0", t:"Respirar com Calma", d:"3 minutos de respiração guiada", tipo:"calma"},
+];
+
+const jogosItens = [
+  {icone:"🧠", cor:"#E4EEF0", t:"Jogo da Memória", d:"Encontra os pares de animais", tipo:"memoria"},
+  {icone:"🔤", cor:"#FBEFDD", t:"Ordena as Letras", d:"Forma a palavra certa", tipo:"quiz", dados:"letras"},
+  {icone:"🔢", cor:"#F3E3E0", t:"Sequências Numéricas", d:"Qual é o número a seguir?", tipo:"quiz", dados:"numeros"},
+  {icone:"🎯", cor:"#E7F1E8", t:"Verdadeiro ou Falso", d:"Testa o que sabes", tipo:"quiz", dados:"vf"},
+];
+
+const videosItens = [
+  {
+    icone:"🦖", cor:"#F3E3E0", t:"Como viviam os Dinossauros", d:"Uma viagem até à Pré-História",
+    paginas:[
+      {emoji:"🦕", texto:"Os dinossauros viveram na Terra há mais de 65 milhões de anos, muito antes de existirem pessoas. Alguns eram do tamanho de uma galinha. Outros eram tão compridos como três autocarros."},
+      {emoji:"🌿", texto:"A maior parte dos dinossauros comia plantas. Chamamos-lhes herbívoros. O Diplodócus, por exemplo, tinha um pescoço enorme para alcançar as folhas mais altas das árvores."},
+      {emoji:"🦖", texto:"Outros dinossauros, como o Tiranossauro Rex, comiam carne. Chamamos-lhes carnívoros. Tinham dentes afiados como facas e eram caçadores muito rápidos."},
+      {emoji:"🥚", texto:"Os dinossauros nasciam de ovos, tal como as aves de hoje em dia. Algumas mães dinossauro construíam ninhos e protegiam os seus ovos com muito cuidado."},
+      {emoji:"☄️", texto:"Um dia, há muito tempo, um grande asteroide caiu na Terra. Isso mudou o clima e a maior parte dos dinossauros não conseguiu sobreviver. Mas as aves que vemos hoje são os seus parentes mais próximos!"},
+    ]
+  },
+  {
+    icone:"🚀", cor:"#E4EEF0", t:"O Sistema Solar", d:"Uma viagem pelos planetas",
+    paginas:[
+      {emoji:"☀️", texto:"O Sol é a estrela mais próxima de nós. É tão grande que caberiam mais de um milhão de planetas como a Terra lá dentro. É ele que nos dá luz e calor."},
+      {emoji:"🪐", texto:"À volta do Sol giram oito planetas. Os quatro mais próximos, Mercúrio, Vénus, Terra e Marte, são planetas rochosos e mais pequenos."},
+      {emoji:"🌍", texto:"A Terra é o nosso planeta. É o único que conhecemos onde existe vida, porque tem água líquida e uma atmosfera que nos protege."},
+      {emoji:"🟠", texto:"Depois vêm os planetas gigantes: Júpiter, Saturno, Urano e Neptuno. São feitos principalmente de gases e são muito maiores do que a Terra. Saturno tem uns anéis lindos feitos de gelo e rocha."},
+      {emoji:"🌙", texto:"A Lua é o único satélite natural da Terra. Está sempre a girar à nossa volta e é graças a ela que temos as marés no mar."},
+    ]
+  },
+  {
+    icone:"🌊", cor:"#EAE5F1", t:"Os Oceanos do Mundo", d:"Uma viagem pelas águas do planeta",
+    paginas:[
+      {emoji:"🌎", texto:"Mais de 70% da superfície da Terra é coberta de água. É por isso que, visto do espaço, o nosso planeta parece azul."},
+      {emoji:"🌊", texto:"Existem cinco oceanos: o Pacífico, o Atlântico, o Índico, o Ártico e o Antártico. O Oceano Pacífico é o maior de todos, tão grande que poderia conter todos os continentes juntos."},
+      {emoji:"🐋", texto:"Os oceanos são o lar de milhões de animais, desde o minúsculo plâncton até à baleia-azul, o maior animal que já existiu no nosso planeta."},
+      {emoji:"🇵🇹", texto:"Portugal tem uma costa muito grande junto ao Oceano Atlântico. Por isso, o mar sempre foi muito importante para os portugueses, na pesca e nas viagens."},
+      {emoji:"🐠", texto:"Nas zonas mais fundas do oceano ainda há muito por descobrir. Conhecemos melhor a superfície da Lua do que o fundo do nosso próprio oceano!"},
+    ]
+  },
+  {
+    icone:"🦁", cor:"#FBEFDD", t:"Animais da Savana Africana", d:"Leão, zebra, girafa e outros",
+    paginas:[
+      {emoji:"🌅", texto:"A savana é uma imensa planície com erva alta e árvores espalhadas, principalmente em África. Lá vivem alguns dos animais mais conhecidos do mundo."},
+      {emoji:"🦁", texto:"O leão é conhecido como o \"rei da savana\". Vive em grupos chamados alcateias, e são as leoas que costumam caçar para o grupo."},
+      {emoji:"🦒", texto:"A girafa é o animal terrestre mais alto do mundo. O seu pescoço comprido ajuda-a a comer folhas no topo das árvores, onde outros animais não conseguem chegar."},
+      {emoji:"🦓", texto:"As zebras têm riscas únicas, tal como as nossas impressões digitais: não há duas zebras com o mesmo padrão. As riscas ajudam a confundir os predadores."},
+      {emoji:"🐘", texto:"O elefante africano é o maior animal terrestre do mundo. Vive em famílias muito unidas e consegue lembrar-se de outros elefantes durante muitos anos."},
+    ]
+  },
+  {
+    icone:"⚽", cor:"#E7F1E8", t:"Como Funciona o Futebol", d:"Regras, posições e curiosidades",
+    paginas:[
+      {emoji:"⚽", texto:"O futebol joga-se com duas equipas de 11 jogadores. O objetivo é marcar mais golos do que o adversário, fazendo a bola entrar na baliza contrária."},
+      {emoji:"🥅", texto:"Só o guarda-redes pode tocar na bola com as mãos, e apenas dentro da sua própria área. Todos os outros jogadores usam os pés, a cabeça ou o peito."},
+      {emoji:"🟨", texto:"O árbitro usa cartões para mostrar faltas graves: o cartão amarelo é um aviso, o cartão vermelho manda o jogador para fora do jogo."},
+      {emoji:"🏆", texto:"O Campeonato do Mundo (Mundial) acontece a cada 4 anos e junta as melhores seleções do planeta. Portugal já lá esteve muitas vezes, com jogadores como Cristiano Ronaldo."},
+      {emoji:"🇵🇹", texto:"Em Portugal, os três clubes com mais títulos são o Benfica, o Porto e o Sporting. Os jogos entre eles chamam-se \"clássicos\" e são sempre muito esperados pelos adeptos."},
+    ]
+  },
+  {
+    icone:"🏎️", cor:"#EAE5F1", t:"Carros e Motas: Como Funcionam", d:"Motores, velocidade e corridas",
+    paginas:[
+      {emoji:"🔧", texto:"A maior parte dos carros e motas tem um motor que queima combustível para se mover. Esse processo liberta energia que faz as rodas girar."},
+      {emoji:"⚙️", texto:"As mudanças (ou velocidades) ajudam o motor a trabalhar melhor. Em baixa velocidade usa-se uma mudança curta, e em alta velocidade uma mudança mais longa."},
+      {emoji:"🏁", texto:"Na Fórmula 1, os carros de corrida podem ultrapassar os 300 km/h. São construídos para serem muito leves e aerodinâmicos, cortando o ar com facilidade."},
+      {emoji:"🏍️", texto:"As motas dividem-se em vários tipos: motas de estrada, motas de todo-o-terreno (cross) e motas de corrida (MotoGP), cada uma feita para um uso diferente."},
+      {emoji:"🔋", texto:"Hoje em dia há cada vez mais carros elétricos, que funcionam com baterias em vez de combustível. São mais silenciosos e não libertam fumo pelo escape."},
+    ]
+  },
+];
+
+// Vídeos adicionados por ti (link do YouTube ou ficheiro de vídeo). Começa vazio;
+// são guardados em localStorage a partir do ecrã de Gestão de Vídeos.
+const videosReais = [];
+
+const medalhasLista = [
+  {icone:"🏅", t:"Primeira Estrela", d:"Completaste a tua primeira atividade", desbloqueada:true},
+  {icone:"📚", t:"Estudioso", d:"Completa 5 fichas de escola", desbloqueada:false},
+  {icone:"🧠", t:"Mestre da Memória", d:"Ganha o jogo da memória 3 vezes", desbloqueada:false},
+  {icone:"🌿", t:"Calma Total", d:"Usa o modo Calma 5 vezes", desbloqueada:false},
+  {icone:"🔥", t:"Semana Completa", d:"Termina a rotina do dia 7 dias seguidos", desbloqueada:false},
+];
+
+// Cada pergunta tem um nível de dificuldade: 1 = fácil, 2 = médio, 3 = difícil.
+// O quiz começa sempre pelas fáceis e só sobe de nível depois de dominado o anterior.
+const quizzes = {
+  matematica: [
+    {p:"Quanto é 2 + 3?", o:["4","5","6","7"], c:1, nivel:1},
+    {p:"Quanto é 10 - 4?", o:["5","6","7","8"], c:1, nivel:1},
+    {p:"Quanto é 3 x 2?", o:["5","6","7","8"], c:1, nivel:1},
+    {p:"Quanto é 4 + 5?", o:["8","9","10","7"], c:1, nivel:1},
+    {p:"Quanto é 9 - 3?", o:["5","6","7","8"], c:1, nivel:1},
+    {p:"Quanto é 2 x 4?", o:["6","8","10","4"], c:1, nivel:1},
+    {p:"Quanto é 7 + 6?", o:["12","13","14","11"], c:1, nivel:1},
+    {p:"Quanto é 15 - 7?", o:["6","7","8","9"], c:2, nivel:1},
+    {p:"Quanto é 5 x 5?", o:["20","25","30","15"], c:1, nivel:1},
+    {p:"Quanto é 20 ÷ 4?", o:["4","5","6","8"], c:1, nivel:1},
+    {p:"Quanto é 8 + 8?", o:["14","15","16","17"], c:2, nivel:1},
+    {p:"Quanto é 12 - 5?", o:["6","7","8","9"], c:1, nivel:1},
+    {p:"Quanto é 3 x 4?", o:["10","11","12","13"], c:2, nivel:1},
+    {p:"Quanto é 1/2 + 1/4?", o:["3/4","2/6","1/6","2/4"], c:0, nivel:2},
+    {p:"Qual fração é maior?", o:["1/3","1/5","1/8","1/10"], c:0, nivel:2},
+    {p:"Quanto é 3/4 - 1/4?", o:["1/2","2/4","1/4","3/8"], c:0, nivel:2},
+    {p:"Quanto é 5 x 6?", o:["30","35","24","36"], c:0, nivel:2},
+    {p:"Quanto é 100 - 45?", o:["45","55","65","50"], c:1, nivel:2},
+    {p:"Quanto é 7 x 8?", o:["54","56","64","48"], c:1, nivel:2},
+    {p:"Quanto é 96 ÷ 8?", o:["10","11","12","13"], c:2, nivel:2},
+    {p:"Quanto é 1/3 + 1/3?", o:["2/3","2/6","1/3","3/3"], c:0, nivel:2},
+    {p:"Quanto é 9 x 9?", o:["72","81","90","99"], c:1, nivel:2},
+    {p:"Quanto é 2/4 - 1/4?", o:["1/4","1/2","2/4","0"], c:0, nivel:2},
+    {p:"Quanto é 63 ÷ 7?", o:["7","8","9","10"], c:2, nivel:2},
+    {p:"Quanto é 1/5 + 2/5?", o:["3/5","3/10","2/5","1/5"], c:0, nivel:2},
+    {p:"Quanto é 2/5 + 1/5?", o:["3/10","3/5","2/10","1/5"], c:1, nivel:3},
+    {p:"Quanto é 144 ÷ 12?", o:["11","12","13","14"], c:1, nivel:3},
+    {p:"Qual é o resultado de 15% de 200?", o:["20","30","25","15"], c:1, nivel:3},
+    {p:"Quanto é 7²?", o:["14","49","21","42"], c:1, nivel:3},
+    {p:"Quanto é 1/3 de 90?", o:["20","30","45","27"], c:1, nivel:3},
+    {p:"Quanto é 25% de 80?", o:["15","20","25","30"], c:1, nivel:3},
+    {p:"Quanto é 8²?", o:["16","56","64","72"], c:2, nivel:3},
+    {p:"Quanto é 3/8 + 2/8?", o:["5/8","5/16","1/8","5/4"], c:0, nivel:3},
+    {p:"Quanto é 216 ÷ 6?", o:["34","36","38","40"], c:1, nivel:3},
+    {p:"Qual é o resultado de 10% de 350?", o:["25","30","35","40"], c:2, nivel:3},
+    {p:"Quanto é 1/4 de 60?", o:["10","15","20","25"], c:1, nivel:3},
+    {p:"Quanto é 12²?", o:["124","134","144","154"], c:2, nivel:3},
+  ],
+  portugues: [
+    {p:"Qual destas é uma palavra com 3 sílabas?", o:["Casa","Bicicleta","Sol","Pé"], c:1, nivel:1},
+    {p:"Qual destas palavras é um verbo?", o:["Cadeira","Correr","Azul","Rápido"], c:1, nivel:1},
+    {p:"Qual destas palavras é um adjetivo?", o:["Correr","Bonito","Casa","Rapidamente"], c:1, nivel:1},
+    {p:"Qual é o plural de \"animal\"?", o:["Animais","Animals","Animales","Animaus"], c:0, nivel:2},
+    {p:"Qual destas frases está no plural?", o:["O gato dorme.","Os gatos dormem.","O gato dormiu.","A gata dorme."], c:1, nivel:2},
+    {p:"Qual é o sinónimo de \"feliz\"?", o:["Triste","Contente","Cansado","Zangado"], c:1, nivel:2},
+    {p:"Qual é o feminino de \"professor\"?", o:["Professora","Professore","Professoro","Professoria"], c:0, nivel:2},
+    {p:"Qual é o antónimo de \"grande\"?", o:["Enorme","Alto","Pequeno","Largo"], c:2, nivel:3},
+    {p:"Em \"o cão do Eduardo\", qual é o sujeito?", o:["Eduardo","o cão do Eduardo","do Eduardo","cão"], c:1, nivel:3},
+    {p:"Qual destas palavras tem um ditongo?", o:["Casa","Pai","Bola","Livro"], c:1, nivel:3},
+  ],
+  geografia: [
+    {p:"Qual é a capital de Portugal?", o:["Porto","Coimbra","Lisboa","Faro"], c:2, nivel:1},
+    {p:"Portugal faz fronteira terrestre apenas com que país?", o:["França","Espanha","Marrocos","Itália"], c:1, nivel:1},
+    {p:"Em que região de Portugal fica o Algarve?", o:["Norte","Centro","Sul","Ilhas"], c:2, nivel:1},
+    {p:"Qual destes rios passa em Lisboa?", o:["Douro","Tejo","Mondego","Minho"], c:1, nivel:2},
+    {p:"Qual é a capital do distrito do Porto?", o:["Porto","Braga","Vila Real","Aveiro"], c:0, nivel:2},
+    {p:"Qual destes é um oceano, não um mar?", o:["Mediterrâneo","Atlântico","Báltico","Egeu"], c:1, nivel:2},
+    {p:"Qual é a capital do distrito de Braga?", o:["Braga","Guimarães","Barcelos","Famalicão"], c:0, nivel:3},
+    {p:"Qual é o distrito mais a norte de Portugal continental?", o:["Braga","Viana do Castelo","Porto","Bragança"], c:1, nivel:3},
+    {p:"Qual arquipélago português fica no Atlântico, perto de África?", o:["Açores","Madeira","Canárias","Cabo Verde"], c:1, nivel:3},
+    {p:"Qual é a serra mais alta de Portugal continental?", o:["Serra da Estrela","Serra do Gerês","Serra de Sintra","Serra da Arrábida"], c:0, nivel:3},
+  ],
+  ciencias: [
+    {p:"Que gás os humanos precisam de respirar para viver?", o:["Dióxido de carbono","Oxigénio","Azoto","Hidrogénio"], c:1, nivel:1},
+    {p:"O que mede um termómetro?", o:["Peso","Temperatura","Velocidade","Distância"], c:1, nivel:1},
+    {p:"Qual é o planeta mais próximo do Sol?", o:["Vénus","Terra","Mercúrio","Marte"], c:2, nivel:1},
+    {p:"Qual destes é um estado da matéria?", o:["Calor","Gasoso","Peso","Cor"], c:1, nivel:2},
+    {p:"Qual é o órgão responsável por bombear o sangue?", o:["Pulmão","Fígado","Coração","Rim"], c:2, nivel:2},
+    {p:"Qual destes animais é um mamífero?", o:["Golfinho","Tubarão","Pinguim","Sapo"], c:0, nivel:2},
+    {p:"Quantos planetas tem o Sistema Solar?", o:["7","8","9","10"], c:1, nivel:2},
+    {p:"Quantos ossos tem, aproximadamente, o corpo humano adulto?", o:["106","206","306","506"], c:1, nivel:3},
+    {p:"Qual é o maior órgão do corpo humano?", o:["Coração","Fígado","Pele","Cérebro"], c:2, nivel:3},
+    {p:"O que produzem as plantas através da fotossíntese?", o:["Água","Oxigénio","Sal","Ferro"], c:1, nivel:3},
+  ],
+  letras: [
+    {p:"Ordena: S-O-L (astro que ilumina o dia)", o:["OLS","SOL","LOS","OSL"], c:1, nivel:1},
+    {p:"Ordena: A-T-O-G (animal)", o:["GATO","TOGA","GOTA","TAGO"], c:0, nivel:1},
+    {p:"Ordena: A-S-C-A (lugar onde se mora)", o:["CASA","SACA","ACAS","ASCA"], c:0, nivel:1},
+    {p:"Ordena: A-U-L-A (sítio onde se estuda)", o:["ALUA","AULA","LAUA","UALA"], c:1, nivel:2},
+    {p:"Ordena: R-O-L-F (parte de uma planta)", o:["FLOR","FROL","ROLF","LORF"], c:0, nivel:2},
+    {p:"Ordena: E-D-R-A-V (cor da relva)", o:["VERDA","VERDE","DEVAR","REVDA"], c:1, nivel:2},
+    {p:"Ordena: I-V-R-O-L (objeto para ler)", o:["LIVRO","VILRO","ROVIL","LIRVO"], c:0, nivel:3},
+    {p:"Ordena: E-P-E-X-I (algo de comer)", o:["PEIXE","EXPEI","PEXIE","IXEPE"], c:0, nivel:3},
+  ],
+  numeros: [
+    {p:"2, 4, 6, 8, ___", o:["9","10","12","11"], c:1, nivel:1},
+    {p:"5, 10, 15, 20, ___", o:["22","24","25","30"], c:2, nivel:1},
+    {p:"20, 18, 16, 14, ___", o:["13","12","10","11"], c:1, nivel:1},
+    {p:"3, 6, 9, 12, ___", o:["14","15","16","18"], c:1, nivel:2},
+    {p:"10, 20, 30, 40, ___", o:["45","50","55","60"], c:1, nivel:2},
+    {p:"100, 90, 80, 70, ___", o:["50","60","65","55"], c:1, nivel:2},
+    {p:"1, 2, 4, 8, ___", o:["10","12","16","14"], c:2, nivel:3},
+    {p:"1, 4, 9, 16, ___", o:["20","24","25","21"], c:2, nivel:3},
+  ],
+  vf: [
+    {p:"O Sol é uma estrela. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:0, nivel:1},
+    {p:"Portugal fica na Europa. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:0, nivel:1},
+    {p:"Um triângulo tem 4 lados. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:1, nivel:1},
+    {p:"A Terra é o maior planeta do Sistema Solar. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:1, nivel:2},
+    {p:"Os peixes respiram através de brânquias. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:0, nivel:2},
+    {p:"A Lua produz luz própria. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:1, nivel:2},
+    {p:"A água ferve a 0°C ao nível do mar. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:1, nivel:3},
+    {p:"O coração humano tem 4 câmaras. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:0, nivel:3},
+  ],
+};
+
+// Nível de dificuldade atualmente desbloqueado por matéria (chave do banco de perguntas).
+// Começa sempre em 1 (fácil); só sobe depois de acertar TODAS as perguntas desse nível de uma vez.
+let nivelDesbloqueado = {};
+
+function obterNivelAtual(chave){
+  return nivelDesbloqueado[chave] || 1;
+}
+
+// Devolve uma cópia embaralhada de um array (Fisher-Yates), sem alterar o original
+function embaralhar(array){
+  const copia = array.slice();
+  for(let i = copia.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
+// Embaralha as opções de uma pergunta, preservando qual delas é a correta
+function embaralharOpcoes(q){
+  const opcoesComIndice = q.o.map((texto, i) => ({texto, correta: i === q.c}));
+  const embaralhadas = embaralhar(opcoesComIndice);
+  return {
+    p: q.p,
+    o: embaralhadas.map(op => op.texto),
+    c: embaralhadas.findIndex(op => op.correta),
+    nivel: q.nivel,
+  };
+}
+
+// Monta a sessão de quiz para o nível atualmente desbloqueado de uma matéria.
+// Usa TODAS as perguntas desse nível (não só uma amostra), para dar uma prática mais completa.
+// As opções de cada pergunta são embaralhadas, tal como a ordem das perguntas.
+function montarQuizProgressivo(chave){
+  const banco = quizzes[chave] || [];
+  const nivel = obterNivelAtual(chave);
+  let doNivel = banco.filter(q => q.nivel === nivel);
+  // Segurança: se o nível não existir no banco (ex: já chegou ao fim), usa o nível mais alto disponível
+  if(doNivel.length === 0){
+    const niveisDisponiveis = [...new Set(banco.map(q => q.nivel).filter(Boolean))];
+    const maiorNivel = Math.max(...niveisDisponiveis, 1);
+    doNivel = banco.filter(q => q.nivel === maiorNivel);
+  }
+  return embaralhar(doNivel).map(embaralharOpcoes);
+}
+
+let estrelas = 3;
+let audioCtx = null;
+let somAtivo = null; // { chave, pararFn }
+
+// "Efeitos calmos": interruptor manual em Definições que reduz confetis e som de ovação,
+// independente da preferência do sistema (prefers-reduced-motion) e do volume do dispositivo.
+let efeitosCalmosAtivo = false;
+
+// Contadores para desbloquear medalhas específicas
+let contadorFichasEscola = 0;
+let contadorVitoriasMemoria = 0;
+let contadorUsosCalma = 0;
+
+// Sequência de dias seguidos com a rotina do dia 100% completa
+let streakDias = 0;
+let ultimaDataStreak = null; // última data (AAAA-MM-DD) em que a rotina ficou completa
+
+/* ======================= PERSISTÊNCIA (localStorage) ======================= */
+const CHAVE_ESTADO = 'mundoDoEduardo_estado_v1';
+
+// Data de hoje no formato AAAA-MM-DD, usada para saber se a rotina "feita" ainda é válida
+function dataHojeChave(){
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth()+1).padStart(2,'0');
+  const dia = String(agora.getDate()).padStart(2,'0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+function guardarEstado(){
+  try{
+    const estado = {
+      estrelas: estrelas,
+      rotinaFeita: rotinaHoje.map(b => b.feito),
+      rotinaData: dataHojeChave(), // permite detetar um novo dia e repor a rotina
+      medalhasDesbloqueadas: medalhasLista.map(m => m.desbloqueada),
+      contadorFichasEscola: contadorFichasEscola,
+      contadorVitoriasMemoria: contadorVitoriasMemoria,
+      contadorUsosCalma: contadorUsosCalma,
+      nivelDesbloqueado: nivelDesbloqueado,
+      streakDias: streakDias,
+      ultimaDataStreak: ultimaDataStreak,
+      efeitosCalmosAtivo: efeitosCalmosAtivo,
+    };
+    localStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado));
+  }catch(e){
+    // Se o localStorage falhar (ex: modo privado), a app continua a funcionar sem guardar
+  }
+}
+
+function carregarEstado(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_ESTADO);
+    if(!bruto) return;
+    const estado = JSON.parse(bruto);
+    if(typeof estado.estrelas === 'number'){
+      estrelas = estado.estrelas;
+    }
+    // Só restaura o estado "feito" da rotina se ainda for o mesmo dia.
+    // Num novo dia, a rotina começa toda por fazer — isto é intencional.
+    const mesmoDia = estado.rotinaData === dataHojeChave();
+    if(mesmoDia && Array.isArray(estado.rotinaFeita)){
+      estado.rotinaFeita.forEach((feito, i) => {
+        if(rotinaHoje[i]) rotinaHoje[i].feito = feito;
+      });
+    }
+    if(Array.isArray(estado.medalhasDesbloqueadas)){
+      estado.medalhasDesbloqueadas.forEach((desbloqueada, i) => {
+        if(medalhasLista[i]) medalhasLista[i].desbloqueada = desbloqueada;
+      });
+    }
+    if(typeof estado.contadorFichasEscola === 'number') contadorFichasEscola = estado.contadorFichasEscola;
+    if(typeof estado.contadorVitoriasMemoria === 'number') contadorVitoriasMemoria = estado.contadorVitoriasMemoria;
+    if(typeof estado.contadorUsosCalma === 'number') contadorUsosCalma = estado.contadorUsosCalma;
+    if(estado.nivelDesbloqueado && typeof estado.nivelDesbloqueado === 'object'){
+      nivelDesbloqueado = estado.nivelDesbloqueado;
+    }
+    if(typeof estado.streakDias === 'number') streakDias = estado.streakDias;
+    if(typeof estado.ultimaDataStreak === 'string') ultimaDataStreak = estado.ultimaDataStreak;
+    if(typeof estado.efeitosCalmosAtivo === 'boolean') efeitosCalmosAtivo = estado.efeitosCalmosAtivo;
+  }catch(e){
+    // Estado inválido ou inacessível: arranca do zero sem rebentar a app
+  }
+}
+
+function aplicarClasseMovimentoReduzido(){
+  document.body.classList.toggle('movimento-reduzido', efeitosCalmosAtivo);
+}
+
+function alternarEfeitosCalmos(){
+  efeitosCalmosAtivo = !efeitosCalmosAtivo;
+  aplicarClasseMovimentoReduzido();
+  guardarEstado();
+  vibrar(20);
+  const btn = document.getElementById('interruptor-efeitos-calmos');
+  if(btn) btn.classList.toggle('ligado', efeitosCalmosAtivo);
+}
+
+// A rotina personalizada (guardada pelos pais/cuidador em Configuração) é gravada
+// separadamente do estado de "feito", para poder substituir por completo os blocos padrão.
+const CHAVE_ROTINA = 'mundoDoEduardo_rotina_v1';
+
+function guardarRotinaPersonalizada(){
+  try{
+    localStorage.setItem(CHAVE_ROTINA, JSON.stringify(rotinaHoje));
+  }catch(e){
+    // Sem suporte ou espaço: a app continua a funcionar com a rotina em memória
+  }
+}
+
+function carregarRotinaPersonalizada(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_ROTINA);
+    if(!bruto) return;
+    const rotinaGuardada = JSON.parse(bruto);
+    if(Array.isArray(rotinaGuardada) && rotinaGuardada.length > 0){
+      rotinaHoje.length = 0;
+      rotinaGuardada.forEach(b => rotinaHoje.push(b));
+    }
+  }catch(e){
+    // Rotina guardada inválida: mantém a rotina padrão
+  }
+}
+
+// Vídeos reais (links YouTube ou ficheiros), guardados separadamente para
+// não interferir com os temas de enciclopédia já existentes.
+const CHAVE_VIDEOS_REAIS = 'mundoDoEduardo_videosReais_v1';
+
+function guardarVideosReais(){
+  try{
+    localStorage.setItem(CHAVE_VIDEOS_REAIS, JSON.stringify(videosReais));
+  }catch(e){
+    // Sem suporte ou espaço: a app continua a funcionar com os vídeos em memória
+  }
+}
+
+function carregarVideosReais(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_VIDEOS_REAIS);
+    if(!bruto) return;
+    const guardados = JSON.parse(bruto);
+    if(Array.isArray(guardados)){
+      videosReais.length = 0;
+      guardados.forEach(v => videosReais.push(v));
+    }
+  }catch(e){
+    // Lista guardada inválida: arranca vazia sem rebentar a app
+  }
+}
+
+/* ======================= TAMANHO DO TEXTO (acessibilidade) ======================= */
+// Três níveis: normal, grande, muito grande. Guardado para se manter entre visitas.
+const CHAVE_ESCALA_TEXTO = 'mundoDoEduardo_escalaTexto_v1';
+const NIVEIS_ESCALA_TEXTO = [1, 1.15, 1.3];
+let indiceEscalaTexto = 0;
+
+function aplicarEscalaTexto(){
+  document.documentElement.style.setProperty('--escala-texto', NIVEIS_ESCALA_TEXTO[indiceEscalaTexto]);
+}
+
+function alternarTamanhoTexto(){
+  indiceEscalaTexto = (indiceEscalaTexto + 1) % NIVEIS_ESCALA_TEXTO.length;
+  aplicarEscalaTexto();
+  try{
+    localStorage.setItem(CHAVE_ESCALA_TEXTO, String(indiceEscalaTexto));
+  }catch(e){
+    // Sem suporte ou espaço: o tamanho aplica-se na sessão atual na mesma
+  }
+  vibrar(20);
+}
+
+function carregarEscalaTexto(){
+  try{
+    const guardado = localStorage.getItem(CHAVE_ESCALA_TEXTO);
+    if(guardado !== null){
+      const i = parseInt(guardado, 10);
+      if(i >= 0 && i < NIVEIS_ESCALA_TEXTO.length) indiceEscalaTexto = i;
+    }
+  }catch(e){
+    // Sem suporte: mantém o tamanho normal
+  }
+  aplicarEscalaTexto();
+}
+
+/* ======================= FEEDBACK TÁTIL (Vibração) ======================= */
+// Vibração suave e opcional; nunca falha a app se o dispositivo/browser não suportar.
+function vibrar(padrao){
+  try{
+    if('vibrate' in navigator){
+      navigator.vibrate(padrao);
+    }
+  }catch(e){
+    // Sem suporte ou permissão: segue em frente silenciosamente
+  }
+}
+
+/* ======================= SONS DE FEEDBACK (certo/errado) ======================= */
+function tocarTom(ctx, freq, inicio, duracao, volume, tipo){
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = tipo || 'sine';
+  osc.frequency.setValueAtTime(freq, inicio);
+  gain.gain.setValueAtTime(0, inicio);
+  gain.gain.linearRampToValueAtTime(volume, inicio + 0.02);
+  gain.gain.linearRampToValueAtTime(0, inicio + duracao);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(inicio);
+  osc.stop(inicio + duracao + 0.02);
+}
+function tocarSomAcerto(){
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    // "Plim" alegre: dois tons a subir
+    tocarTom(ctx, 880, agora, 0.14, 0.12, 'sine');
+    tocarTom(ctx, 1318.5, agora + 0.1, 0.22, 0.12, 'sine');
+  }catch(e){}
+}
+function tocarSomErro(){
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    // Som suave e curto, sem ser áspero — dois tons a descer, tom "quase lá"
+    tocarTom(ctx, 349.2, agora, 0.18, 0.08, 'sine');
+    tocarTom(ctx, 293.7, agora + 0.13, 0.22, 0.08, 'sine');
+  }catch(e){}
+}
+
+/* ======================= NAVEGAÇÃO ======================= */
+
+function pararSomAtivo(){
+  if(somAtivo){
+    somAtivo.pararFn();
+    somAtivo = null;
+  }
+  pararNarracao();
+}
+
+function irPara(ecra){
+  pararSomAtivo();
+  document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
+  document.getElementById('ecra-'+ecra).classList.add('ativo');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
+  const btn = document.querySelector('.nav-btn[data-nav="'+ecra+'"]');
+  if(btn) btn.classList.add('ativo');
+  document.getElementById('main').scrollTop = 0;
+}
+
+function irParaDetalhe(html, tituloVoltar){
+  if(tituloVoltar !== 'atividades'){ pararSomAtivo(); } // mantém o som se ainda estivermos dentro de Atividades
+  document.getElementById('conteudo-detalhe').innerHTML = html;
+  document.getElementById('voltar-detalhe').onclick = ()=> irPara(tituloVoltar);
+  document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
+  document.getElementById('ecra-detalhe').classList.add('ativo');
+  document.getElementById('main').scrollTop = 0;
+}
+
+/* ======================= DATA / SAUDAÇÃO ======================= */
+function atualizarData(){
+  const dias = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+  const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const agora = new Date();
+  document.getElementById('data-hoje').textContent = dias[agora.getDay()] + ", " + agora.getDate() + " de " + meses[agora.getMonth()];
+}
+
+/* ======================= ROTINA ======================= */
+
+// Guarda a data "vista" pela app, para detetar a viragem do dia mesmo com a app sempre aberta
+let dataVistaRotina = dataHojeChave();
+
+function verificarNovoDia(){
+  const hoje = dataHojeChave();
+  if(hoje !== dataVistaRotina){
+    dataVistaRotina = hoje;
+    rotinaHoje.forEach(b => { b.feito = false; });
+    guardarEstado();
+    renderRotina();
+  }
+}
+
+// Calcula o índice do bloco "atual" com base na hora real do dispositivo:
+// é o último bloco cujo horário já começou e que ainda não foi marcado como feito.
+function calcularIndiceAgora(){
+  const agora = new Date();
+  const minutosAgora = agora.getHours()*60 + agora.getMinutes();
+  let indice = -1;
+  rotinaHoje.forEach((b,i)=>{
+    const [h,m] = b.hora.split(':').map(Number);
+    const minutosBloco = h*60 + m;
+    if(minutosBloco <= minutosAgora && !b.feito){
+      indice = i;
+    }
+  });
+  return indice;
+}
+
+// Janela de aviso antecipado antes de uma transição (em minutos).
+// Dar tempo à criança para se preparar é mais importante do que o aviso ser "em cima da hora".
+const MINUTOS_AVISO_TRANSICAO = 10;
+
+// Devolve o próximo bloco por fazer a seguir ao índice atual, e quantos minutos faltam
+// para a sua hora de início. Se não houver próximo bloco (ou não estiver dentro da
+// janela de aviso), devolve null.
+function calcularProximaTransicao(indiceAgora){
+  if(indiceAgora === -1) return null;
+  // Procura o próximo bloco por fazer depois do atual
+  let proximo = null;
+  for(let i = indiceAgora + 1; i < rotinaHoje.length; i++){
+    if(!rotinaHoje[i].feito){ proximo = rotinaHoje[i]; break; }
+  }
+  if(!proximo) return null;
+  const agora = new Date();
+  const minutosAgora = agora.getHours()*60 + agora.getMinutes();
+  const [h,m] = proximo.hora.split(':').map(Number);
+  const minutosProximo = h*60 + m;
+  const faltam = minutosProximo - minutosAgora;
+  if(faltam > 0 && faltam <= MINUTOS_AVISO_TRANSICAO){
+    return {bloco: proximo, minutos: faltam};
+  }
+  return null;
+}
+
+function renderRotina(){
+  const cont = document.getElementById('lista-rotina');
+  const indiceAgora = calcularIndiceAgora();
+  const transicao = calcularProximaTransicao(indiceAgora);
+  avisarTransicaoSeNova(transicao);
+  cont.innerHTML = (transicao ? `
+    <div class="aviso-transicao" role="status">
+      <span class="icone-aviso">⏰</span>
+      <span>Daqui a <strong>${transicao.minutos} min${transicao.minutos===1?'':'s'}</strong>: ${transicao.bloco.icone} ${transicao.bloco.t}</span>
+    </div>
+  ` : '') + rotinaHoje.map((b,i)=>`
+    <div class="bloco-rotina ${b.feito?'feito':''} ${i===indiceAgora?'agora':''}">
+      <div class="hora">${b.hora}</div>
+      <div class="icone-rotina">${b.icone}</div>
+      <div class="info">
+        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${b.t}</div>
+        ${b.d && !b.feito ? `<div class="d">${b.d}</div>` : ''}
+      </div>
+      <button class="btn-ouvir-rotina" data-indice="${i}" aria-label="Ouvir esta tarefa">🔊</button>
+      <button class="check-rotina" onclick="toggleRotina(${i})">${b.feito?'✓':''}</button>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.btn-ouvir-rotina').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const b = rotinaHoje[btn.dataset.indice];
+      if(vozAtiva){
+        pararNarracao();
+        btn.textContent = '🔊';
+        return;
+      }
+      btn.textContent = '⏸️';
+      const texto = b.t + (b.d ? '. ' + b.d : '');
+      narrar(texto, ()=>{ btn.textContent = '🔊'; });
+    });
+  });
+  renderProgressoDia();
+}
+
+// Dá um aviso discreto (vibração curta, e voz se a app estiver no ecrã "O Meu Dia")
+// apenas na PRIMEIRA vez que uma transição entra na janela de aviso — nunca repete
+// para a mesma tarefa, para não se tornar irritante a cada atualização por minuto.
+let ultimaTransicaoAvisada = null;
+function avisarTransicaoSeNova(transicao){
+  const chave = transicao ? transicao.bloco.hora + transicao.bloco.t : null;
+  if(chave && chave !== ultimaTransicaoAvisada){
+    ultimaTransicaoAvisada = chave;
+    vibrar([25,50,25]);
+    const ecraRotinaAtivo = document.getElementById('ecra-rotina') && document.getElementById('ecra-rotina').classList.contains('ativo');
+    if(ecraRotinaAtivo && !vozAtiva){
+      narrar(`Daqui a ${transicao.minutos} minutos: ${transicao.bloco.t}`);
+    }
+  }
+  if(!chave){
+    ultimaTransicaoAvisada = null;
+  }
+}
+
+// Atualiza a barra "X de Y feitas hoje" e a etiqueta de sequência (streak)
+function renderProgressoDia(){
+  const elTexto = document.getElementById('progresso-dia-texto');
+  const elBarra = document.getElementById('progresso-dia-barra');
+  const elStreak = document.getElementById('progresso-dia-streak');
+  const elStreakNum = document.getElementById('streak-numero');
+  if(!elTexto || !elBarra) return;
+  const total = rotinaHoje.length;
+  const feitas = rotinaHoje.filter(b => b.feito).length;
+  elTexto.textContent = `${feitas} de ${total} feitas`;
+  elBarra.style.width = total > 0 ? `${Math.round((feitas/total)*100)}%` : '0%';
+  if(streakDias > 0){
+    elStreak.style.display = 'flex';
+    elStreakNum.textContent = streakDias;
+  } else {
+    elStreak.style.display = 'none';
+  }
+}
+
+// Pequeno som de "tique" de sucesso — mais discreto que a ovação completa,
+// para não sobrecarregar quando se marca cada tarefa individual da rotina.
+function tocarTique(){
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, agora);
+    osc.frequency.exponentialRampToValueAtTime(1320, agora + 0.1);
+    gain.gain.setValueAtTime(0.001, agora);
+    gain.gain.exponentialRampToValueAtTime(0.12, agora + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, agora + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(agora);
+    osc.stop(agora + 0.2);
+  }catch(e){}
+}
+
+function toggleRotina(i){
+  rotinaHoje[i].feito = !rotinaHoje[i].feito;
+  renderRotina();
+  guardarEstado();
+
+  if(rotinaHoje[i].feito){
+    vibrar(40);
+    tocarTique();
+    // Pequeno pulso visual no botão que acabou de ser marcado
+    const botoes = document.querySelectorAll('#lista-rotina .check-rotina');
+    if(botoes[i]){
+      botoes[i].classList.add('a-pulsar');
+      setTimeout(()=> botoes[i].classList.remove('a-pulsar'), 400);
+    }
+    // Se esta foi a última tarefa a faltar, celebra o dia completo
+    const todasFeitas = rotinaHoje.length > 0 && rotinaHoje.every(b => b.feito);
+    if(todasFeitas){
+      atualizarStreakDia();
+      setTimeout(()=> darEstrela('Dia completo!', 'Fizeste tudo o que estava planeado para hoje.'), 350);
+    }
+  } else {
+    vibrar(20);
+  }
+}
+
+// Regista que a rotina de hoje ficou 100% feita, incrementando a sequência (streak)
+// só se o dia anterior também tiver sido completo — caso contrário, reinicia a contagem.
+function atualizarStreakDia(){
+  const hoje = dataHojeChave();
+  if(ultimaDataStreak === hoje) return; // já contado hoje, evita duplicar
+  const ontem = new Date();
+  ontem.setDate(ontem.getDate() - 1);
+  const anoO = ontem.getFullYear(), mesO = String(ontem.getMonth()+1).padStart(2,'0'), diaO = String(ontem.getDate()).padStart(2,'0');
+  const chaveOntem = `${anoO}-${mesO}-${diaO}`;
+
+  streakDias = (ultimaDataStreak === chaveOntem) ? streakDias + 1 : 1;
+  ultimaDataStreak = hoje;
+  guardarEstado();
+  renderProgressoDia();
+}
+
+/* ======================= LISTAS ======================= */
+const acoesLista = {}; // regista as funções de clique por id de lista
+
+function renderLista(id, itens, funcaoClicar){
+  const cont = document.getElementById(id);
+  acoesLista[id] = funcaoClicar;
+  cont.innerHTML = itens.map((it,i)=>`
+    <div class="lista-item" data-lista="${id}" data-indice="${i}">
+      <div class="icone-item" style="background:${it.cor}">${it.icone}</div>
+      <div class="txt">
+        <div class="t">${it.t}</div>
+        <div class="d">${it.d}</div>
+        ${it.nivel ? `<span class="etiqueta et-${it.nivel}">${it.nivel==='facil'?'Fácil':it.nivel==='medio'?'Médio':'Desafio'}</span>` : ''}
+      </div>
+      <div class="seta">›</div>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.lista-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx = parseInt(el.getAttribute('data-indice'), 10);
+      acoesLista[id](idx);
+    });
+  });
+}
+
+function abrirEscola(i){ abrirItemGenerico(escolaItens[i], 'escola'); }
+function abrirAtividade(i){ abrirItemGenerico(atividadesItens[i], 'atividades'); }
+function abrirJogo(i){ abrirItemGenerico(jogosItens[i], 'jogos'); }
+/* ======================= NARRAÇÃO POR VOZ (Web Speech API) ======================= */
+let vozAtiva = false;
+
+function pararNarracao(){
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+  }
+  vozAtiva = false;
+}
+
+function narrar(texto, aoTerminar){
+  if(!('speechSynthesis' in window)){
+    if(aoTerminar) aoTerminar();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const fala = new SpeechSynthesisUtterance(texto);
+  fala.lang = 'pt-PT';
+  fala.rate = 0.92;
+  fala.pitch = 1;
+  vozAtiva = true;
+  fala.onend = ()=>{ vozAtiva = false; if(aoTerminar) aoTerminar(); };
+  fala.onerror = ()=>{ vozAtiva = false; };
+  window.speechSynthesis.speak(fala);
+}
+
+let temaAtual = null, paginaAtual = 0, origemTema = 'curiosidades';
+
+function abrirVideo(i){
+  temaAtual = videosItens[i];
+  paginaAtual = 0;
+  origemTema = 'curiosidades';
+  renderPaginaTema();
+}
+
+/* ======================= VÍDEOS REAIS (link do YouTube ou ficheiro) ======================= */
+
+// Extrai o ID de um link do YouTube em qualquer formato comum
+// (youtube.com/watch?v=, youtu.be/, youtube.com/shorts/, embed/).
+function extrairIdYoutube(url){
+  const padroes = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?&]+)/,
+    /youtube\.com\/shorts\/([^?&]+)/,
+    /youtube\.com\/embed\/([^?&]+)/,
+  ];
+  for(const p of padroes){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+// Extrai o ID de um link do Vimeo (vimeo.com/123456 ou player.vimeo.com/video/123456)
+function extrairIdVimeo(url){
+  const padroes = [
+    /vimeo\.com\/(\d+)/,
+    /player\.vimeo\.com\/video\/(\d+)/,
+  ];
+  for(const p of padroes){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function renderListaVideosReais(){
+  const bloco = document.getElementById('bloco-videos-reais');
+  const cont = document.getElementById('lista-videos-reais');
+  if(videosReais.length === 0){
+    bloco.style.display = 'none';
+    return;
+  }
+  bloco.style.display = 'block';
+  cont.innerHTML = videosReais.map((v,i)=>`
+    <div class="lista-item" data-indice="${i}">
+      <div class="icone-item" style="background:#F3E3E0">${v.tipo==='youtube' || v.tipo==='vimeo' ? '▶️' : '🎬'}</div>
+      <div class="txt">
+        <div class="t">${v.titulo}</div>
+        <div class="d">${v.tipo==='youtube' ? 'Vídeo do YouTube' : v.tipo==='vimeo' ? 'Vídeo do Vimeo' : 'Ficheiro de vídeo'}</div>
+      </div>
+      <div class="seta">›</div>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.lista-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx = parseInt(el.getAttribute('data-indice'), 10);
+      abrirVideoReal(idx);
+    });
+  });
+}
+
+function abrirVideoReal(i){
+  const v = videosReais[i];
+  pararSomAtivo();
+  let player = '';
+  if(v.tipo === 'youtube'){
+    player = `<div style="position:relative;width:100%;padding-top:56.25%;border-radius:var(--raio);overflow:hidden;background:#000;">
+      <iframe src="https://www.youtube.com/embed/${v.idYoutube}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>`;
+  } else if(v.tipo === 'vimeo'){
+    player = `<div style="position:relative;width:100%;padding-top:56.25%;border-radius:var(--raio);overflow:hidden;background:#000;">
+      <iframe src="https://player.vimeo.com/video/${v.idVimeo}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    </div>`;
+  } else {
+    player = `<video src="${v.url}" controls playsinline style="width:100%;border-radius:var(--raio);background:#000;"></video>`;
+  }
+  irParaDetalhe(`
+    <div class="painel" style="text-align:left;">
+      <h2 style="text-align:center;">${v.titulo}</h2>
+      ${player}
+      <button class="btn-primario" id="btn-video-real-terminei" style="margin-top:18px;">Já vi ✓</button>
+    </div>
+  `, 'videos');
+  document.getElementById('btn-video-real-terminei').addEventListener('click', ()=>{
+    darEstrela('Boa!', 'Viste: ' + v.titulo);
+  });
+}
+
+function renderPaginaTema(){
+  const total = temaAtual.paginas.length;
+  const pag = temaAtual.paginas[paginaAtual];
+  const pct = Math.round(((paginaAtual+1)/total)*100);
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
+      <h2 style="margin-bottom:14px;">${temaAtual.t}</h2>
+      <div class="pagina-tema">
+        <div class="pagina-emoji">${pag.emoji}</div>
+        <p class="pagina-texto">${pag.texto}</p>
+      </div>
+      <button class="btn-primario" id="btn-ouvir">🔊 Ouvir esta página</button>
+      <div class="nav-paginas">
+        <button class="btn-pagina" id="btn-pag-anterior" ${paginaAtual===0?'disabled':''}>← Anterior</button>
+        <span class="pagina-contador">${paginaAtual+1} / ${total}</span>
+        <button class="btn-pagina" id="btn-pag-seguinte">${paginaAtual===total-1?'Concluir ✓':'Seguinte →'}</button>
+      </div>
+    </div>
+  `, origemTema);
+
+  document.getElementById('btn-ouvir').addEventListener('click', ()=>{
+    const btn = document.getElementById('btn-ouvir');
+    if(vozAtiva){
+      pararNarracao();
+      btn.textContent = '🔊 Ouvir esta página';
+    } else {
+      btn.textContent = '⏸ A ouvir...';
+      narrar(pag.texto, ()=>{ btn.textContent = '🔊 Ouvir esta página'; });
+    }
+  });
+  const btnAnt = document.getElementById('btn-pag-anterior');
+  if(btnAnt){
+    btnAnt.addEventListener('click', ()=>{
+      pararNarracao();
+      if(paginaAtual > 0){ paginaAtual--; renderPaginaTema(); }
+    });
+  }
+  document.getElementById('btn-pag-seguinte').addEventListener('click', ()=>{
+    pararNarracao();
+    if(paginaAtual < total-1){
+      paginaAtual++;
+      renderPaginaTema();
+    } else {
+      darEstrela('Muito bem!', 'Aprendeste tudo sobre: ' + temaAtual.t);
+    }
+  });
+}
+
+function abrirItemGenerico(it, origem){
+  if(it.tipo === 'quiz'){
+    iniciarQuiz(it.dados, it.t, origem);
+    return;
+  }
+  if(it.tipo === 'memoria'){
+    irParaDetalhe(gerarHtmlMemoria(), origem);
+    return;
+  }
+  if(it.tipo === 'calma'){
+    abrirCalma();
+    return;
+  }
+  if(it.tipo === 'sons'){
+    abrirSons(origem);
+    return;
+  }
+  let extra = '';
+  if(it.tipo === 'emocoes'){
+    extra = gerarEmocoes();
+  } else if(it.tipo === 'pintura'){
+    extra = gerarPintura();
+  } else {
+    extra = `<p class="desc">Esta atividade está pronta para começar. Sem pressa, faz ao teu ritmo.</p>
+      <button class="btn-primario" id="btn-concluir-generico">Concluir</button>`;
+  }
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="icone-grande" style="background:${it.cor}">${it.icone}</div>
+      <h2>${it.t}</h2>
+      ${extra}
+    </div>
+  `, origem);
+  const btnGenerico = document.getElementById('btn-concluir-generico');
+  if(btnGenerico){
+    btnGenerico.addEventListener('click', ()=> darEstrela('Boa!', 'Concluíste: ' + it.t));
+  }
+  const btnPintura = document.getElementById('btn-concluir-pintura');
+  if(btnPintura){
+    btnPintura.addEventListener('click', ()=> darEstrela('Que bonito!','Terminaste a tua pintura.'));
+  }
+  document.querySelectorAll('.opcao-emocao').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      darEstrela('Obrigado por partilhares', 'Registámos: ' + el.getAttribute('data-emocao'));
+    });
+  });
+}
+
+function gerarEmocoes(){
+  const emocoes = [["😊","Feliz"],["😌","Calmo"],["😐","Normal"],["😟","Preocupado"],["😢","Triste"],["😠","Zangado"]];
+  return `<p class="desc">Toca na cara que mostra como te sentes agora.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      ${emocoes.map(e=>`<div class="opcao opcao-emocao" data-emocao="${e[1]}" style="text-align:center;font-size:26px;display:block;">${e[0]}<div style="font-size:11px;margin-top:4px;">${e[1]}</div></div>`).join('')}
+    </div>`;
+}
+/* ======================= SONS RELAXANTES (Web Audio API) ======================= */
+
+function obterAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Gera um buffer de ruído branco reutilizável
+function criarRuidoBranco(ctx){
+  const bufferSize = ctx.sampleRate * 2;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i] = Math.random()*2-1; }
+  const fonte = ctx.createBufferSource();
+  fonte.buffer = buffer;
+  fonte.loop = true;
+  return fonte;
+}
+
+function tocarChuva(ctx){
+  const ruido = criarRuidoBranco(ctx);
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'highpass';
+  filtro.frequency.value = 1200;
+  const ganho = ctx.createGain();
+  ganho.gain.value = 0.18;
+  ruido.connect(filtro).connect(ganho).connect(ctx.destination);
+  ruido.start();
+  return ()=>{ ruido.stop(); };
+}
+
+function tocarOndas(ctx){
+  const ruido = criarRuidoBranco(ctx);
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'lowpass';
+  filtro.frequency.value = 500;
+  const ganho = ctx.createGain();
+  ganho.gain.value = 0.22;
+  // LFO para simular o "vai e vem" das ondas
+  const lfo = ctx.createOscillator();
+  lfo.frequency.value = 0.15;
+  const lfoGanho = ctx.createGain();
+  lfoGanho.gain.value = 0.15;
+  lfo.connect(lfoGanho).connect(ganho.gain);
+  ruido.connect(filtro).connect(ganho).connect(ctx.destination);
+  ruido.start(); lfo.start();
+  return ()=>{ ruido.stop(); lfo.stop(); };
+}
+
+function tocarFloresta(ctx){
+  const ruido = criarRuidoBranco(ctx);
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'bandpass';
+  filtro.frequency.value = 2500;
+  filtro.Q.value = 0.6;
+  const ganho = ctx.createGain();
+  ganho.gain.value = 0.10;
+  ruido.connect(filtro).connect(ganho).connect(ctx.destination);
+  ruido.start();
+  // "pássaros" ocasionais
+  let ativo = true;
+  function passaro(){
+    if(!ativo) return;
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    osc.connect(g).connect(ctx.destination);
+    const freqBase = 1800 + Math.random()*800;
+    osc.frequency.setValueAtTime(freqBase, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freqBase*1.3, ctx.currentTime+0.08);
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.05, ctx.currentTime+0.02);
+    g.gain.linearRampToValueAtTime(0, ctx.currentTime+0.15);
+    osc.start(); osc.stop(ctx.currentTime+0.2);
+    setTimeout(passaro, 1500 + Math.random()*3000);
+  }
+  setTimeout(passaro, 800);
+  return ()=>{ ativo=false; ruido.stop(); };
+}
+
+function tocarLareira(ctx){
+  const ruido = criarRuidoBranco(ctx);
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'lowpass';
+  filtro.frequency.value = 700;
+  const ganho = ctx.createGain();
+  ganho.gain.value = 0.16;
+  ruido.connect(filtro).connect(ganho).connect(ctx.destination);
+  ruido.start();
+  // estalidos ocasionais
+  let ativo = true;
+  function estalo(){
+    if(!ativo) return;
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    const g = ctx.createGain();
+    osc.frequency.value = 100 + Math.random()*200;
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.06);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime+0.07);
+    setTimeout(estalo, 400 + Math.random()*1200);
+  }
+  setTimeout(estalo, 500);
+  return ()=>{ ativo=false; ruido.stop(); };
+}
+
+const geradoresSom = {
+  chuva: tocarChuva,
+  ondas: tocarOndas,
+  floresta: tocarFloresta,
+  lareira: tocarLareira,
+};
+
+const sonsLista = [
+  {chave:"chuva", icone:"🌧️", t:"Chuva"},
+  {chave:"ondas", icone:"🌊", t:"Ondas do Mar"},
+  {chave:"floresta", icone:"🌲", t:"Floresta"},
+  {chave:"lareira", icone:"🔥", t:"Lareira"},
+];
+
+function abrirSons(origem){
+  irParaDetalhe(`
+    <div class="painel" style="text-align:left;">
+      <p class="desc" style="text-align:center;">Escolhe um som para ouvir e relaxar. Toca outra vez para parar.</p>
+      <div id="lista-sons"></div>
+    </div>
+  `, origem);
+  const cont = document.getElementById('lista-sons');
+  cont.innerHTML = sonsLista.map(s=>`
+    <div class="lista-item" data-som="${s.chave}">
+      <div class="icone-item" style="background:var(--salva-clara)">${s.icone}</div>
+      <div class="txt">
+        <div class="t">${s.t}</div>
+        <div class="d" id="estado-${s.chave}">Toca para reproduzir</div>
+      </div>
+      <div class="seta" id="seta-${s.chave}">▶</div>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.lista-item').forEach(el=>{
+    el.addEventListener('click', ()=> alternarSom(el.getAttribute('data-som')));
+  });
+}
+
+function alternarSom(chave){
+  const ctx = obterAudioCtx();
+
+  // Se já há um som a tocar, para-o sempre (mesmo que seja o mesmo)
+  if(somAtivo){
+    somAtivo.pararFn();
+    const chaveAnterior = somAtivo.chave;
+    somAtivo = null;
+    const dEl = document.getElementById('estado-'+chaveAnterior);
+    const sEl = document.getElementById('seta-'+chaveAnterior);
+    if(dEl){ dEl.textContent = 'Toca para reproduzir'; }
+    if(sEl){ sEl.textContent = '▶'; }
+    if(chaveAnterior === chave) return; // só queria parar
+  }
+
+  const pararFn = geradoresSom[chave](ctx);
+  somAtivo = { chave, pararFn };
+  const dEl = document.getElementById('estado-'+chave);
+  const sEl = document.getElementById('seta-'+chave);
+  if(dEl){ dEl.textContent = 'A tocar — toca para parar'; }
+  if(sEl){ sEl.textContent = '⏸'; }
+}
+function gerarPintura(){
+  return `<p class="desc">Escolhe uma cor e desenha livremente numa folha à parte, ou pinta no ecrã se tiveres uma app de desenho.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:18px;">
+      ${['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7'].map(c=>`<div style="width:38px;height:38px;border-radius:50%;background:${c};box-shadow:var(--sombra);"></div>`).join('')}
+    </div>
+    <button class="btn-primario" id="btn-concluir-pintura">Terminei</button>`;
+}
+
+/* ======================= QUIZ ======================= */
+let quizAtual = null, quizIndex = 0, quizTitulo = '', quizOrigem = '', quizChave = '';
+let quizAcertosSeguidos = 0, quizTeveErro = false;
+
+function iniciarQuiz(chave, titulo, origem){
+  quizAtual = montarQuizProgressivo(chave);
+  quizIndex = 0;
+  quizTitulo = titulo;
+  quizOrigem = origem;
+  quizChave = chave;
+  quizAcertosSeguidos = 0;
+  quizTeveErro = false;
+  renderQuiz();
+}
+function renderQuiz(){
+  pararNarracao();
+  if(quizIndex >= quizAtual.length){
+    const nivelDaSessao = quizAtual[0] ? quizAtual[0].nivel : 1;
+    const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
+    const eraONivelAtual = obterNivelAtual(quizChave) === nivelDaSessao;
+    if(quizTeveErro){
+      // Não passou todas de uma vez: sem estrela e sem subir de nível, incentiva a tentar de novo
+      const dica = eraONivelAtual
+        ? 'Tenta outra vez — acertando todas ganhas a estrela e passas ao próximo nível.'
+        : 'Tenta outra vez — acertando todas ganhas uma estrela extra de treino.';
+      irParaDetalhe(`
+        <div class="painel">
+          <div class="icone-grande" style="background:var(--salva-clara)">💪</div>
+          <h2>Quase lá!</h2>
+          <p class="desc">Tiveste algumas respostas erradas em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). ${dica}</p>
+          <button class="btn-primario" id="btn-quiz-repetir">Tentar novamente</button>
+        </div>
+      `, quizOrigem);
+      document.getElementById('btn-quiz-repetir').addEventListener('click', ()=> iniciarQuiz(quizChave, quizTitulo, quizOrigem));
+      return;
+    }
+    // Acertou tudo: sobe de nível (se houver próximo) e recebe estrela
+    irParaDetalhe(`
+      <div class="painel">
+        <div class="icone-grande" style="background:var(--salva-clara)">🎉</div>
+        <h2>Terminaste!</h2>
+        <p class="desc">Acertaste tudo em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). Muito bem, Eduardo!</p>
+        <button class="btn-primario" id="btn-quiz-final">Receber estrela</button>
+      </div>
+    `, quizOrigem);
+    document.getElementById('btn-quiz-final').addEventListener('click', ()=>{
+      if(quizOrigem === 'escola'){
+        contadorFichasEscola++;
+      }
+      const bancoDaMateria = quizzes[quizChave] || [];
+      const proximoNivel = nivelDaSessao + 1;
+      const existeProximoNivel = bancoDaMateria.some(q => q.nivel === proximoNivel);
+      if(existeProximoNivel && obterNivelAtual(quizChave) <= nivelDaSessao){
+        nivelDesbloqueado[quizChave] = proximoNivel;
+      }
+      darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo);
+    });
+    return;
+  }
+  const q = quizAtual[quizIndex];
+  const pct = Math.round((quizAcertosSeguidos/quizAtual.length)*100);
+  const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
+  const classesNivel = {1:'et-facil', 2:'et-medio', 3:'et-dificil'};
+  const etiquetaNivel = q.nivel ? `<span class="etiqueta ${classesNivel[q.nivel]}">${nomesNivel[q.nivel]}</span>` : '';
+  irParaDetalhe(`
+    <div class="painel" style="text-align:left;">
+      <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
+      ${etiquetaNivel ? `<div style="margin-bottom:10px;">${etiquetaNivel}</div>` : ''}
+      <div class="pergunta">${q.p}</div>
+      <button class="btn-pagina" id="btn-ouvir-quiz" style="margin-bottom:12px;">🔊 Ouvir</button>
+      ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${op}</div>`).join('')}
+      <p id="feedback-quiz" style="min-height:20px;font-size:13.5px;font-weight:700;margin-top:12px;text-align:center;"></p>
+    </div>
+  `, quizOrigem);
+
+  const btnOuvir = document.getElementById('btn-ouvir-quiz');
+  if(btnOuvir){
+    btnOuvir.addEventListener('click', ()=>{
+      if(vozAtiva){
+        pararNarracao();
+        btnOuvir.textContent = '🔊 Ouvir';
+      } else {
+        btnOuvir.textContent = '⏸ A ouvir...';
+        // Lê a pergunta seguida das opções, para não precisar de ler sozinho
+        const textoCompleto = q.p + '. ' + q.o.map((op,i)=>`Opção ${i+1}: ${op}.`).join(' ');
+        narrar(textoCompleto, ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
+      }
+    });
+  }
+}
+function responderQuiz(i){
+  pararNarracao();
+  const q = quizAtual[quizIndex];
+  document.querySelectorAll('.opcao').forEach(el=>el.style.pointerEvents='none');
+  document.getElementById('op-'+q.c).classList.add('certa');
+  const feedback = document.getElementById('feedback-quiz');
+  if(i !== q.c){
+    document.getElementById('op-'+i).classList.add('errada');
+    quizTeveErro = true;
+    if(feedback){
+      feedback.textContent = 'Não foi desta vez. A resposta certa é: ' + q.o[q.c];
+      feedback.style.color = 'var(--coral-suave)';
+    }
+    tocarSomErro();
+    vibrar(25);
+  } else {
+    quizAcertosSeguidos++;
+    if(feedback){
+      feedback.textContent = 'Boa! Resposta certa.';
+      feedback.style.color = 'var(--petroleo)';
+    }
+    tocarSomAcerto();
+    vibrar(40);
+  }
+  setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1400);
+}
+
+/* ======================= JOGO DA MEMÓRIA ======================= */
+function gerarHtmlMemoria(){
+  return `
+    <div class="painel">
+      <div class="estado-jogo" id="estado-memoria">Encontra todos os pares</div>
+      <div class="grelha-memoria" id="grelha-memoria"></div>
+    </div>
+  `;
+}
+let memCartas = [], memViradas = [], memPares = 0, memBloqueado = false;
+function iniciarMemoria(){
+  const emojis = ['🐶','🐱','🐰','🦊'];
+  const conjunto = [...emojis, ...emojis];
+  memCartas = conjunto.sort(()=>Math.random()-0.5);
+  memViradas = []; memPares = 0; memBloqueado = false;
+  const g = document.getElementById('grelha-memoria');
+  if(!g) return;
+  g.innerHTML = memCartas.map((e,i)=>`<div class="carta" id="carta-${i}" onclick="virarCarta(${i})"></div>`).join('');
+}
+function virarCarta(i){
+  if(memBloqueado) return;
+  const el = document.getElementById('carta-'+i);
+  if(el.classList.contains('virada') || el.classList.contains('par')) return;
+  el.classList.add('virada');
+  el.textContent = memCartas[i];
+  memViradas.push(i);
+  if(memViradas.length === 2){
+    memBloqueado = true;
+    const [a,b] = memViradas;
+    if(memCartas[a] === memCartas[b]){
+      document.getElementById('carta-'+a).classList.add('par');
+      document.getElementById('carta-'+b).classList.add('par');
+      memPares++;
+      memViradas = []; memBloqueado = false;
+      vibrar(40);
+      if(memPares === 4){
+        document.getElementById('estado-memoria').textContent = 'Encontraste todos os pares!';
+        contadorVitoriasMemoria++;
+        setTimeout(()=> darEstrela('Muito bem!','Completaste o Jogo da Memória'), 500);
+      }
+    } else {
+      setTimeout(()=>{
+        document.getElementById('carta-'+a).classList.remove('virada');
+        document.getElementById('carta-'+a).textContent = '';
+        document.getElementById('carta-'+b).classList.remove('virada');
+        document.getElementById('carta-'+b).textContent = '';
+        memViradas = []; memBloqueado = false;
+      }, 800);
+    }
+  }
+}
+
+/* Observador simples para iniciar o jogo da memória quando a grelha aparece */
+const observador = new MutationObserver(()=>{
+  if(document.getElementById('grelha-memoria') && !document.getElementById('grelha-memoria').dataset.iniciado){
+    document.getElementById('grelha-memoria').dataset.iniciado = '1';
+    iniciarMemoria();
+  }
+});
+observador.observe(document.getElementById('conteudo-detalhe'), {childList:true, subtree:true});
+
+/* ======================= CONQUISTAS ======================= */
+function renderConquistas(){
+  document.getElementById('total-estrelas').textContent = estrelas;
+  document.getElementById('total-estrelas-2').textContent = estrelas;
+  document.getElementById('lista-medalhas').innerHTML = medalhasLista.map(m=>`
+    <div class="medalha ${m.desbloqueada?'':'bloqueada'}">
+      <div class="m-icone">${m.icone}</div>
+      <div class="txt">
+        <div class="t" style="font-weight:700;">${m.t}</div>
+        <div class="d" style="font-size:12.5px;color:var(--texto-suave);">${m.d}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Índices fixos na medalhasLista, para não depender da ordem por nome
+const MEDALHA_ESTUDIOSO = 1;
+const MEDALHA_MEMORIA = 2;
+const MEDALHA_CALMA = 3;
+const MEDALHA_STREAK = 4;
+
+// Verifica os contadores atuais contra os limiares de cada medalha e desbloqueia
+// as que ainda não estavam. Mostra o ecrã de reforço positivo para cada uma desbloqueada agora.
+function verificarMedalhas(){
+  const desbloqueiosNovos = [];
+
+  if(!medalhasLista[MEDALHA_ESTUDIOSO].desbloqueada && contadorFichasEscola >= 5){
+    medalhasLista[MEDALHA_ESTUDIOSO].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_ESTUDIOSO]);
+  }
+  if(!medalhasLista[MEDALHA_MEMORIA].desbloqueada && contadorVitoriasMemoria >= 3){
+    medalhasLista[MEDALHA_MEMORIA].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_MEMORIA]);
+  }
+  if(!medalhasLista[MEDALHA_CALMA].desbloqueada && contadorUsosCalma >= 5){
+    medalhasLista[MEDALHA_CALMA].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_CALMA]);
+  }
+  if(!medalhasLista[MEDALHA_STREAK].desbloqueada && streakDias >= 7){
+    medalhasLista[MEDALHA_STREAK].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_STREAK]);
+  }
+
+  if(desbloqueiosNovos.length > 0){
+    renderConquistas();
+    guardarEstado();
+  }
+  return desbloqueiosNovos;
+}
+
+/* ======================= REFORÇO POSITIVO ======================= */
+/* ======================= CONFETIS + OVAÇÃO (ao ganhar estrela) ======================= */
+// Verdadeiro se o sistema tiver "reduzir movimento" ativo OU se o interruptor
+// manual "Efeitos calmos" estiver ligado nas Definições.
+function movimentoReduzidoAtivo(){
+  const preferenciaSistema = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return preferenciaSistema || efeitosCalmosAtivo;
+}
+
+// Reforço visual alternativo, discreto: um brilho suave à volta do emoji da estrela,
+// sem partículas nem movimento pela tela. Mantém a sensação de recompensa sem sobrecarregar.
+function mostrarBrilhoSuave(){
+  const emoji = document.querySelector('#overlay-yay .emoji');
+  if(!emoji) return;
+  emoji.style.transition = 'text-shadow .6s ease';
+  emoji.style.textShadow = '0 0 28px rgba(232,196,104,0.9)';
+  setTimeout(()=>{ emoji.style.textShadow = 'none'; }, 900);
+}
+
+function dispararConfetis(){
+  if(movimentoReduzidoAtivo()){
+    mostrarBrilhoSuave();
+    return;
+  }
+  const canvas = document.getElementById('canvas-confetis');
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const larg = canvas.clientWidth, alt = canvas.clientHeight;
+  canvas.width = larg * dpr;
+  canvas.height = alt * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const cores = ['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7','#ffffff'];
+  const total = 70;
+  const peças = [];
+  for(let i=0;i<total;i++){
+    peças.push({
+      x: Math.random()*larg,
+      y: -20 - Math.random()*alt*0.5,
+      vx: (Math.random()-0.5)*1.6,
+      vy: 2 + Math.random()*2.5,
+      tam: 5 + Math.random()*5,
+      cor: cores[Math.floor(Math.random()*cores.length)],
+      rot: Math.random()*Math.PI*2,
+      vrot: (Math.random()-0.5)*0.2
+    });
+  }
+  const duracaoMs = 2600;
+  const inicio = performance.now();
+  function passo(agora){
+    const t = agora - inicio;
+    ctx.clearRect(0,0,larg,alt);
+    peças.forEach(p=>{
+      p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.cor;
+      ctx.globalAlpha = t > duracaoMs - 500 ? Math.max(0, (duracaoMs - t)/500) : 1;
+      ctx.fillRect(-p.tam/2, -p.tam/2, p.tam, p.tam*0.6);
+      ctx.restore();
+    });
+    if(t < duracaoMs){
+      requestAnimationFrame(passo);
+    } else {
+      ctx.clearRect(0,0,larg,alt);
+    }
+  }
+  requestAnimationFrame(passo);
+}
+
+function tocarPalmaSimples(ctx, tempo, volume){
+  // Uma "palma" = ruído branco curto filtrado, imita o estalo de mãos
+  const duracao = 0.09;
+  const amostras = Math.floor(ctx.sampleRate * duracao);
+  const buffer = ctx.createBuffer(1, amostras, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for(let i=0;i<amostras;i++){
+    dados[i] = (Math.random()*2-1) * Math.pow(1 - i/amostras, 2);
+  }
+  const fonte = ctx.createBufferSource();
+  fonte.buffer = buffer;
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'bandpass';
+  filtro.frequency.value = 1500 + Math.random()*1000;
+  filtro.Q.value = 0.8;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(volume, tempo);
+  gain.gain.exponentialRampToValueAtTime(0.001, tempo + duracao);
+  fonte.connect(filtro);
+  filtro.connect(gain);
+  gain.connect(ctx.destination);
+  fonte.start(tempo);
+  fonte.stop(tempo + duracao);
+}
+function tocarVozMultidao(ctx, tempo, duracao, freqBase, volume){
+  // Uma "voz" da multidão a dizer "eh!" — oscilador tipo corda vocal (dente-de-serra,
+  // rico em harmónicos) passado por dois filtros formantes em paralelo, imitando
+  // as ressonâncias da vogal "e". Ruído sozinho soa a vento, não a voz; isto soa a voz.
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freqBase, tempo);
+  osc.frequency.linearRampToValueAtTime(freqBase*1.08, tempo + duracao*0.15);
+  osc.frequency.linearRampToValueAtTime(freqBase*0.9, tempo + duracao);
+  // Vibrato leve para soar mais orgânico
+  const lfo = ctx.createOscillator();
+  lfo.frequency.value = 5.5;
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = freqBase * 0.015;
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc.frequency);
+  lfo.start(tempo);
+  lfo.stop(tempo + duracao + 0.05);
+
+  // Dois formantes da vogal "e" (aproximado), em paralelo
+  const formante1 = ctx.createBiquadFilter();
+  formante1.type = 'bandpass';
+  formante1.frequency.value = 500;
+  formante1.Q.value = 6;
+  const formante2 = ctx.createBiquadFilter();
+  formante2.type = 'bandpass';
+  formante2.frequency.value = 1900;
+  formante2.Q.value = 7;
+
+  const gain1 = ctx.createGain();
+  const gain2 = ctx.createGain();
+  gain1.gain.value = 1;
+  gain2.gain.value = 0.5;
+
+  const gainGeral = ctx.createGain();
+  gainGeral.gain.setValueAtTime(0, tempo);
+  gainGeral.gain.linearRampToValueAtTime(volume, tempo + duracao*0.12);
+  gainGeral.gain.setValueAtTime(volume, tempo + duracao*0.6);
+  gainGeral.gain.linearRampToValueAtTime(0, tempo + duracao);
+
+  osc.connect(formante1); formante1.connect(gain1); gain1.connect(gainGeral);
+  osc.connect(formante2); formante2.connect(gain2); gain2.connect(gainGeral);
+  gainGeral.connect(ctx.destination);
+
+  osc.start(tempo);
+  osc.stop(tempo + duracao + 0.05);
+}
+function tocarOvacao(){
+  // Em "Efeitos calmos", troca a ovação (multidão + palmas) por um som curto e suave,
+  // para não sobrecarregar quem tem sensibilidade auditiva.
+  if(movimentoReduzidoAtivo()){
+    tocarSomAcerto();
+    return;
+  }
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    const duracaoTotal = 2.2;
+
+    // Camada 1: várias "vozes" de multidão sobrepostas, tipo "ehhh" de ovação,
+    // com pequenas diferenças de tom, atraso e duração para não soarem uniformes
+    const numVozes = 8;
+    for(let v=0; v<numVozes; v++){
+      const atraso = Math.random()*0.15;
+      const duracaoVoz = 1.3 + Math.random()*0.7;
+      const freqBase = 150 + Math.random()*130; // vozes diferentes (graves a médias)
+      const volume = 0.09 + Math.random()*0.05;
+      tocarVozMultidao(ctx, agora + atraso, duracaoVoz, freqBase, volume);
+    }
+
+    // Camada 2: palmas, distribuídas de forma irregular como uma plateia real
+    const numPalmas = 55;
+    for(let i=0;i<numPalmas;i++){
+      const posicao = Math.random();
+      const t = agora + 0.05 + posicao * duracaoTotal;
+      const volume = 0.05 + Math.random()*0.05;
+      tocarPalmaSimples(ctx, t, volume);
+    }
+  }catch(e){}
+}
+
+// Lista de elogios variados para não repetir sempre a mesma palavra,
+// o que com o tempo perde força como reforço. Escolhida ao acaso a cada vez.
+const elogiosVariados = [
+  'Muito bem, Eduardo!', 'Boa! Conseguiste!', 'Estás cheio de talento!',
+  'Isso mesmo!', 'Impressionante!', 'Continua assim!', 'Que orgulho!'
+];
+
+function darEstrela(titulo, texto){
+  estrelas++;
+  renderConquistas();
+  guardarEstado();
+  const medalhasNovas = verificarMedalhas();
+  vibrar([40,60,40]);
+  // Só varia o título quando vem o genérico "Boa!"/"Muito bem!", para não
+  // atropelar títulos já específicos como "Dia completo!" ou "Excelente trabalho!"
+  const titulosGenericos = ['Boa!', 'Muito bem!'];
+  const tituloFinal = titulosGenericos.includes(titulo)
+    ? elogiosVariados[Math.floor(Math.random()*elogiosVariados.length)]
+    : titulo;
+  document.getElementById('yay-titulo').textContent = tituloFinal;
+  document.getElementById('yay-texto').textContent = texto;
+  mostrarMedalhaNoOverlay(medalhasNovas);
+  document.getElementById('overlay-yay').classList.add('mostrar');
+  dispararConfetis();
+  tocarOvacao();
+}
+
+// Mostra, no overlay de recompensa, a medalha nova desbloqueada nesta ação (se houver)
+function mostrarMedalhaNoOverlay(medalhasNovas){
+  const bloco = document.getElementById('yay-medalha');
+  if(medalhasNovas && medalhasNovas.length > 0){
+    const m = medalhasNovas[0];
+    bloco.textContent = `${m.icone} Nova medalha: ${m.t}!`;
+    bloco.style.display = 'block';
+  } else {
+    bloco.style.display = 'none';
+  }
+}
+function fecharYay(){
+  document.getElementById('overlay-yay').classList.remove('mostrar');
+  irPara('inicio');
+}
+
+/* ======================= MODO CALMA ======================= */
+function abrirCalma(){
+  contadorUsosCalma++;
+  guardarEstado();
+  verificarMedalhas();
+  document.getElementById('overlay-calma').classList.add('mostrar');
+}
+function fecharCalma(){
+  document.getElementById('overlay-calma').classList.remove('mostrar');
+}
+
+// Toque longo no avatar (± 600ms) abre o Modo Calma diretamente,
+// como atalho para momentos em que procurar o botão é mais difícil.
+function configurarToqueLongoCalma(){
+  const avatar = document.getElementById('avatar-calma');
+  if(!avatar) return;
+  const DURACAO_HOLD = 600; // ms
+  let temporizador = null;
+
+  function iniciarHold(){
+    avatar.classList.add('a-premir');
+    temporizador = setTimeout(()=>{
+      avatar.classList.remove('a-premir');
+      vibrar([30,40,30]);
+      abrirCalma();
+    }, DURACAO_HOLD);
+  }
+  function cancelarHold(){
+    avatar.classList.remove('a-premir');
+    if(temporizador){ clearTimeout(temporizador); temporizador = null; }
+  }
+
+  avatar.addEventListener('pointerdown', iniciarHold);
+  avatar.addEventListener('pointerup', cancelarHold);
+  avatar.addEventListener('pointercancel', cancelarHold);
+  avatar.addEventListener('pointerleave', cancelarHold);
+  // Bloqueia o menu de contexto nativo (Copiar/Partilhar/Selecionar) que o toque longo do browser dispara
+  avatar.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+/* ======================= CONFIGURAÇÃO (área dos pais/cuidador) ======================= */
+// Acesso escondido: toque longo (2s) no nome da criança no cabeçalho.
+// Propositadamente mais longo que o atalho do Modo Calma, para não ser acionado por acidente.
+function configurarAcessoConfig(){
+  const alvo = document.getElementById('saudacao-nome');
+  if(!alvo) return;
+  const DURACAO_HOLD = 2000; // ms
+  let temporizador = null;
+
+  function iniciarHoldConfig(){
+    temporizador = setTimeout(()=>{
+      vibrar([30,30,30,30]);
+      abrirConfig();
+    }, DURACAO_HOLD);
+  }
+  function cancelarHoldConfig(){
+    if(temporizador){ clearTimeout(temporizador); temporizador = null; }
+  }
+
+  alvo.addEventListener('pointerdown', iniciarHoldConfig);
+  alvo.addEventListener('pointerup', cancelarHoldConfig);
+  alvo.addEventListener('pointercancel', cancelarHoldConfig);
+  alvo.addEventListener('pointerleave', cancelarHoldConfig);
+  // Bloqueia o menu de contexto nativo (Copiar/Partilhar/Selecionar) que o toque longo do browser dispara
+  alvo.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+function abrirConfig(){
+  renderConfig();
+  const interruptor = document.getElementById('interruptor-efeitos-calmos');
+  if(interruptor) interruptor.classList.toggle('ligado', efeitosCalmosAtivo);
+  irPara('config');
+}
+
+function renderConfig(){
+  const cont = document.getElementById('lista-config');
+  cont.innerHTML = rotinaHoje.map((b,i)=>`
+    <div class="bloco-config" data-indice="${i}">
+      <div class="linha">
+        <input type="text" class="campo-icone" data-campo="icone" value="${b.icone}" maxlength="2" aria-label="Ícone">
+        <input type="time" class="campo-hora" data-campo="hora" value="${b.hora}" aria-label="Hora">
+        <input type="text" data-campo="t" value="${b.t}" placeholder="Nome da tarefa" aria-label="Nome da tarefa">
+      </div>
+      <div class="linha">
+        <input type="text" data-campo="d" value="${b.d || ''}" placeholder="Descrição (opcional)" aria-label="Descrição">
+      </div>
+      <button class="btn-remover-bloco" onclick="removerBlocoConfig(${i})">✕ Remover este bloco</button>
+    </div>
+  `).join('');
+  document.getElementById('msg-config').textContent = '';
+}
+
+function removerBlocoConfig(i){
+  rotinaHoje.splice(i, 1);
+  renderConfig();
+}
+
+function lerFormularioConfig(){
+  const blocos = document.querySelectorAll('#lista-config .bloco-config');
+  const novaRotina = [];
+  blocos.forEach(bl=>{
+    const icone = bl.querySelector('[data-campo="icone"]').value.trim() || '⭐';
+    const hora = bl.querySelector('[data-campo="hora"]').value || '00:00';
+    const t = bl.querySelector('[data-campo="t"]').value.trim();
+    const d = bl.querySelector('[data-campo="d"]').value.trim();
+    if(t){ // ignora blocos sem nome de tarefa
+      novaRotina.push({hora, icone, t, d, feito:false});
+    }
+  });
+  return novaRotina;
+}
+
+function guardarConfig(){
+  const novaRotina = lerFormularioConfig();
+  if(novaRotina.length === 0){
+    document.getElementById('msg-config').textContent = 'Adiciona pelo menos um bloco com nome antes de guardar.';
+    return;
+  }
+  // Ordena por hora para a rotina fazer sentido visualmente
+  novaRotina.sort((a,b)=> a.hora.localeCompare(b.hora));
+  rotinaHoje.length = 0;
+  novaRotina.forEach(b => rotinaHoje.push(b));
+  guardarEstado();
+  guardarRotinaPersonalizada();
+  renderRotina();
+  vibrar([40,60,40]);
+  document.getElementById('msg-config').textContent = '✓ Rotina guardada com sucesso.';
+}
+
+function adicionarBlocoConfig(){
+  rotinaHoje.push({hora:"12:00", icone:"⭐", t:"", d:"", feito:false});
+  renderConfig();
+  const campos = document.querySelectorAll('#lista-config .bloco-config');
+  const ultimo = campos[campos.length-1];
+  if(ultimo) ultimo.querySelector('[data-campo="t"]').focus();
+}
+
+/* ======================= GESTÃO DE VÍDEOS (acesso escondido, área do responsável técnico) ======================= */
+function abrirGestaoVideos(){
+  renderGestaoVideos();
+  irPara('gestao-videos');
+}
+
+function renderGestaoVideos(){
+  const cont = document.getElementById('lista-gestao-videos');
+  cont.innerHTML = videosReais.map((v,i)=>`
+    <div class="bloco-config" data-indice="${i}">
+      <div class="linha">
+        <input type="text" data-campo="titulo" value="${v.titulo}" placeholder="Título do vídeo" aria-label="Título do vídeo">
+      </div>
+      <div class="linha">
+        <input type="text" data-campo="url" value="${v.tipo==='youtube' ? v.urlOriginal : v.tipo==='vimeo' ? v.urlOriginal : v.url}" placeholder="Link do YouTube, Vimeo ou URL do ficheiro (.mp4)" aria-label="Link ou URL do ficheiro">
+      </div>
+      <button class="btn-remover-bloco" onclick="removerBlocoVideo(${i})">✕ Remover este vídeo</button>
+    </div>
+  `).join('');
+  document.getElementById('msg-gestao-videos').textContent = '';
+}
+
+function removerBlocoVideo(i){
+  videosReais.splice(i, 1);
+  renderGestaoVideos();
+}
+
+function lerFormularioVideos(){
+  const blocos = document.querySelectorAll('#lista-gestao-videos .bloco-config');
+  const novosVideos = [];
+  let erro = '';
+  blocos.forEach(bl=>{
+    const titulo = bl.querySelector('[data-campo="titulo"]').value.trim();
+    const urlBruto = bl.querySelector('[data-campo="url"]').value.trim();
+    if(!titulo && !urlBruto) return; // bloco vazio, ignora
+    if(!titulo || !urlBruto){
+      erro = 'Cada vídeo precisa de título e link/URL preenchidos.';
+      return;
+    }
+    const idYoutube = extrairIdYoutube(urlBruto);
+    const idVimeo = extrairIdVimeo(urlBruto);
+    if(idYoutube){
+      novosVideos.push({titulo, tipo:'youtube', idYoutube, urlOriginal:urlBruto});
+    } else if(idVimeo){
+      novosVideos.push({titulo, tipo:'vimeo', idVimeo, urlOriginal:urlBruto});
+    } else if(/^https?:\/\/.+\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(urlBruto)){
+      novosVideos.push({titulo, tipo:'ficheiro', url:urlBruto});
+    } else {
+      erro = `Não reconheci o link de "${titulo}". Usa um link do YouTube, do Vimeo, ou um URL direto para um ficheiro de vídeo (.mp4, .webm, .ogg, .mov).`;
+    }
+  });
+  return {novosVideos, erro};
+}
+
+function guardarVideos(){
+  const {novosVideos, erro} = lerFormularioVideos();
+  if(erro){
+    document.getElementById('msg-gestao-videos').textContent = erro;
+    return;
+  }
+  videosReais.length = 0;
+  novosVideos.forEach(v => videosReais.push(v));
+  guardarVideosReais();
+  renderListaVideosReais();
+  vibrar([40,60,40]);
+  document.getElementById('msg-gestao-videos').textContent = '✓ Vídeos guardados com sucesso.';
+}
+
+function adicionarBlocoVideo(){
+  videosReais.push({titulo:'', tipo:'ficheiro', url:''});
+  renderGestaoVideos();
+  const campos = document.querySelectorAll('#lista-gestao-videos .bloco-config');
+  const ultimo = campos[campos.length-1];
+  if(ultimo) ultimo.querySelector('[data-campo="titulo"]').focus();
+}
+
+// Toque longo (2s) na engrenagem do cabeçalho. Duração igual ao acesso da mãe,
+// mas caminho e ecrã completamente separados — cada um só vê o seu próprio menu.
+function configurarAcessoGestaoVideos(){
+  const alvo = document.getElementById('btn-engrenagem-videos');
+  if(!alvo) return;
+  const DURACAO_HOLD = 2000; // ms
+  let temporizador = null;
+
+  function iniciarHold(){
+    alvo.classList.add('a-premir');
+    temporizador = setTimeout(()=>{
+      alvo.classList.remove('a-premir');
+      vibrar([30,30,30,30]);
+      abrirGestaoVideos();
+    }, DURACAO_HOLD);
+  }
+  function cancelarHold(){
+    alvo.classList.remove('a-premir');
+    if(temporizador){ clearTimeout(temporizador); temporizador = null; }
+  }
+
+  alvo.addEventListener('pointerdown', iniciarHold);
+  alvo.addEventListener('pointerup', cancelarHold);
+  alvo.addEventListener('pointercancel', cancelarHold);
+  alvo.addEventListener('pointerleave', cancelarHold);
+  alvo.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+/* ======================= INICIALIZAÇÃO ======================= */
+carregarEscalaTexto();
+carregarRotinaPersonalizada();
+carregarVideosReais();
+carregarEstado();
+aplicarClasseMovimentoReduzido();
+atualizarData();
+renderRotina();
+setInterval(()=>{ verificarNovoDia(); renderRotina(); }, 60000); // deteta novo dia e atualiza o bloco "agora" a cada minuto
+configurarToqueLongoCalma();
+configurarAcessoConfig();
+configurarAcessoGestaoVideos();
+document.getElementById('btn-add-bloco').addEventListener('click', adicionarBlocoConfig);
+document.getElementById('btn-guardar-config').addEventListener('click', guardarConfig);
+document.getElementById('btn-add-video').addEventListener('click', adicionarBlocoVideo);
+document.getElementById('btn-guardar-videos').addEventListener('click', guardarVideos);
+renderLista('lista-escola', escolaItens, abrirEscola);
+renderLista('lista-atividades', atividadesItens, abrirAtividade);
+renderLista('lista-jogos', jogosItens, abrirJogo);
+renderLista('lista-videos', videosItens, abrirVideo);
+renderListaVideosReais();
+renderConquistas();
+
+</script>
+</body>
+</html>
