@@ -159,6 +159,14 @@
     to{opacity:1; transform:translateY(0);}
   }
 
+  .nome-app{
+    font-size:11.5px;
+    font-weight:800;
+    color:var(--salva);
+    text-transform:uppercase;
+    letter-spacing:.8px;
+    margin:0 0 6px;
+  }
   .titulo-secao{
     font-size:22px;
     font-weight:800;
@@ -193,6 +201,12 @@
     transition:transform .15s ease, border-color .15s ease;
   }
   .cartao:active{ transform:scale(0.96); }
+  .cartao:focus-visible,
+  .lista-item:focus-visible,
+  .opcao:focus-visible{
+    outline:3px solid var(--petroleo);
+    outline-offset:2px;
+  }
   .cartao .icone{
     width:56px;height:56px;
     border-radius:18px;
@@ -222,6 +236,7 @@
     box-shadow:var(--sombra);
     border-left:6px solid var(--salva-clara);
     position:relative;
+    cursor:pointer;
     transition:padding .25s ease, opacity .25s ease, margin .25s ease;
   }
   .bloco-rotina.feito{
@@ -434,6 +449,90 @@
   }
   .progresso-quiz .barra{ height:100%; background:var(--petroleo); border-radius:100px; transition:width .3s; }
 
+  /* ===== Primeiro / Depois (apoio visual à transição) ===== */
+  .primeiro-depois{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .pd-bloco{
+    flex:1;
+    background:var(--areia-clara);
+    border:2px solid var(--salva-clara);
+    border-radius:var(--raio);
+    padding:16px 10px;
+    text-align:center;
+  }
+  .pd-bloco.pd-vazio{
+    opacity:.7;
+  }
+  .pd-etiqueta{
+    font-size:11.5px;
+    font-weight:800;
+    color:var(--petroleo);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+  }
+  .pd-icone{
+    font-size:40px;
+    width:70px; height:70px;
+    border-radius:50%;
+    background:var(--salva-clara);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 10px;
+  }
+  .pd-texto{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--texto);
+    line-height:1.35;
+  }
+  .pd-seta{
+    font-size:22px;
+    color:var(--salva);
+    font-weight:800;
+    flex-shrink:0;
+  }
+
+  /* ===== Temporizador visual (sem números a contar) ===== */
+  .temporizador-visual{
+    position:relative;
+    width:180px; height:180px;
+    margin:0 auto 18px;
+  }
+  .temporizador-svg{
+    width:100%; height:100%;
+    transform:rotate(-90deg);
+  }
+  .temp-fundo{
+    fill:none;
+    stroke:var(--salva-clara);
+    stroke-width:10;
+  }
+  .temp-progresso{
+    fill:none;
+    stroke:var(--petroleo);
+    stroke-width:10;
+    stroke-linecap:round;
+    transition:stroke-dashoffset 1s linear;
+  }
+  .temp-icone-central{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:48px;
+  }
+  .temp-texto-simples{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--petroleo);
+    text-align:center;
+    margin:0 0 20px;
+  }
+
   /* ===== Enciclopédia visual (páginas de conhecimento narradas) ===== */
   .pagina-tema{
     text-align:center;
@@ -526,6 +625,9 @@
     padding:30px;
   }
   .overlay-calma.mostrar{ display:flex; }
+  #calma-passo-respirar, #calma-passo-pos{
+    display:flex; flex-direction:column; align-items:center; width:100%;
+  }
   .circulo-respirar{
     width:150px;height:150px;
     border-radius:50%;
@@ -545,6 +647,21 @@
     background:white; color:var(--petroleo);
     border:none; padding:13px 24px; border-radius:100px;
     font-size:14px; font-weight:800; cursor:pointer;
+  }
+
+  /* Segundo passo do Modo Calma: pergunta leve sobre o que aconteceu a seguir (fecha o ciclo ABC) */
+  .calma-pos-pergunta{ display:flex; flex-direction:column; align-items:center; }
+  .calma-pos-pergunta .btn-pos{
+    width:100%; max-width:280px;
+    background:rgba(255,255,255,0.14); color:white;
+    border:2px solid rgba(255,255,255,0.5);
+    padding:14px 18px; border-radius:16px;
+    font-family:inherit; font-size:14.5px; font-weight:700;
+    margin-bottom:12px; cursor:pointer;
+  }
+  .calma-pos-pergunta .btn-saltar{
+    background:none; border:none; color:rgba(255,255,255,0.6);
+    font-size:12.5px; font-weight:600; padding:6px; margin-top:4px;
   }
 
   /* ===== Progresso do dia (rotina) ===== */
@@ -572,6 +689,72 @@
     height:100%; background:var(--petroleo);
     border-radius:100px;
     transition:width .5s ease;
+  }
+
+  /* ===== Alternador de vista da rotina (dia todo / só agora) ===== */
+  .alternador-vista{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .btn-vista{
+    flex:1;
+    background:var(--branco);
+    color:var(--texto-suave);
+    border:2px solid var(--salva-clara);
+    border-radius:100px;
+    padding:10px 8px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-vista.ativo{
+    background:var(--petroleo);
+    color:white;
+    border-color:var(--petroleo);
+  }
+  .bloco-rotina.oculto-por-vista{
+    display:none;
+  }
+
+  /* ===== Modo Dupla (Jogo da Memória) ===== */
+  .alternador-modo-dupla{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .btn-modo-dupla{
+    flex:1;
+    background:var(--branco);
+    color:var(--texto-suave);
+    border:2px solid var(--salva-clara);
+    border-radius:100px;
+    padding:10px 8px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-modo-dupla.ativo{
+    background:var(--petroleo);
+    color:white;
+    border-color:var(--petroleo);
+  }
+  .vez-modo-dupla{
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    padding:10px;
+    border-radius:14px;
+    margin-bottom:12px;
+    transition:background .25s ease, color .25s ease;
+  }
+  .vez-modo-dupla.vez-eduardo{
+    background:var(--salva-clara);
+    color:var(--petroleo);
+  }
+  .vez-modo-dupla.vez-mae{
+    background:var(--amarelo-suave);
+    color:var(--texto);
   }
 
   /* Pulso curto no check da rotina ao marcar como feito */
@@ -611,6 +794,43 @@
   .medalha.bloqueada{ opacity:.4; }
   .medalha.bloqueada .m-icone{ background:var(--salva-clara); }
 
+  /* ===== Loja de Recompensas ===== */
+  .recompensa{
+    display:flex; align-items:center; gap:12px;
+    background:var(--branco); border-radius:var(--raio);
+    padding:14px 16px; margin-bottom:10px; box-shadow:var(--sombra);
+  }
+  .recompensa .r-icone{ font-size:28px; flex-shrink:0; }
+  .recompensa .r-info{ flex:1; min-width:0; }
+  .recompensa .r-info .t{ font-weight:700; font-size:14.5px; }
+  .recompensa .r-info .custo{ font-size:12.5px; color:var(--texto-suave); margin-top:2px; }
+  .recompensa .r-barra-fundo{
+    height:8px; background:var(--salva-clara); border-radius:100px;
+    overflow:hidden; margin-top:6px;
+  }
+  .recompensa .r-barra-preenchida{ height:100%; background:var(--petroleo); border-radius:100px; transition:width .4s ease; }
+  .recompensa.resgatavel{ border:2px solid var(--petroleo); }
+  .recompensa .btn-resgatar{
+    flex-shrink:0; background:var(--petroleo); color:#fff; border:none;
+    border-radius:100px; padding:8px 14px; font-family:inherit; font-weight:700;
+    font-size:12.5px; cursor:pointer;
+  }
+  .recompensa .btn-resgatar:disabled{ background:var(--salva-clara); color:var(--texto-suave); cursor:default; }
+  .recompensa-config-linha{
+    display:flex; gap:8px; align-items:center; margin-bottom:8px;
+  }
+  .recompensa-config-linha input[type="text"]{
+    flex:1; padding:10px; border-radius:12px; border:2px solid var(--salva-clara);
+    background:var(--areia-clara); font-family:inherit; font-size:13.5px; color:var(--texto);
+  }
+  .recompensa-config-linha input[type="number"]{
+    width:70px; padding:10px; border-radius:12px; border:2px solid var(--salva-clara);
+    background:var(--areia-clara); font-family:inherit; font-size:13.5px; color:var(--texto); text-align:center;
+  }
+  .recompensa-config-linha button{
+    flex-shrink:0; background:none; border:none; font-size:18px; cursor:pointer; color:var(--coral-suave);
+  }
+
   /* ===== Configuração (edição da rotina) ===== */
   .bloco-config{
     background:var(--branco);
@@ -637,6 +857,7 @@
   .bloco-config input:focus{ outline:none; border-color:var(--petroleo-claro); }
   .bloco-config .campo-hora{ max-width:90px; flex-shrink:0; }
   .bloco-config .campo-icone{ max-width:56px; flex-shrink:0; text-align:center; }
+  .bloco-config .campo-duracao{ max-width:220px; }
   .btn-remover-bloco{
     background:none;
     border:none;
@@ -645,6 +866,153 @@
     font-weight:700;
     cursor:pointer;
     padding:4px 0;
+    transition:background .2s ease, padding .2s ease;
+  }
+  .btn-remover-bloco.a-confirmar{
+    background:#F6E2DE;
+    border-radius:100px;
+    padding:8px 14px;
+  }
+
+  /* ===== Gerador de perguntas com IA (área do administrador) ===== */
+  .separador-secao{
+    height:2px;
+    background:var(--salva-clara);
+    margin:26px 0 18px;
+    border-radius:2px;
+  }
+
+  /* ===== Evolução do Eduardo e dicas para os pais (área parental) ===== */
+  .grelha-resumo-parental{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .resumo-parental-cartao{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px;
+    box-shadow:var(--sombra);
+    text-align:center;
+  }
+  .resumo-parental-cartao .num{
+    font-size:24px;
+    font-weight:800;
+    color:var(--petroleo);
+    line-height:1.1;
+  }
+  .resumo-parental-cartao .lbl{
+    font-size:11.5px;
+    color:var(--texto-suave);
+    margin-top:4px;
+  }
+  .cartao-grafico{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:var(--sombra);
+  }
+  .cartao-grafico .t-grafico{
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--texto);
+    margin-bottom:12px;
+  }
+  .grafico-barras{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    height:100px;
+    gap:6px;
+  }
+  .grafico-barra-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+  }
+  .grafico-barra{
+    width:100%;
+    max-width:26px;
+    background:var(--salva-clara);
+    border-radius:6px 6px 0 0;
+    transition:height .4s ease;
+  }
+  .grafico-barra.completo{ background:var(--petroleo); }
+  .grafico-barra-lbl{
+    font-size:10.5px;
+    color:var(--texto-suave);
+    margin-top:6px;
+    text-transform:capitalize;
+  }
+  .linha-nivel-materia{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 0;
+    border-bottom:1px solid var(--areia-clara);
+    font-size:13px;
+  }
+  .linha-nivel-materia:last-child{ border-bottom:none; }
+  .linha-nivel-materia .nome-materia{ color:var(--texto); font-weight:600; }
+  .cartao-dica{
+    background:#FFFBF0;
+    border:2px solid var(--amarelo-suave);
+    border-radius:var(--raio);
+    padding:14px;
+    margin-bottom:10px;
+    font-size:13.5px;
+    color:var(--texto);
+    line-height:1.5;
+  }
+  .cartao-dica strong{ color:var(--petroleo); display:block; margin-bottom:4px; }
+
+  .bloco-pergunta-ia{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:14px;
+    margin-bottom:10px;
+    box-shadow:var(--sombra);
+    border-left:5px solid var(--salva);
+  }
+  .bloco-pergunta-ia .p-enunciado{
+    font-weight:700;
+    font-size:14px;
+    color:var(--texto);
+    margin-bottom:8px;
+    width:100%;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    resize:vertical;
+  }
+  .bloco-pergunta-ia .p-opcao{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .bloco-pergunta-ia .p-opcao input[type="text"]{
+    flex:1;
+    font-family:inherit;
+    border:2px solid var(--salva-clara);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:13px;
+    background:var(--areia-clara);
+    color:var(--texto);
+  }
+  .bloco-pergunta-ia .p-opcao input[type="radio"]{ flex-shrink:0; width:18px; height:18px; accent-color:var(--petroleo); }
+  .bloco-pergunta-ia .p-descartar{
+    background:none; border:none; color:var(--coral-suave);
+    font-size:12px; font-weight:700; cursor:pointer; padding:4px 0; margin-top:4px;
+  }
+  .ia-carregando{
+    text-align:center; padding:20px; color:var(--texto-suave); font-size:13.5px;
   }
 
   /* ===== Aviso de transição (previsibilidade) ===== */
@@ -732,40 +1100,41 @@
 
     <!-- ===================== INÍCIO ===================== -->
     <section class="ecra ativo" id="ecra-inicio">
+      <div class="nome-app">🦕 O Mundo do Eduardo</div>
       <div class="titulo-secao">O que vamos fazer?</div>
       <div class="subtitulo-secao">Escolhe uma atividade</div>
       <div class="grelha">
-        <div class="cartao c-rotina" onclick="irPara('rotina')">
+        <div class="cartao c-rotina" onclick="irPara('rotina')" role="button" tabindex="0" aria-label="O Meu Dia — Horário de hoje" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('rotina');}">
           <div class="icone">📅</div>
           <span class="nome">O Meu Dia</span>
           <span class="legenda">Horário de hoje</span>
         </div>
-        <div class="cartao c-escola" onclick="irPara('escola')">
+        <div class="cartao c-escola" onclick="irPara('escola')" role="button" tabindex="0" aria-label="Escola — Trabalhos de casa" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('escola');}">
           <div class="icone">📚</div>
           <span class="nome">Escola</span>
           <span class="legenda">Trabalhos de casa</span>
         </div>
-        <div class="cartao c-atividades" onclick="irPara('atividades')">
+        <div class="cartao c-atividades" onclick="irPara('atividades')" role="button" tabindex="0" aria-label="Atividades — Coisas para fazer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('atividades');}">
           <div class="icone">🎨</div>
           <span class="nome">Atividades</span>
           <span class="legenda">Coisas para fazer</span>
         </div>
-        <div class="cartao c-jogos" onclick="irPara('jogos')">
+        <div class="cartao c-jogos" onclick="irPara('jogos')" role="button" tabindex="0" aria-label="Jogos — Divertir e aprender" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('jogos');}">
           <div class="icone">🎮</div>
           <span class="nome">Jogos</span>
           <span class="legenda">Divertir e aprender</span>
         </div>
-        <div class="cartao c-videos" onclick="irPara('videos')">
+        <div class="cartao c-videos" onclick="irPara('videos')" role="button" tabindex="0" aria-label="Vídeos — Vídeos para ver" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('videos');}">
           <div class="icone">🎬</div>
           <span class="nome">Vídeos</span>
           <span class="legenda">Vídeos para ver</span>
         </div>
-        <div class="cartao c-curiosidades" onclick="irPara('curiosidades')">
+        <div class="cartao c-curiosidades" onclick="irPara('curiosidades')" role="button" tabindex="0" aria-label="Curiosidades — Aprende coisas novas" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('curiosidades');}">
           <div class="icone">📖</div>
           <span class="nome">Curiosidades</span>
           <span class="legenda">Aprende coisas novas</span>
         </div>
-        <div class="cartao c-conquistas" onclick="irPara('conquistas')">
+        <div class="cartao c-conquistas" onclick="irPara('conquistas')" role="button" tabindex="0" aria-label="As Minhas Estrelas" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('conquistas');}">
           <div class="icone">⭐</div>
           <span class="nome">As Minhas Estrelas</span>
           <span class="legenda"><span id="total-estrelas">0</span> estrelas</span>
@@ -784,6 +1153,10 @@
           <span class="streak" id="progresso-dia-streak" style="display:none;">🔥 <span id="streak-numero">0</span> dias seguidos</span>
         </div>
         <div class="barra-fundo"><div class="barra-preenchida" id="progresso-dia-barra" style="width:0%"></div></div>
+      </div>
+      <div class="alternador-vista">
+        <button class="btn-vista" id="btn-vista-agora" data-vista="agora">👉 Só agora</button>
+        <button class="btn-vista" id="btn-vista-dia" data-vista="dia">📋 O dia todo</button>
       </div>
       <div id="lista-rotina"></div>
     </section>
@@ -835,7 +1208,17 @@
       <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
       <div class="titulo-secao">As Minhas Estrelas</div>
       <div class="estrelas-topo">⭐ <span id="total-estrelas-2">0</span> estrelas ao todo</div>
+      <button class="btn-secundario" onclick="irPara('loja-recompensas')" style="margin-bottom:16px;">🎁 Ver Loja de Recompensas</button>
       <div id="lista-medalhas"></div>
+    </section>
+
+    <!-- ===================== LOJA DE RECOMPENSAS ===================== -->
+    <section class="ecra" id="ecra-loja-recompensas">
+      <button class="voltar" onclick="irPara('conquistas')">← Voltar</button>
+      <div class="titulo-secao">Loja de Recompensas</div>
+      <div class="estrelas-topo">⭐ <span id="total-estrelas-loja">0</span> estrelas para gastar</div>
+      <div class="subtitulo-secao">Troca as tuas estrelas por uma recompensa combinada com os pais</div>
+      <div id="lista-loja-recompensas"></div>
     </section>
 
     <!-- ===================== PÁGINA DE DETALHE (dinâmica) ===================== -->
@@ -847,8 +1230,84 @@
     <!-- ===================== CONFIGURAÇÃO (só para pais/cuidador) ===================== -->
     <section class="ecra" id="ecra-config">
       <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
-      <div class="titulo-secao">Configuração da Rotina</div>
-      <div class="subtitulo-secao">Ajusta os horários e tarefas do dia do Eduardo</div>
+      <div class="titulo-secao">Configuração</div>
+      <div class="subtitulo-secao">Personaliza a app e ajusta os horários e tarefas do dia</div>
+
+      <!-- ===================== QUESTIONÁRIO SOBRE A CRIANÇA (área parental) ===================== -->
+      <div class="titulo-secao" style="font-size:18px;">📝 Sobre o utilizador</div>
+      <div class="subtitulo-secao">O nome e a idade personalizam a app. As restantes respostas ajudam a IA a adaptar as perguntas do quiz. Usadas automaticamente sempre que forem geradas novas perguntas.</div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Nome</div>
+          <input type="text" id="quest-nome" placeholder="Ex: Eduardo" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);box-sizing:border-box;">
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Idade</div>
+          <input type="number" id="quest-idade" min="1" max="25" placeholder="Ex: 13" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);box-sizing:border-box;">
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Ano / nível escolar</div>
+          <select id="quest-ano-escolar" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+            <option value="">Escolhe...</option>
+            <option value="1º ano">1º ano</option>
+            <option value="2º ano">2º ano</option>
+            <option value="3º ano">3º ano</option>
+            <option value="4º ano">4º ano</option>
+            <option value="5º ano">5º ano</option>
+            <option value="6º ano">6º ano</option>
+            <option value="7º ano">7º ano</option>
+            <option value="8º ano">8º ano</option>
+            <option value="9º ano">9º ano</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Dificuldades específicas</div>
+          <div class="d">Ex: dificuldade em enunciados longos, em leitura, em concentração...</div>
+          <textarea id="quest-dificuldades" rows="3" placeholder="Escreve aqui..." style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Interesses</div>
+          <div class="d">O que gosta de fazer, temas que o motivam</div>
+          <textarea id="quest-interesses" rows="3" placeholder="Escreve aqui..." style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Rotina diária</div>
+          <div class="d">Horários habituais, o que ajuda nas transições entre atividades</div>
+          <textarea id="quest-rotina" rows="3" placeholder="Escreve aqui..." style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Preferências sensoriais</div>
+          <div class="d">Sons, luzes, texturas ou situações que gosta ou evita</div>
+          <textarea id="quest-sensorial" rows="3" placeholder="Escreve aqui..." style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primario" id="btn-guardar-questionario" style="margin-top:6px;">Guardar respostas</button>
+      <p id="msg-questionario" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+
+      <!-- ===================== CONFIGURAÇÃO DA ROTINA ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🗓️ Configuração da Rotina</div>
+      <div class="subtitulo-secao">Ajusta os horários e tarefas do dia</div>
 
       <div class="linha-definicao">
         <div class="txt-def">
@@ -860,13 +1319,80 @@
         </button>
       </div>
 
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">🔊 Volume do som</div>
+          <div class="d">Sons de acerto/erro no quiz e cliques de navegação. Arrasta até ao fim à esquerda para silenciar.</div>
+          <input type="range" id="slider-volume-som" min="0" max="100" step="10" value="100"
+            oninput="ajustarVolumeSom(this.value)"
+            style="margin-top:10px;width:100%;accent-color:var(--petroleo);">
+        </div>
+      </div>
+
       <div id="lista-config"></div>
       <button class="btn-secundario" id="btn-add-bloco" style="margin-top:6px;">+ Adicionar bloco</button>
       <button class="btn-primario" id="btn-guardar-config" style="margin-top:14px;">Guardar alterações</button>
       <p id="msg-config" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+
+      <!-- ===================== EVOLUÇÃO DO EDUARDO (área parental) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">📈 Evolução do Eduardo</div>
+      <div class="subtitulo-secao">Um resumo simples de utilização — não substitui a avaliação de um profissional.</div>
+
+      <div class="grelha-resumo-parental" id="grelha-resumo-parental"></div>
+
+      <div class="cartao-grafico">
+        <div class="t-grafico">Tarefas da rotina concluídas (últimos 7 dias)</div>
+        <div id="grafico-tarefas-semana"></div>
+      </div>
+
+      <div class="cartao-grafico">
+        <div class="t-grafico">Nível atual por matéria</div>
+        <div id="lista-nivel-materias"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-calma-contexto" style="display:none;">
+        <div class="t-grafico">Modo Calma — em que momento costuma ser usado</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Só uma contagem simples de utilização, para ajudar a notar padrões — não é um diagnóstico.</p>
+        <div id="lista-calma-contexto"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-pos-calma" style="display:none;">
+        <div class="t-grafico">Modo Calma — o que aconteceu depois</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Resposta opcional do Eduardo após cada pausa — ajuda a perceber se a pausa está a ajudar a regressar à tarefa.</p>
+        <div id="lista-pos-calma"></div>
+      </div>
+
+      <!-- ===================== LOJA DE RECOMPENSAS (configuração dos pais) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🎁 Loja de Recompensas</div>
+      <div class="subtitulo-secao">Define recompensas reais que o Eduardo pode trocar pelas estrelas que ganha. Combinem juntos o que faz sentido.</div>
+      <div id="lista-config-recompensas"></div>
+      <button class="btn-secundario" id="btn-add-recompensa" style="margin-top:6px;">+ Adicionar recompensa</button>
+      <button class="btn-primario" id="btn-guardar-recompensas" style="margin-top:14px;">Guardar recompensas</button>
+      <p id="msg-recompensas" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+
+      <!-- ===================== DICAS PARA OS PAIS ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">💡 Dicas para os pais</div>
+      <div id="lista-dicas-pais"></div>
+
+      <div class="cartao-grafico" style="margin-top:12px;">
+        <div class="t-grafico">✨ Dica personalizada com IA</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Analisa os dados de utilização dos últimos dias e sugere uma dica prática — não substitui avaliação profissional.</p>
+        <select id="dica-ia-fornecedor" aria-label="Fornecedor de IA" style="margin-bottom:10px;">
+          <option value="gemini" selected>Gemini (precisa de chave própria)</option>
+          <option value="claude">Claude (só no ambiente de pré-visualização)</option>
+        </select>
+        <button class="btn-secundario" id="btn-gerar-dica-ia">✨ Gerar dica sobre a evolução do Eduardo</button>
+        <p id="msg-dica-ia" style="font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
+        <div id="resultado-dica-ia" style="display:none;margin-top:10px;"></div>
+      </div>
+
+      <p id="versao-app" style="text-align:center;font-size:11px;color:var(--texto-suave);opacity:.6;margin-top:22px;"></p>
     </section>
 
-    <!-- ===================== GESTÃO DE VÍDEOS (área escondida, acesso próprio) ===================== -->
+    <!-- ===================== GESTÃO DE VÍDEOS + IA (área escondida do administrador, acesso pela engrenagem) ===================== -->
     <section class="ecra" id="ecra-gestao-videos">
       <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
       <div class="titulo-secao">Gerir Vídeos</div>
@@ -875,6 +1401,149 @@
       <button class="btn-secundario" id="btn-add-video" style="margin-top:6px;">+ Adicionar vídeo</button>
       <button class="btn-primario" id="btn-guardar-videos" style="margin-top:14px;">Guardar alterações</button>
       <p id="msg-gestao-videos" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+
+      <!-- ===================== GERADOR DE PERGUNTAS COM IA (só para o administrador) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🤖 Gerar perguntas com IA</div>
+      <div class="subtitulo-secao">Cria novas perguntas de quiz para reveres e adicionares ao banco. O Eduardo nunca vê texto gerado ao vivo — só o que tu aprovares aqui.</div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Fornecedor de IA</div>
+          <div class="d">Gemini é gratuito e vem selecionado por defeito. Claude fica disponível como alternativa.</div>
+          <select id="ia-fornecedor" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+            <option value="gemini" selected>Gemini (gratuito)</option>
+            <option value="claude">Claude (só no ambiente de pré-visualização)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="bloco-chave-gemini" class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Chave da API Gemini</div>
+          <div class="d">Guardada só neste dispositivo (localStorage). Nunca é enviada para nós — só para a Google, ao gerar as perguntas.</div>
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--petroleo);text-decoration:underline;">🔑 Criar chave gratuita no Google AI Studio</a>
+          <input type="password" id="ia-chave-gemini" placeholder="Cola aqui a tua chave Gemini" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">📎 Gerar a partir de um documento (opcional)</div>
+          <div class="d">Envia um PDF, foto ou print da matéria que o Eduardo está a dar. A IA lê o conteúdo e sugere perguntas baseadas nele — continuas a rever tudo antes de aprovar.</div>
+          <input type="file" id="ia-ficheiro" accept="application/pdf,image/png,image/jpeg,image/webp" style="margin-top:8px;width:100%;font-size:12.5px;color:var(--texto-suave);">
+          <div id="ia-ficheiro-nome" style="margin-top:6px;font-size:12px;color:var(--petroleo);font-weight:600;display:none;"></div>
+          <button class="btn-secundario" id="btn-remover-ficheiro-ia" style="margin-top:6px;display:none;font-size:12px;padding:6px 12px;">✕ Remover ficheiro</button>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">🧩 Contexto sobre o Eduardo (opcional)</div>
+          <div class="d">Escreve aqui o que a IA deve saber para esta geração — interesses, dificuldades, forma de comunicar. Este texto é usado só desta vez e limpa-se sozinho depois.</div>
+          <textarea id="ia-contexto-eduardo" rows="3" placeholder="Ex: Gosta muito de futebol e carros. Prefere frases curtas e diretas. Tem dificuldade com enunciados longos." style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Matéria e nível</div>
+          <div class="d" id="ia-materia-desc">As perguntas geradas seguem o mesmo formato e estilo das já existentes.</div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <select id="ia-materia" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+              <option value="matematica">Matemática</option>
+              <option value="portugues">Português</option>
+              <option value="geografia">Estudo do Meio (Geografia)</option>
+              <option value="ciencias">Ciências</option>
+              <option value="letras">Ordena as Letras</option>
+              <option value="numeros">Sequências Numéricas</option>
+              <option value="vf">Verdadeiro ou Falso</option>
+              <option value="ingles">Inglês</option>
+              <option value="espanhol">Espanhol</option>
+            </select>
+            <select id="ia-nivel" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+              <option value="1">Fácil</option>
+              <option value="2">Médio</option>
+              <option value="3">Difícil</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <label for="ia-quantidade" style="font-size:12.5px;color:var(--texto-suave);">Quantas perguntas:</label>
+            <input type="number" id="ia-quantidade" value="5" min="1" max="15" style="width:60px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primario" id="btn-gerar-ia" style="margin-top:10px;">✨ Gerar perguntas</button>
+      <p id="msg-ia" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+      <div id="lista-ia-revisao"></div>
+      <button class="btn-primario" id="btn-adicionar-ia" style="margin-top:10px;display:none;">✓ Adicionar estas perguntas ao banco</button>
+
+      <!-- ===================== BACKUP (exportar/importar progresso) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">💾 Backup</div>
+      <div class="subtitulo-secao">Guarda uma cópia do progresso e configurações num ficheiro. Útil antes de trocar de telemóvel ou limpar dados do browser. (A chave da API Gemini não é incluída, por segurança — tens de a colar novamente.)</div>
+
+      <button class="btn-secundario" id="btn-exportar-backup" style="margin-top:6px;">⬇️ Exportar backup</button>
+      <label class="btn-secundario" for="input-importar-backup" style="margin-top:10px;display:block;text-align:center;cursor:pointer;">⬆️ Importar backup</label>
+      <input type="file" id="input-importar-backup" accept="application/json" style="display:none;">
+      <p id="msg-backup" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+
+      <!-- ===================== RESET (para publicar a app / recomeçar do zero) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🔄 Reset</div>
+      <div class="subtitulo-secao">Escolhe o que queres apagar antes de o Eduardo começar a usar a app</div>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">⭐ Progresso e estrelas</div>
+          <div class="d">Estrelas ganhas, nível desbloqueado em cada matéria, medalhas</div>
+        </div>
+        <input type="checkbox" id="reset-progresso" class="checkbox-reset" checked>
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">📅 Rotina do dia</div>
+          <div class="d">Tarefas marcadas como feitas e rotina personalizada</div>
+        </div>
+        <input type="checkbox" id="reset-rotina" class="checkbox-reset" checked>
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">📊 Histórico</div>
+          <div class="d">Dados usados no gráfico semanal de progresso</div>
+        </div>
+        <input type="checkbox" id="reset-historico" class="checkbox-reset" checked>
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">🎬 Vídeos adicionados</div>
+          <div class="d">Os links de YouTube, Vimeo ou ficheiros que configuraste</div>
+        </div>
+        <input type="checkbox" id="reset-videos" class="checkbox-reset">
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">🤖 Perguntas geradas por IA</div>
+          <div class="d">Perguntas já aprovadas e adicionadas ao banco de quiz</div>
+        </div>
+        <input type="checkbox" id="reset-banco-ia" class="checkbox-reset">
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">🔑 Chave da API Gemini</div>
+          <div class="d">Vais ter de a colar novamente para gerar mais perguntas</div>
+        </div>
+        <input type="checkbox" id="reset-chave-gemini" class="checkbox-reset">
+      </label>
+
+      <button class="btn-primario" id="btn-fazer-reset" style="margin-top:14px;background:var(--coral-suave);">🔄 Fazer reset</button>
+      <p id="msg-reset" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
     </section>
 
   </main>
@@ -901,13 +1570,21 @@
 
 <!-- Overlay modo calma -->
 <div class="overlay-calma" id="overlay-calma">
-  <div class="circulo-respirar" id="circulo-respirar">Respira</div>
-  <p>Inspira devagar enquanto o círculo cresce.<br>Expira devagar enquanto ele encolhe.<br>Está tudo bem. Não há pressa.</p>
-  <button onclick="fecharCalma()">Já estou melhor</button>
+  <div id="calma-passo-respirar">
+    <div class="circulo-respirar" id="circulo-respirar">Respira</div>
+    <p>Inspira devagar enquanto o círculo cresce.<br>Expira devagar enquanto ele encolhe.<br>Está tudo bem. Não há pressa.</p>
+    <button onclick="avancarParaPosCalma()">Já estou melhor</button>
+  </div>
+  <div id="calma-passo-pos" class="calma-pos-pergunta" style="display:none;">
+    <p style="margin-bottom:20px;">E agora, o que vai acontecer?</p>
+    <button class="btn-pos" onclick="fecharCalma('voltou')">👍 Vou voltar à tarefa</button>
+    <button class="btn-pos" onclick="fecharCalma('ajuda')">🤝 Vou pedir ajuda a um adulto</button>
+    <button class="btn-saltar" onclick="fecharCalma(null)">Saltar</button>
+  </div>
 </div>
 
 <script>
-window.APP_VERSION = '1.5.5';
+window.APP_VERSION = '1.17.0';
 
 /* ======================= DADOS ======================= */
 
@@ -916,17 +1593,19 @@ const rotinaHoje = [
   {hora:"08:30", icone:"🥣", t:"Pequeno-almoço", d:"Cereais + leite, no lugar habitual", feito:true},
   {hora:"09:00", icone:"🎒", t:"Escola", d:"Aulas da manhã", feito:false},
   {hora:"13:00", icone:"🍽️", t:"Almoço", d:"", feito:false},
-  {hora:"15:00", icone:"📖", t:"Trabalhos de casa", d:"20 minutos, com pausa a meio", feito:false},
-  {hora:"16:00", icone:"🎮", t:"Tempo livre", d:"Jogos ou atividade à escolha", feito:false},
+  {hora:"15:00", icone:"📖", t:"Trabalhos de casa", d:"20 minutos, com pausa a meio", duracaoMin:20, feito:false},
+  {hora:"16:00", icone:"🎮", t:"Tempo livre", d:"Jogos ou atividade à escolha", feito:false, opcoes:["Jogo da memória","Desenhar","Ouvir sons calmos"]},
   {hora:"19:00", icone:"🛁", t:"Banho e jantar", d:"", feito:false},
   {hora:"21:00", icone:"🌙", t:"Hora de dormir", d:"Luz suave, sem ecrãs", feito:false},
 ];
 
 const escolaItens = [
-  {icone:"➗", cor:"#E4EEF0", t:"Matemática — Frações", d:"Ficha de treino, 8 exercícios", nivel:"medio", tipo:"quiz", dados:"matematica"},
-  {icone:"📗", cor:"#E7F1E8", t:"Português — Leitura", d:"Ler o texto e responder", nivel:"facil", tipo:"quiz", dados:"portugues"},
-  {icone:"🌍", cor:"#FBEFDD", t:"Estudo do Meio — Portugal", d:"Distritos e capitais", nivel:"dificil", tipo:"quiz", dados:"geografia"},
-  {icone:"🔬", cor:"#F3E3E0", t:"Ciências — O Sistema Solar", d:"Vídeo + perguntas", nivel:"facil", tipo:"quiz", dados:"ciencias"},
+  {icone:"➗", cor:"#E4EEF0", t:"Matemática — Frações", d:"Ficha de treino", tipo:"quiz", dados:"matematica"},
+  {icone:"📗", cor:"#E7F1E8", t:"Português — Leitura", d:"Ler o texto e responder", tipo:"quiz", dados:"portugues"},
+  {icone:"🌍", cor:"#FBEFDD", t:"Estudo do Meio — Portugal", d:"Distritos e capitais", tipo:"quiz", dados:"geografia"},
+  {icone:"🔬", cor:"#F3E3E0", t:"Ciências — O Sistema Solar", d:"Vídeo + perguntas", tipo:"quiz", dados:"ciencias"},
+  {icone:"🇬🇧", cor:"#E4EEF0", t:"Inglês — Vocabulário", d:"Palavras e frases simples", tipo:"quiz", dados:"ingles"},
+  {icone:"🇪🇸", cor:"#FBEFDD", t:"Espanhol — Vocabulário", d:"Palavras e frases simples", tipo:"quiz", dados:"espanhol"},
 ];
 
 const atividadesItens = [
@@ -938,7 +1617,7 @@ const atividadesItens = [
 ];
 
 const jogosItens = [
-  {icone:"🧠", cor:"#E4EEF0", t:"Jogo da Memória", d:"Encontra os pares de animais", tipo:"memoria"},
+  {icone:"🧠", cor:"#E4EEF0", t:"Jogo da Memória", d:"Encontra os pares de animais", tipo:"memoria", dados:"memoria"},
   {icone:"🔤", cor:"#FBEFDD", t:"Ordena as Letras", d:"Forma a palavra certa", tipo:"quiz", dados:"letras"},
   {icone:"🔢", cor:"#F3E3E0", t:"Sequências Numéricas", d:"Qual é o número a seguir?", tipo:"quiz", dados:"numeros"},
   {icone:"🎯", cor:"#E7F1E8", t:"Verdadeiro ou Falso", d:"Testa o que sabes", tipo:"quiz", dados:"vf"},
@@ -1017,6 +1696,7 @@ const medalhasLista = [
   {icone:"🧠", t:"Mestre da Memória", d:"Ganha o jogo da memória 3 vezes", desbloqueada:false},
   {icone:"🌿", t:"Calma Total", d:"Usa o modo Calma 5 vezes", desbloqueada:false},
   {icone:"🔥", t:"Semana Completa", d:"Termina a rotina do dia 7 dias seguidos", desbloqueada:false},
+  {icone:"💪", t:"Nunca Desistes", d:"Termina 10 fichas até ao fim, mesmo com respostas erradas", desbloqueada:false},
 ];
 
 // Cada pergunta tem um nível de dificuldade: 1 = fácil, 2 = médio, 3 = difícil.
@@ -1062,7 +1742,7 @@ const quizzes = {
     {p:"Quanto é 12²?", o:["124","134","144","154"], c:2, nivel:3},
   ],
   portugues: [
-    {p:"Qual destas é uma palavra com 3 sílabas?", o:["Casa","Bicicleta","Sol","Pé"], c:1, nivel:1},
+    {p:"Qual destas é uma palavra com 3 sílabas?", o:["Casa","Sol","Boneca","Pé"], c:2, nivel:1},
     {p:"Qual destas palavras é um verbo?", o:["Cadeira","Correr","Azul","Rápido"], c:1, nivel:1},
     {p:"Qual destas palavras é um adjetivo?", o:["Correr","Bonito","Casa","Rapidamente"], c:1, nivel:1},
     {p:"Qual é o plural de \"animal\"?", o:["Animais","Animals","Animales","Animaus"], c:0, nivel:2},
@@ -1127,6 +1807,30 @@ const quizzes = {
     {p:"A água ferve a 0°C ao nível do mar. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:1, nivel:3},
     {p:"O coração humano tem 4 câmaras. Verdadeiro ou Falso?", o:["Verdadeiro","Falso"], c:0, nivel:3},
   ],
+  ingles: [
+    {p:"Como se diz \"cão\" em inglês?", o:["Cat","Dog","Bird","Fish"], c:1, nivel:1},
+    {p:"Como se diz \"vermelho\" em inglês?", o:["Blue","Green","Red","Yellow"], c:2, nivel:1},
+    {p:"Como se diz \"obrigado\" em inglês?", o:["Please","Sorry","Thank you","Hello"], c:2, nivel:1},
+    {p:"Como se diz \"carro\" em inglês?", o:["Car","Bike","Bus","Train"], c:0, nivel:1},
+    {p:"Qual é o plural de \"book\" em inglês?", o:["Bookes","Books","Booky","Bookss"], c:1, nivel:2},
+    {p:"Como se diz \"Eu gosto de futebol\" em inglês?", o:["I like football","I likes football","I liking football","I to like football"], c:0, nivel:2},
+    {p:"Qual destas palavras significa \"rápido\" em inglês?", o:["Slow","Fast","Big","Small"], c:1, nivel:2},
+    {p:"Como se diz \"Que horas são?\" em inglês?", o:["What time is it?","What time it is?","How time is?","What is the time now question"], c:0, nivel:3},
+    {p:"Qual é o passado de \"go\" (ir) em inglês?", o:["Goed","Gone","Went","Going"], c:2, nivel:3},
+    {p:"Como se diz \"Eu tenho treze anos\" em inglês?", o:["I have thirteen years","I am thirteen years old","I am thirteen","I has thirteen"], c:1, nivel:3},
+  ],
+  espanhol: [
+    {p:"Como se diz \"cão\" em espanhol?", o:["Gato","Perro","Pájaro","Pez"], c:1, nivel:1},
+    {p:"Como se diz \"vermelho\" em espanhol?", o:["Azul","Verde","Rojo","Amarillo"], c:2, nivel:1},
+    {p:"Como se diz \"obrigado\" em espanhol?", o:["Por favor","Perdón","Gracias","Hola"], c:2, nivel:1},
+    {p:"Como se diz \"carro\" em espanhol?", o:["Coche","Bicicleta","Autobús","Tren"], c:0, nivel:1},
+    {p:"Qual é o plural de \"libro\" (livro) em espanhol?", o:["Libroes","Libros","Libris","Libross"], c:1, nivel:2},
+    {p:"Como se diz \"Eu gosto de futebol\" em espanhol?", o:["Me gusta el fútbol","Yo gusto el fútbol","Me gustan fútbol","Gusto me el fútbol"], c:0, nivel:2},
+    {p:"Qual destas palavras significa \"rápido\" em espanhol?", o:["Lento","Rápido","Grande","Pequeño"], c:1, nivel:2},
+    {p:"Como se diz \"Que horas são?\" em espanhol?", o:["¿Qué hora es?","¿Qué hora son?","¿Cómo hora es?","¿Qué es la hora ahora?"], c:0, nivel:3},
+    {p:"Qual é o passado de \"ir\" (ir) em espanhol, na 1ª pessoa?", o:["Iba","Fui","Iré","Voy"], c:1, nivel:3},
+    {p:"Como se diz \"Eu tenho treze anos\" em espanhol?", o:["Tengo trece años","Soy trece años","Estoy trece","Tengo trece"], c:0, nivel:3},
+  ],
 };
 
 // Nível de dificuldade atualmente desbloqueado por matéria (chave do banco de perguntas).
@@ -1176,21 +1880,116 @@ function montarQuizProgressivo(chave){
 }
 
 let estrelas = 3;
+
+// Loja de Recompensas: cada item tem ícone, nome e custo em estrelas. Configurável pelos pais.
+// "gastas" acumula quantas estrelas já foram gastas ao todo (para o total "disponíveis" = estrelas - gastas).
+let recompensasLista = [
+  {icone:'📱', t:'30 minutos de tablet extra', custo:10},
+  {icone:'🍦', t:'Escolher a sobremesa', custo:15},
+  {icone:'🎬', t:'Escolher o filme do fim de semana', custo:25},
+];
+let estrelasGastas = 0;
 let audioCtx = null;
-let somAtivo = null; // { chave, pararFn }
+let somAtivo = null; // { chave, pararFn } — som ambiente (chuva, etc.) atualmente a tocar
 
 // "Efeitos calmos": interruptor manual em Definições que reduz confetis e som de ovação,
 // independente da preferência do sistema (prefers-reduced-motion) e do volume do dispositivo.
 let efeitosCalmosAtivo = false;
 
+// Interruptor geral de som (acerto/erro do quiz e demais efeitos sonoros da app).
+// Independente do som ambiente (chuva, etc.), que tem o seu próprio controlo.
+// Volume geral dos sons de feedback da app (acerto/erro/clique), de 0 (silêncio) a 1 (máximo).
+// Substitui o antigo interruptor on/off por um controlo de intensidade.
+let volumeSomApp = 1;
+
 // Contadores para desbloquear medalhas específicas
 let contadorFichasEscola = 0;
 let contadorVitoriasMemoria = 0;
 let contadorUsosCalma = 0;
+// Conta quizzes terminados até ao fim, mesmo com erros pelo caminho — reforça
+// a persistência em tentar, não só o resultado final (ver responderQuiz/renderQuiz)
+let contadorQuizzesConcluidos = 0;
 
 // Sequência de dias seguidos com a rotina do dia 100% completa
 let streakDias = 0;
 let ultimaDataStreak = null; // última data (AAAA-MM-DD) em que a rotina ficou completa
+// Melhor sequência alguma vez alcançada — nunca desce, mesmo que o streak atual quebre.
+// Serve de reforço permanente pelo esforço já feito, em vez de "apagar" o progresso num dia difícil.
+let recordeStreakDias = 0;
+
+// Regista, por nome de bloco da rotina, quantas vezes o modo Calma foi aberto enquanto
+// esse bloco estava "atual". Ajuda os pais/terapeuta a notar padrões (ex: "usa sempre o
+// Calma antes de Matemática") — é só uma contagem simples, não um diário de comportamento.
+let registoCalmaPorBloco = {}; // { 'Matemática — Frações': 3, 'Sem tarefa associada': 1 }
+// Consequência do Modo Calma, por bloco da rotina: { 'Trabalhos de casa': {voltou:2, ajuda:1} }
+// Fecha o ciclo ABC (Antecedente já estava em registoCalmaPorBloco) — opcional, nunca obrigatório.
+let registoPosCalma = {};
+
+/* ======================= HISTÓRICO DIÁRIO (para os gráficos da área parental) ======================= */
+// Guarda, por dia, um retrato simples do progresso: tarefas da rotina feitas/total,
+// estrelas ganhas nesse dia, e fichas de escola concluídas nesse dia.
+// Não é um registo clínico — só serve para os pais acompanharem tendências gerais de utilização.
+const CHAVE_HISTORICO = 'mundoDoEduardo_historico_v1';
+const DIAS_HISTORICO_GUARDADOS = 60; // mantém só os últimos ~2 meses, para não crescer sem limite
+let historicoDiario = {}; // { 'AAAA-MM-DD': { tarefasFeitas, tarefasTotal, estrelasGanhas, fichasEscola } }
+let estrelasNoInicioDoDia = null; // valor de 'estrelas' no momento em que o dia atual começou a ser rastreado
+
+function guardarHistorico(){
+  try{
+    localStorage.setItem(CHAVE_HISTORICO, JSON.stringify(historicoDiario));
+  }catch(e){ /* sem acesso ao localStorage: histórico fica só em memória nesta sessão */ }
+}
+
+function carregarHistorico(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_HISTORICO);
+    if(bruto){
+      const guardado = JSON.parse(bruto);
+      if(guardado && typeof guardado === 'object') historicoDiario = guardado;
+    }
+  }catch(e){ /* histórico inválido: começa vazio, sem rebentar a app */ }
+  podarHistoricoAntigo();
+}
+
+// Remove entradas de dias muito antigos, para o localStorage não crescer indefinidamente
+function podarHistoricoAntigo(){
+  const chaves = Object.keys(historicoDiario).sort();
+  if(chaves.length <= DIAS_HISTORICO_GUARDADOS) return;
+  const excesso = chaves.length - DIAS_HISTORICO_GUARDADOS;
+  chaves.slice(0, excesso).forEach(chave => { delete historicoDiario[chave]; });
+}
+
+// Atualiza o retrato do dia de hoje no histórico, a partir do estado atual da rotina e das estrelas.
+// Chamada sempre que algo relevante muda (tarefa marcada, estrela ganha), para o gráfico ficar sempre atualizado.
+function atualizarHistoricoHoje(){
+  const hoje = dataHojeChave();
+  if(estrelasNoInicioDoDia === null){
+    // Primeira vez nesta sessão: usa o que já estava guardado para hoje (se existir) como referência
+    const existente = historicoDiario[hoje];
+    estrelasNoInicioDoDia = existente ? (estrelas - existente.estrelasGanhas) : estrelas;
+  }
+  const tarefasFeitas = rotinaHoje.filter(b => b.feito).length;
+  historicoDiario[hoje] = {
+    tarefasFeitas,
+    tarefasTotal: rotinaHoje.length,
+    estrelasGanhas: Math.max(0, estrelas - estrelasNoInicioDoDia),
+    fichasEscola: contadorFichasEscola,
+  };
+  guardarHistorico();
+}
+
+// Devolve os últimos N dias (incluindo hoje) em ordem cronológica, com zeros para dias sem registo
+function obterUltimosDias(n){
+  const dias = [];
+  for(let i = n - 1; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const chave = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const registo = historicoDiario[chave] || {tarefasFeitas:0, tarefasTotal:0, estrelasGanhas:0, fichasEscola:0};
+    dias.push({ data: chave, diaSemana: d.toLocaleDateString('pt-PT', {weekday:'short'}), ...registo });
+  }
+  return dias;
+}
 
 /* ======================= PERSISTÊNCIA (localStorage) ======================= */
 const CHAVE_ESTADO = 'mundoDoEduardo_estado_v1';
@@ -1209,15 +2008,23 @@ function guardarEstado(){
     const estado = {
       estrelas: estrelas,
       rotinaFeita: rotinaHoje.map(b => b.feito),
+      rotinaEscolhas: rotinaHoje.map(b => b.escolhaHoje || null),
       rotinaData: dataHojeChave(), // permite detetar um novo dia e repor a rotina
       medalhasDesbloqueadas: medalhasLista.map(m => m.desbloqueada),
       contadorFichasEscola: contadorFichasEscola,
       contadorVitoriasMemoria: contadorVitoriasMemoria,
       contadorUsosCalma: contadorUsosCalma,
+      contadorQuizzesConcluidos: contadorQuizzesConcluidos,
       nivelDesbloqueado: nivelDesbloqueado,
       streakDias: streakDias,
+      recordeStreakDias: recordeStreakDias,
       ultimaDataStreak: ultimaDataStreak,
       efeitosCalmosAtivo: efeitosCalmosAtivo,
+      volumeSomApp: volumeSomApp,
+      registoCalmaPorBloco: registoCalmaPorBloco,
+      registoPosCalma: registoPosCalma,
+      recompensasLista: recompensasLista,
+      estrelasGastas: estrelasGastas,
     };
     localStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado));
   }catch(e){
@@ -1241,6 +2048,11 @@ function carregarEstado(){
         if(rotinaHoje[i]) rotinaHoje[i].feito = feito;
       });
     }
+    if(mesmoDia && Array.isArray(estado.rotinaEscolhas)){
+      estado.rotinaEscolhas.forEach((escolha, i) => {
+        if(rotinaHoje[i] && escolha) rotinaHoje[i].escolhaHoje = escolha;
+      });
+    }
     if(Array.isArray(estado.medalhasDesbloqueadas)){
       estado.medalhasDesbloqueadas.forEach((desbloqueada, i) => {
         if(medalhasLista[i]) medalhasLista[i].desbloqueada = desbloqueada;
@@ -1249,12 +2061,26 @@ function carregarEstado(){
     if(typeof estado.contadorFichasEscola === 'number') contadorFichasEscola = estado.contadorFichasEscola;
     if(typeof estado.contadorVitoriasMemoria === 'number') contadorVitoriasMemoria = estado.contadorVitoriasMemoria;
     if(typeof estado.contadorUsosCalma === 'number') contadorUsosCalma = estado.contadorUsosCalma;
+    if(typeof estado.contadorQuizzesConcluidos === 'number') contadorQuizzesConcluidos = estado.contadorQuizzesConcluidos;
     if(estado.nivelDesbloqueado && typeof estado.nivelDesbloqueado === 'object'){
       nivelDesbloqueado = estado.nivelDesbloqueado;
     }
     if(typeof estado.streakDias === 'number') streakDias = estado.streakDias;
+    if(typeof estado.recordeStreakDias === 'number') recordeStreakDias = estado.recordeStreakDias;
+    if(recordeStreakDias < streakDias) recordeStreakDias = streakDias; // compatibilidade com estados antigos sem este campo
     if(typeof estado.ultimaDataStreak === 'string') ultimaDataStreak = estado.ultimaDataStreak;
     if(typeof estado.efeitosCalmosAtivo === 'boolean') efeitosCalmosAtivo = estado.efeitosCalmosAtivo;
+    // Compatibilidade com o antigo interruptor on/off (versões anteriores da app)
+    if(typeof estado.somAppLigado === 'boolean') volumeSomApp = estado.somAppLigado ? 1 : 0;
+    if(typeof estado.volumeSomApp === 'number') volumeSomApp = Math.min(1, Math.max(0, estado.volumeSomApp));
+    if(estado.registoCalmaPorBloco && typeof estado.registoCalmaPorBloco === 'object'){
+      registoCalmaPorBloco = estado.registoCalmaPorBloco;
+    }
+    if(estado.registoPosCalma && typeof estado.registoPosCalma === 'object'){
+      registoPosCalma = estado.registoPosCalma;
+    }
+    if(Array.isArray(estado.recompensasLista)) recompensasLista = estado.recompensasLista;
+    if(typeof estado.estrelasGastas === 'number') estrelasGastas = estado.estrelasGastas;
   }catch(e){
     // Estado inválido ou inacessível: arranca do zero sem rebentar a app
   }
@@ -1271,6 +2097,19 @@ function alternarEfeitosCalmos(){
   vibrar(20);
   const btn = document.getElementById('interruptor-efeitos-calmos');
   if(btn) btn.classList.toggle('ligado', efeitosCalmosAtivo);
+}
+
+// Chamado ao arrastar o slider de volume nas Definições. Valor recebido é 0–100 (do input range).
+let temporizadorPreviewVolume = null;
+function ajustarVolumeSom(valorSlider){
+  volumeSomApp = Math.min(1, Math.max(0, Number(valorSlider) / 100));
+  guardarEstado();
+  // Pré-visualização: toca o som de acerto (com pequeno atraso) para o utilizador ouvir o volume
+  // escolhido, sem disparar um som a cada pequeníssimo movimento do dedo no slider.
+  clearTimeout(temporizadorPreviewVolume);
+  if(volumeSomApp > 0){
+    temporizadorPreviewVolume = setTimeout(()=> tocarSomAcerto(), 250);
+  }
 }
 
 // A rotina personalizada (guardada pelos pais/cuidador em Configuração) é gravada
@@ -1378,29 +2217,109 @@ function tocarTom(ctx, freq, inicio, duracao, volume, tipo){
   osc.type = tipo || 'sine';
   osc.frequency.setValueAtTime(freq, inicio);
   gain.gain.setValueAtTime(0, inicio);
-  gain.gain.linearRampToValueAtTime(volume, inicio + 0.02);
-  gain.gain.linearRampToValueAtTime(0, inicio + duracao);
+  gain.gain.linearRampToValueAtTime(volume, inicio + 0.015);
+  // Fade exponencial em vez de linear: soa mais natural e evita o "clique" do corte abrupto
+  gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start(inicio);
   osc.stop(inicio + duracao + 0.02);
 }
-function tocarSomAcerto(){
+function tocarSomClique(){
+  if(volumeSomApp <= 0) return;
   try{
     const ctx = obterAudioCtx();
     const agora = ctx.currentTime;
-    // "Plim" alegre: dois tons a subir
-    tocarTom(ctx, 880, agora, 0.14, 0.12, 'sine');
-    tocarTom(ctx, 1318.5, agora + 0.1, 0.22, 0.12, 'sine');
+    const v = (efeitosCalmosAtivo ? 0.5 : 1) * volumeSomApp; // efeitos calmos: bem mais discreto, é só um clique de navegação
+    // Clique suave e neutro para navegação (trocar de ecrã, abrir um cartão) —
+    // deliberadamente mais discreto que os sons de acerto/erro do quiz, só uma confirmação tátil.
+    tocarTom(ctx, 520, agora, 0.06, 0.05*v, 'sine');
+  }catch(e){}
+}
+function tocarSomEsforco(){
+  if(volumeSomApp <= 0) return;
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    const v = (efeitosCalmosAtivo ? 0.6 : 1) * volumeSomApp;
+    // Som de reconhecimento calmo (não celebração): dois tons próximos e suaves,
+    // claramente diferente do "plim" de acerto total e do buzz de erro — sinaliza
+    // "reconheci o teu esforço" sem soar a vitória nem a falha.
+    tocarTom(ctx, 587.3, agora, 0.16, 0.08*v, 'sine');       // Ré5
+    tocarTom(ctx, 659.3, agora + 0.14, 0.20, 0.08*v, 'sine');// Mi5
+  }catch(e){}
+}
+function tocarSomAcerto(){
+  if(volumeSomApp <= 0) return;
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    const v = (efeitosCalmosAtivo ? 0.6 : 1) * volumeSomApp; // efeitos calmos: volume mais discreto
+
+    // Eco simples (delay + feedback) só para dar sensação de "sala" à nota final,
+    // tornando o "plim" mais rico e satisfatório sem precisar de amostras de áudio.
+    const delay = ctx.createDelay();
+    delay.delayTime.value = 0.14;
+    const feedback = ctx.createGain();
+    feedback.gain.value = 0.28;
+    const ecoSaida = ctx.createGain();
+    ecoSaida.gain.value = 0.5;
+    delay.connect(feedback);
+    feedback.connect(delay); // realimentação: cada eco repete mais baixo
+    delay.connect(ecoSaida);
+    ecoSaida.connect(ctx.destination);
+
+    // "Plim" tipo sino: arpejo de três tons a subir (dó-mi-sol agudo), efeito claramente positivo
+    tocarTom(ctx, 784.0, agora, 0.16, 0.11*v, 'sine');        // Sol5
+    tocarTom(ctx, 987.8, agora + 0.08, 0.18, 0.12*v, 'sine'); // Si5
+    // A nota final também alimenta o eco, além de tocar diretamente
+    tocarTom(ctx, 1318.5, agora + 0.16, 0.30, 0.13*v, 'sine');// Mi6 — nota final mais sustida, dá satisfação
+    const oscEco = ctx.createOscillator();
+    const gainEco = ctx.createGain();
+    oscEco.type = 'sine';
+    oscEco.frequency.setValueAtTime(1318.5, agora + 0.16);
+    gainEco.gain.setValueAtTime(0, agora + 0.16);
+    gainEco.gain.linearRampToValueAtTime(0.13*v, agora + 0.175);
+    gainEco.gain.exponentialRampToValueAtTime(0.0001, agora + 0.46);
+    oscEco.connect(gainEco);
+    gainEco.connect(delay);
+    oscEco.start(agora + 0.16);
+    oscEco.stop(agora + 0.48);
   }catch(e){}
 }
 function tocarSomErro(){
+  if(volumeSomApp <= 0) return;
   try{
     const ctx = obterAudioCtx();
     const agora = ctx.currentTime;
-    // Som suave e curto, sem ser áspero — dois tons a descer, tom "quase lá"
-    tocarTom(ctx, 349.2, agora, 0.18, 0.08, 'sine');
-    tocarTom(ctx, 293.7, agora + 0.13, 0.22, 0.08, 'sine');
+    const v = (efeitosCalmosAtivo ? 0.6 : 1) * volumeSomApp; // efeitos calmos: volume mais discreto
+    // Som clássico de "erro" de jogo: dois "buzzes" curtos e secos em sequência rápida
+    // (tipo trivia/Duolingo), com square wave filtrada — mais reconhecível que um glissando único.
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = 'lowpass';
+    filtro.frequency.value = 1200;
+    filtro.connect(ctx.destination);
+
+    function buzz(inicio, freq, duracao, volume){
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, inicio);
+      gain.gain.setValueAtTime(0, inicio);
+      gain.gain.linearRampToValueAtTime(volume, inicio + 0.008);
+      gain.gain.setValueAtTime(volume, inicio + duracao - 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+      osc.connect(gain);
+      gain.connect(filtro);
+      osc.start(inicio);
+      osc.stop(inicio + duracao + 0.01);
+    }
+
+    // Pequena variação aleatória de afinação (±6%) para o som não soar sempre idêntico
+    // em erros seguidos — reduz o efeito repetitivo/irritante sem perder o reconhecimento do som.
+    const variacao = 0.94 + Math.random() * 0.12;
+    buzz(agora, 180 * variacao, 0.11, 0.14*v);
+    buzz(agora + 0.13, 140 * variacao, 0.16, 0.14*v);
   }catch(e){}
 }
 
@@ -1415,9 +2334,18 @@ function pararSomAtivo(){
 }
 
 function irPara(ecra){
+  // Se há um quiz por terminar e o destino é diferente do ecrã de detalhe do próprio quiz,
+  // confirma antes de sair para não perder o progresso sem querer (ex: toque na barra de baixo).
+  if(quizEmCurso && ecra !== 'detalhe'){
+    confirmarSairDoQuiz(()=>{ quizEmCurso = false; irPara(ecra); });
+    return;
+  }
   pararSomAtivo();
+  pararTemporizador();
+  tocarSomClique();
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-'+ecra).classList.add('ativo');
+  if(ecra === 'loja-recompensas') renderLojaRecompensas();
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
   const btn = document.querySelector('.nav-btn[data-nav="'+ecra+'"]');
   if(btn) btn.classList.add('ativo');
@@ -1426,11 +2354,28 @@ function irPara(ecra){
 
 function irParaDetalhe(html, tituloVoltar){
   if(tituloVoltar !== 'atividades'){ pararSomAtivo(); } // mantém o som se ainda estivermos dentro de Atividades
+  tocarSomClique();
   document.getElementById('conteudo-detalhe').innerHTML = html;
   document.getElementById('voltar-detalhe').onclick = ()=> irPara(tituloVoltar);
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-detalhe').classList.add('ativo');
   document.getElementById('main').scrollTop = 0;
+}
+
+// Mostra um pequeno aviso amigável antes de sair de um quiz a meio, com opção de continuar ou sair.
+function confirmarSairDoQuiz(aoConfirmarSaida){
+  const cont = document.getElementById('conteudo-detalhe');
+  cont.innerHTML = `
+    <div class="painel">
+      <div class="icone-grande" style="background:var(--salva-clara)">🤔</div>
+      <h2>Sair do jogo?</h2>
+      <p class="desc">Ainda não terminaste. Se saíres agora, tens de começar este nível outra vez.</p>
+      <button class="btn-primario" id="btn-confirmar-sair-quiz">Sair mesmo assim</button>
+      <button class="btn-secundario" id="btn-continuar-quiz" style="margin-top:10px;">Continuar a responder</button>
+    </div>
+  `;
+  document.getElementById('btn-confirmar-sair-quiz').addEventListener('click', aoConfirmarSaida);
+  document.getElementById('btn-continuar-quiz').addEventListener('click', renderQuiz);
 }
 
 /* ======================= DATA / SAUDAÇÃO ======================= */
@@ -1450,7 +2395,7 @@ function verificarNovoDia(){
   const hoje = dataHojeChave();
   if(hoje !== dataVistaRotina){
     dataVistaRotina = hoje;
-    rotinaHoje.forEach(b => { b.feito = false; });
+    rotinaHoje.forEach(b => { b.feito = false; delete b.escolhaHoje; });
     guardarEstado();
     renderRotina();
   }
@@ -1498,28 +2443,74 @@ function calcularProximaTransicao(indiceAgora){
   return null;
 }
 
+// Modo de vista da rotina: "dia" mostra tudo, "agora" mostra só a tarefa atual + a seguinte.
+// Guardado em localStorage para se manter entre visitas — é uma preferência estável, não do momento.
+const CHAVE_VISTA_ROTINA = 'mundoDoEduardo_vistaRotina_v1';
+let vistaRotina = 'dia';
+
+function carregarVistaRotina(){
+  try{
+    const guardado = localStorage.getItem(CHAVE_VISTA_ROTINA);
+    if(guardado === 'agora' || guardado === 'dia'){ vistaRotina = guardado; }
+  }catch(e){
+    // Sem suporte: mantém o modo "dia todo" por omissão
+  }
+}
+
+function definirVistaRotina(modo){
+  vistaRotina = modo;
+  try{ localStorage.setItem(CHAVE_VISTA_ROTINA, modo); }catch(e){}
+  vibrar(20);
+  renderRotina();
+}
+
 function renderRotina(){
   const cont = document.getElementById('lista-rotina');
   const indiceAgora = calcularIndiceAgora();
   const transicao = calcularProximaTransicao(indiceAgora);
   avisarTransicaoSeNova(transicao);
+
+  document.querySelectorAll('.btn-vista').forEach(btn=>{
+    btn.classList.toggle('ativo', btn.dataset.vista === vistaRotina);
+  });
+
   cont.innerHTML = (transicao ? `
     <div class="aviso-transicao" role="status">
       <span class="icone-aviso">⏰</span>
       <span>Daqui a <strong>${transicao.minutos} min${transicao.minutos===1?'':'s'}</strong>: ${transicao.bloco.icone} ${transicao.bloco.t}</span>
     </div>
-  ` : '') + rotinaHoje.map((b,i)=>`
-    <div class="bloco-rotina ${b.feito?'feito':''} ${i===indiceAgora?'agora':''}">
+  ` : '') + (
+    // Caso extremo: modo "Só agora" mas já não há nenhuma tarefa por fazer — mostra uma mensagem
+    // simples de dia completo em vez de arriscar mostrar um bloco errado.
+    (vistaRotina === 'agora' && indiceAgora === -1 && rotinaHoje.every(x => x.feito) && rotinaHoje.length > 0)
+      ? `<div class="aviso-transicao" role="status"><span class="icone-aviso">🎉</span><span>O dia de hoje está completo!</span></div>`
+      : ''
+  ) + rotinaHoje.map((b,i)=>{
+    // Em modo "Só agora": mostra apenas a tarefa atual e a seguinte por fazer.
+    // Se não houver tarefa "atual" (ex: antes da primeira hora do dia), mostra a próxima por fazer.
+    let visivel = true;
+    if(vistaRotina === 'agora'){
+      if(rotinaHoje.every(x => x.feito)){
+        visivel = false; // já foi mostrada a mensagem de dia completo acima
+      } else {
+        const proximaPorFazer = rotinaHoje.findIndex(x => !x.feito);
+        const referencia = indiceAgora !== -1 ? indiceAgora : proximaPorFazer;
+        visivel = (i === referencia || i === referencia + 1);
+      }
+    }
+    return `
+    <div class="bloco-rotina ${b.feito?'feito':''} ${i===indiceAgora?'agora':''} ${visivel?'':'oculto-por-vista'}" data-indice-bloco="${i}">
       <div class="hora">${b.hora}</div>
       <div class="icone-rotina">${b.icone}</div>
       <div class="info">
-        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${b.t}</div>
-        ${b.d && !b.feito ? `<div class="d">${b.d}</div>` : ''}
+        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${b.t}${b.escolhaHoje ? ': ' + b.escolhaHoje : ''}</div>
+        ${b.opcoes && b.opcoes.length > 0 && !b.escolhaHoje ? `<div class="d">✋ Toca para escolher</div>` : (b.d && !b.feito ? `<div class="d">${b.d}</div>` : '')}
       </div>
       <button class="btn-ouvir-rotina" data-indice="${i}" aria-label="Ouvir esta tarefa">🔊</button>
       <button class="check-rotina" onclick="toggleRotina(${i})">${b.feito?'✓':''}</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
   cont.querySelectorAll('.btn-ouvir-rotina').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       ev.stopPropagation();
@@ -1532,6 +2523,19 @@ function renderRotina(){
       btn.textContent = '⏸️';
       const texto = b.t + (b.d ? '. ' + b.d : '');
       narrar(texto, ()=>{ btn.textContent = '🔊'; });
+    });
+  });
+  // Toca no bloco (fora dos botões) para ver "Primeiro / Depois" — ajuda a antecipar a transição
+  cont.querySelectorAll('.bloco-rotina').forEach(bloco=>{
+    bloco.addEventListener('click', (ev)=>{
+      if(ev.target.closest('.btn-ouvir-rotina') || ev.target.closest('.check-rotina')) return;
+      const idx = parseInt(bloco.getAttribute('data-indice-bloco'), 10);
+      const b = rotinaHoje[idx];
+      if(b.opcoes && b.opcoes.length > 0 && !b.escolhaHoje){
+        abrirEscolhaBloco(idx);
+      } else {
+        abrirPrimeiroDepois(idx);
+      }
     });
   });
   renderProgressoDia();
@@ -1596,10 +2600,195 @@ function tocarTique(){
   }catch(e){}
 }
 
+/* ======================= PRIMEIRO / DEPOIS (apoio visual à transição) ======================= */
+// Mostra a tarefa atual e a seguinte lado a lado, para o Eduardo saber sempre
+// "o que vem a seguir" antes de uma mudança — reduz a ansiedade de transição.
+
+// Blocos de "escolha estruturada": os pais definem 2-3 opções concretas para um bloco
+// (ex: Tempo livre → "Puzzle, Desenhar, Lego"), o Eduardo escolhe uma. A hora do bloco
+// não muda — só o conteúdo dentro dela é escolhido, mantendo a rotina previsível.
+// A escolha do dia fica guardada em rotinaHoje[i].escolhaHoje e é reposta no dia seguinte.
+function abrirEscolhaBloco(i){
+  const bloco = rotinaHoje[i];
+  const opcoes = bloco.opcoes || [];
+  irParaDetalhe(`
+    <div class="painel">
+      <h2 style="margin-bottom:6px;">${bloco.icone} ${bloco.t}</h2>
+      <p class="desc" style="margin-bottom:18px;">O que queres fazer agora?</p>
+      <div class="lista-opcoes-escolha">
+        ${opcoes.map((op,idx)=>`<button class="btn-secundario btn-opcao-escolha" data-opcao="${idx}" style="display:block;width:100%;margin-bottom:10px;">${op}</button>`).join('')}
+      </div>
+    </div>
+  `, 'rotina');
+  document.querySelectorAll('.btn-opcao-escolha').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const escolhida = opcoes[parseInt(btn.dataset.opcao, 10)];
+      rotinaHoje[i].escolhaHoje = escolhida;
+      vibrar(20);
+      guardarEstado();
+      abrirPrimeiroDepois(i);
+    });
+  });
+}
+
+function abrirPrimeiroDepois(i){
+  const atual = rotinaHoje[i];
+  const seguinte = rotinaHoje[i+1] || null;
+  const html = `
+    <div class="painel">
+      <h2 style="margin-bottom:18px;">O que vem a seguir?</h2>
+      <div class="primeiro-depois">
+        <div class="pd-bloco">
+          <div class="pd-etiqueta">Primeiro</div>
+          <div class="pd-icone">${atual.icone}</div>
+          <div class="pd-texto">${atual.t}${atual.escolhaHoje ? ': ' + atual.escolhaHoje : ''}</div>
+        </div>
+        <div class="pd-seta">→</div>
+        <div class="pd-bloco ${seguinte ? '' : 'pd-vazio'}">
+          <div class="pd-etiqueta">Depois</div>
+          <div class="pd-icone">${seguinte ? seguinte.icone : '🌙'}</div>
+          <div class="pd-texto">${seguinte ? seguinte.t : 'Fim do dia'}</div>
+        </div>
+      </div>
+      <button class="btn-primario" id="btn-ouvir-pd">🔊 Ouvir</button>
+      ${atual.duracaoMin ? `<button class="btn-secundario" id="btn-temporizador-pd" style="margin-top:10px;">⏳ Começar o tempo (${atual.duracaoMin} min)</button>` : ''}
+      <button class="btn-secundario" id="btn-fechar-pd" style="margin-top:10px;">Já percebi</button>
+    </div>
+  `;
+  irParaDetalhe(html, 'rotina');
+  document.getElementById('btn-ouvir-pd').addEventListener('click', ()=>{
+    const btn = document.getElementById('btn-ouvir-pd');
+    if(vozAtiva){
+      pararNarracao();
+      btn.textContent = '🔊 Ouvir';
+    } else {
+      btn.textContent = '⏸ A ouvir...';
+      const texto = seguinte
+        ? `Primeiro: ${atual.t}. Depois: ${seguinte.t}.`
+        : `Primeiro: ${atual.t}. Depois disso, é o fim do dia.`;
+      narrar(texto, ()=>{ btn.textContent = '🔊 Ouvir'; });
+    }
+  });
+  const btnTemporizador = document.getElementById('btn-temporizador-pd');
+  if(btnTemporizador){
+    btnTemporizador.addEventListener('click', ()=>{
+      abrirTemporizador(atual, i);
+    });
+  }
+  document.getElementById('btn-fechar-pd').addEventListener('click', ()=>{
+    irPara('rotina');
+  });
+}
+
+/* ======================= TEMPORIZADOR VISUAL (sem contagem numérica) ======================= */
+// Círculo que se esvazia com o tempo, em vez de números a contar — reduz ansiedade
+// face a um relógio. Toca um som suave no fim, nunca alto ou súbito.
+let temporizadorAtivo = null; // { intervaloId, segundosTotal, segundosRestantes, pausado }
+
+function pararTemporizador(){
+  if(temporizadorAtivo && temporizadorAtivo.intervaloId){
+    clearInterval(temporizadorAtivo.intervaloId);
+  }
+  temporizadorAtivo = null;
+}
+
+function abrirTemporizador(bloco, indiceRotina){
+  pararTemporizador();
+  const segundosTotal = bloco.duracaoMin * 60;
+  temporizadorAtivo = { segundosTotal, segundosRestantes: segundosTotal, pausado: false, intervaloId: null };
+
+  const html = `
+    <div class="painel">
+      <h2 style="margin-bottom:6px;">${bloco.icone} ${bloco.t}</h2>
+      <p class="desc" style="margin-bottom:20px;">Enquanto o círculo estiver cheio, ainda há tempo. Quando esvaziar, a tarefa termina.</p>
+      <div class="temporizador-visual">
+        <svg viewBox="0 0 120 120" class="temporizador-svg">
+          <circle cx="60" cy="60" r="52" class="temp-fundo"></circle>
+          <circle cx="60" cy="60" r="52" class="temp-progresso" id="temp-circulo"
+            style="stroke-dasharray:326.7; stroke-dashoffset:0;"></circle>
+        </svg>
+        <div class="temp-icone-central" id="temp-icone-central">${bloco.icone}</div>
+      </div>
+      <p class="temp-texto-simples" id="temp-texto-simples">Ainda falta bastante tempo</p>
+      <button class="btn-primario" id="btn-pausar-temp">⏸ Pausar</button>
+      <button class="btn-secundario" id="btn-parar-temp" style="margin-top:10px;">Terminar agora</button>
+    </div>
+  `;
+  irParaDetalhe(html, 'rotina');
+  atualizarVisualTemporizador();
+
+  temporizadorAtivo.intervaloId = setInterval(()=>{
+    if(!temporizadorAtivo || temporizadorAtivo.pausado) return;
+    temporizadorAtivo.segundosRestantes--;
+    if(temporizadorAtivo.segundosRestantes <= 0){
+      atualizarVisualTemporizador();
+      concluirTemporizador(bloco, indiceRotina);
+      return;
+    }
+    atualizarVisualTemporizador();
+  }, 1000);
+
+  const btnPausar = document.getElementById('btn-pausar-temp');
+  btnPausar.addEventListener('click', ()=>{
+    if(!temporizadorAtivo) return;
+    temporizadorAtivo.pausado = !temporizadorAtivo.pausado;
+    btnPausar.textContent = temporizadorAtivo.pausado ? '▶ Continuar' : '⏸ Pausar';
+    vibrar(20);
+  });
+  document.getElementById('btn-parar-temp').addEventListener('click', ()=>{
+    pararTemporizador();
+    irPara('rotina');
+  });
+}
+
+// Três frases simples em vez de números — dá noção de tempo sem gerar ansiedade de contagem
+function fraseTempoRestante(fracao){
+  if(fracao > 0.5) return 'Ainda falta bastante tempo';
+  if(fracao > 0.15) return 'Já vai a meio — continua';
+  return 'Quase a terminar';
+}
+
+function atualizarVisualTemporizador(){
+  if(!temporizadorAtivo) return;
+  const circulo = document.getElementById('temp-circulo');
+  const texto = document.getElementById('temp-texto-simples');
+  if(!circulo || !texto) return;
+  const fracao = Math.max(0, temporizadorAtivo.segundosRestantes / temporizadorAtivo.segundosTotal);
+  const perimetro = 326.7; // 2 * PI * 52, arredondado
+  circulo.style.strokeDashoffset = String(perimetro * (1 - fracao));
+  texto.textContent = fraseTempoRestante(fracao);
+}
+
+function concluirTemporizador(bloco, indiceRotina){
+  pararTemporizador();
+  vibrar([30,50,30,50,30]);
+  // Som suave de conclusão — reaproveita o "tique" já usado na app, discreto e não alarmante
+  tocarTique();
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="icone-grande" style="background:var(--salva-clara)">⏳</div>
+      <h2>Tempo terminado</h2>
+      <p class="desc">Já passou o tempo para "${bloco.t}". Podes marcar como feito ou continuar mais um pouco, sem problema.</p>
+      <button class="btn-primario" id="btn-marcar-feito-temp">✓ Marcar como feito</button>
+      <button class="btn-secundario" id="btn-voltar-temp" style="margin-top:10px;">Voltar ao Meu Dia</button>
+    </div>
+  `, 'rotina');
+  document.getElementById('btn-marcar-feito-temp').addEventListener('click', ()=>{
+    if(!rotinaHoje[indiceRotina].feito){
+      toggleRotina(indiceRotina);
+    }
+    irPara('rotina');
+  });
+  document.getElementById('btn-voltar-temp').addEventListener('click', ()=>{
+    irPara('rotina');
+  });
+}
+
 function toggleRotina(i){
   rotinaHoje[i].feito = !rotinaHoje[i].feito;
   renderRotina();
   guardarEstado();
+  atualizarHistoricoHoje();
 
   if(rotinaHoje[i].feito){
     vibrar(40);
@@ -1621,18 +2810,30 @@ function toggleRotina(i){
   }
 }
 
-// Regista que a rotina de hoje ficou 100% feita, incrementando a sequência (streak)
-// só se o dia anterior também tiver sido completo — caso contrário, reinicia a contagem.
+// Regista que a rotina de hoje ficou 100% feita, incrementando a sequência (streak).
+// Tolera 1 dia de folga sem apagar a sequência (ex: doença, dia sensorialmente difícil) —
+// só reinicia para 1 se tiverem passado 2 ou mais dias seguidos sem a rotina completa.
+// O recorde pessoal (recordeStreakDias) nunca desce, mesmo que a sequência atual quebre.
 function atualizarStreakDia(){
   const hoje = dataHojeChave();
   if(ultimaDataStreak === hoje) return; // já contado hoje, evita duplicar
-  const ontem = new Date();
-  ontem.setDate(ontem.getDate() - 1);
-  const anoO = ontem.getFullYear(), mesO = String(ontem.getMonth()+1).padStart(2,'0'), diaO = String(ontem.getDate()).padStart(2,'0');
-  const chaveOntem = `${anoO}-${mesO}-${diaO}`;
 
-  streakDias = (ultimaDataStreak === chaveOntem) ? streakDias + 1 : 1;
+  if(ultimaDataStreak){
+    const anterior = new Date(ultimaDataStreak + 'T00:00:00');
+    const atual = new Date(hoje + 'T00:00:00');
+    const diasPassados = Math.round((atual - anterior) / 86400000);
+    if(diasPassados <= 2){
+      // 1 dia seguido (normal) ou 1 dia de folga entre dois dias completos: mantém a sequência
+      streakDias += 1;
+    } else {
+      streakDias = 1; // 2+ dias sem rotina completa: reinicia
+    }
+  } else {
+    streakDias = 1;
+  }
+
   ultimaDataStreak = hoje;
+  if(streakDias > recordeStreakDias) recordeStreakDias = streakDias;
   guardarEstado();
   renderProgressoDia();
 }
@@ -1643,21 +2844,36 @@ const acoesLista = {}; // regista as funções de clique por id de lista
 function renderLista(id, itens, funcaoClicar){
   const cont = document.getElementById(id);
   acoesLista[id] = funcaoClicar;
-  cont.innerHTML = itens.map((it,i)=>`
-    <div class="lista-item" data-lista="${id}" data-indice="${i}">
+  cont.innerHTML = itens.map((it,i)=>{
+    // Para itens de quiz (fichas de escola), a etiqueta reflete o nível REAL já alcançado
+    // pelo Eduardo (obterNivelAtual), não um valor fixo escrito no código.
+    const nivelReal = (it.tipo === 'quiz' && it.dados) ? obterNivelAtual(it.dados)
+      : (it.tipo === 'memoria' && it.dados) ? obterNivelAtual(it.dados) : null;
+    const chaveNivel = nivelReal === 1 ? 'facil' : nivelReal === 2 ? 'medio' : nivelReal === 3 ? 'dificil' : it.nivel;
+    const nomeNivel = chaveNivel === 'facil' ? 'Fácil' : chaveNivel === 'medio' ? 'Médio' : chaveNivel === 'dificil' ? 'Desafio' : '';
+    const etiquetaHtml = chaveNivel ? `<span class="etiqueta et-${chaveNivel}">${nomeNivel}</span>` : '';
+    return `
+    <div class="lista-item" data-lista="${id}" data-indice="${i}" role="button" tabindex="0" aria-label="${it.t} — ${it.d}${nomeNivel ? ', nível ' + nomeNivel : ''}">
       <div class="icone-item" style="background:${it.cor}">${it.icone}</div>
       <div class="txt">
         <div class="t">${it.t}</div>
         <div class="d">${it.d}</div>
-        ${it.nivel ? `<span class="etiqueta et-${it.nivel}">${it.nivel==='facil'?'Fácil':it.nivel==='medio'?'Médio':'Desafio'}</span>` : ''}
+        ${etiquetaHtml}
       </div>
       <div class="seta">›</div>
     </div>
-  `).join('');
+  `;}).join('');
   cont.querySelectorAll('.lista-item').forEach(el=>{
     el.addEventListener('click', ()=>{
       const idx = parseInt(el.getAttribute('data-indice'), 10);
       acoesLista[id](idx);
+    });
+    el.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        const idx = parseInt(el.getAttribute('data-indice'), 10);
+        acoesLista[id](idx);
+      }
     });
   });
 }
@@ -1876,7 +3092,8 @@ function abrirItemGenerico(it, origem){
   }
   document.querySelectorAll('.opcao-emocao').forEach(el=>{
     el.addEventListener('click', ()=>{
-      darEstrela('Obrigado por partilhares', 'Registámos: ' + el.getAttribute('data-emocao'));
+      const emocaoEscolhida = el.getAttribute('data-emocao');
+      abrirPorqueEmocao(emocaoEscolhida, origem);
     });
   });
 }
@@ -1887,6 +3104,35 @@ function gerarEmocoes(){
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
       ${emocoes.map(e=>`<div class="opcao opcao-emocao" data-emocao="${e[1]}" style="text-align:center;font-size:26px;display:block;">${e[0]}<div style="font-size:11px;margin-top:4px;">${e[1]}</div></div>`).join('')}
     </div>`;
+}
+
+// Depois de escolher a emoção, pergunta "porquê?" com opções simples de toque —
+// dá contexto útil aos pais sem exigir que o Eduardo escreva nada.
+function abrirPorqueEmocao(emocao, origem){
+  const motivos = [
+    ["🔊","Barulho"], ["🔄","Mudança de planos"], ["😴","Cansado"],
+    ["🍽️","Fome"], ["👥","Muita gente"], ["📚","Trabalhos de casa"],
+    ["🎮","Jogos"], ["❓","Não sei"],
+  ];
+  irParaDetalhe(`
+    <div class="painel">
+      <h2 style="margin-bottom:6px;">Porquê?</h2>
+      <p class="desc">Não precisas de escrever nada. Toca no motivo que se parece mais, ou salta se não souberes.</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
+        ${motivos.map(m=>`<div class="opcao opcao-motivo" data-motivo="${m[1]}" style="text-align:center;">${m[0]}<div style="font-size:12px;margin-top:4px;">${m[1]}</div></div>`).join('')}
+      </div>
+      <button class="btn-secundario" id="btn-saltar-motivo">Saltar esta pergunta</button>
+    </div>
+  `, origem);
+  document.querySelectorAll('.opcao-motivo').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const motivo = el.getAttribute('data-motivo');
+      darEstrela('Obrigado por partilhares', `Registámos: ${emocao} — ${motivo}`);
+    });
+  });
+  document.getElementById('btn-saltar-motivo').addEventListener('click', ()=>{
+    darEstrela('Obrigado por partilhares', 'Registámos: ' + emocao);
+  });
 }
 /* ======================= SONS RELAXANTES (Web Audio API) ======================= */
 
@@ -2068,7 +3314,13 @@ function gerarPintura(){
 
 /* ======================= QUIZ ======================= */
 let quizAtual = null, quizIndex = 0, quizTitulo = '', quizOrigem = '', quizChave = '';
+// Verdadeiro só enquanto há uma sessão de quiz em curso (perguntas ainda por responder),
+// para pedir confirmação antes de sair sem querer e perder o progresso.
+let quizEmCurso = false;
 let quizAcertosSeguidos = 0, quizTeveErro = false;
+// Controla a hierarquia de dicas (prompt fading) dentro da pergunta atual:
+// 0 = ainda sem tentativa; 1 = já errou uma vez nesta pergunta (opção eliminada, dá 2ª hipótese)
+let quizTentativasNaPergunta = 0;
 
 function iniciarQuiz(chave, titulo, origem){
   quizAtual = montarQuizProgressivo(chave);
@@ -2078,16 +3330,22 @@ function iniciarQuiz(chave, titulo, origem){
   quizChave = chave;
   quizAcertosSeguidos = 0;
   quizTeveErro = false;
+  quizEmCurso = true;
   renderQuiz();
 }
 function renderQuiz(){
   pararNarracao();
   if(quizIndex >= quizAtual.length){
+    quizEmCurso = false; // chegou ao fim (com ou sem erro): já não há progresso para perder ao sair
     const nivelDaSessao = quizAtual[0] ? quizAtual[0].nivel : 1;
     const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
     const eraONivelAtual = obterNivelAtual(quizChave) === nivelDaSessao;
     if(quizTeveErro){
-      // Não passou todas de uma vez: sem estrela e sem subir de nível, incentiva a tentar de novo
+      // Não passou todas de uma vez: sem estrela e sem subir de nível, mas o esforço
+      // de terminar até ao fim é reconhecido — reforça a persistência, não só o acerto
+      contadorQuizzesConcluidos++;
+      guardarEstado();
+      const medalhasNovasEsforco = verificarMedalhas();
       const dica = eraONivelAtual
         ? 'Tenta outra vez — acertando todas ganhas a estrela e passas ao próximo nível.'
         : 'Tenta outra vez — acertando todas ganhas uma estrela extra de treino.';
@@ -2095,11 +3353,21 @@ function renderQuiz(){
         <div class="painel">
           <div class="icone-grande" style="background:var(--salva-clara)">💪</div>
           <h2>Quase lá!</h2>
-          <p class="desc">Tiveste algumas respostas erradas em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). ${dica}</p>
+          <p class="desc">Tiveste algumas respostas erradas em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). Mas foste até ao fim — isso também conta. ${dica}</p>
+          <div id="yay-medalha-esforco" style="display:none;margin:6px 0 4px;font-size:14px;font-weight:700;"></div>
           <button class="btn-primario" id="btn-quiz-repetir">Tentar novamente</button>
         </div>
       `, quizOrigem);
       document.getElementById('btn-quiz-repetir').addEventListener('click', ()=> iniciarQuiz(quizChave, quizTitulo, quizOrigem));
+      tocarSomEsforco();
+      vibrar([20,50,20]);
+      if(medalhasNovasEsforco.length > 0){
+        const el = document.getElementById('yay-medalha-esforco');
+        if(el){
+          el.style.display = 'block';
+          el.textContent = medalhasNovasEsforco.map(m => m.icone + ' Nova medalha: ' + m.t).join(' · ');
+        }
+      }
       return;
     }
     // Acertou tudo: sobe de nível (se houver próximo) e recebe estrela
@@ -2120,23 +3388,28 @@ function renderQuiz(){
       const existeProximoNivel = bancoDaMateria.some(q => q.nivel === proximoNivel);
       if(existeProximoNivel && obterNivelAtual(quizChave) <= nivelDaSessao){
         nivelDesbloqueado[quizChave] = proximoNivel;
+        // Atualiza a etiqueta de nível na lista de origem (Escola ou Jogos), para refletir o progresso
+        renderLista('lista-escola', escolaItens, abrirEscola);
+        renderLista('lista-jogos', jogosItens, abrirJogo);
       }
-      darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo);
+      darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo, nivelDaSessao === 3 ? 2 : 1);
     });
     return;
   }
   const q = quizAtual[quizIndex];
+  quizTentativasNaPergunta = 0; // nova pergunta: reinicia a hierarquia de dicas
   const pct = Math.round((quizAcertosSeguidos/quizAtual.length)*100);
   const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
   const classesNivel = {1:'et-facil', 2:'et-medio', 3:'et-dificil'};
   const etiquetaNivel = q.nivel ? `<span class="etiqueta ${classesNivel[q.nivel]}">${nomesNivel[q.nivel]}</span>` : '';
   irParaDetalhe(`
     <div class="painel" style="text-align:left;">
+      <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--texto-suave);">Pergunta ${quizIndex + 1} de ${quizAtual.length}</p>
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
       ${etiquetaNivel ? `<div style="margin-bottom:10px;">${etiquetaNivel}</div>` : ''}
       <div class="pergunta">${q.p}</div>
       <button class="btn-pagina" id="btn-ouvir-quiz" style="margin-bottom:12px;">🔊 Ouvir</button>
-      ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${op}</div>`).join('')}
+      ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})" role="button" tabindex="0" aria-label="Opção ${String.fromCharCode(65+i)}: ${op}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();responderQuiz(${i});}"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${op}</div>`).join('')}
       <p id="feedback-quiz" style="min-height:20px;font-size:13.5px;font-weight:700;margin-top:12px;text-align:center;"></p>
     </div>
   `, quizOrigem);
@@ -2150,7 +3423,7 @@ function renderQuiz(){
       } else {
         btnOuvir.textContent = '⏸ A ouvir...';
         // Lê a pergunta seguida das opções, para não precisar de ler sozinho
-        const textoCompleto = q.p + '. ' + q.o.map((op,i)=>`Opção ${i+1}: ${op}.`).join(' ');
+        const textoCompleto = q.p + '. ' + q.o.map((op,i)=>`Opção ${String.fromCharCode(65+i)}: ${op}.`).join(' ');
         narrar(textoCompleto, ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
       }
     });
@@ -2159,48 +3432,124 @@ function renderQuiz(){
 function responderQuiz(i){
   pararNarracao();
   const q = quizAtual[quizIndex];
-  document.querySelectorAll('.opcao').forEach(el=>el.style.pointerEvents='none');
-  document.getElementById('op-'+q.c).classList.add('certa');
   const feedback = document.getElementById('feedback-quiz');
+
   if(i !== q.c){
-    document.getElementById('op-'+i).classList.add('errada');
     quizTeveErro = true;
+    tocarSomErro();
+
+    if(quizTentativasNaPergunta === 0){
+      // 1º erro nesta pergunta: prompt fading — não revela a resposta ainda.
+      // Elimina só a opção errada escolhida, dando uma pista mínima e uma 2ª hipótese,
+      // em vez de saltar logo para a resposta certa (evita dependência do prompt máximo).
+      quizTentativasNaPergunta = 1;
+      const elOpcao = document.getElementById('op-'+i);
+      elOpcao.classList.add('errada');
+      elOpcao.style.pointerEvents = 'none';
+      if(feedback){
+        feedback.textContent = 'Essa não é. Repara bem nas que sobram e tenta outra vez.';
+        feedback.style.color = 'var(--coral-suave)';
+      }
+      vibrar([25,80,25]);
+      return; // não avança de pergunta — dá a 2ª oportunidade
+    }
+
+    // 2º erro na mesma pergunta: agora sim revela a resposta certa
+    document.querySelectorAll('.opcao').forEach(el=>el.style.pointerEvents='none');
+    document.getElementById('op-'+q.c).classList.add('certa');
+    document.getElementById('op-'+i).classList.add('errada');
     if(feedback){
       feedback.textContent = 'Não foi desta vez. A resposta certa é: ' + q.o[q.c];
       feedback.style.color = 'var(--coral-suave)';
     }
-    tocarSomErro();
-    vibrar(25);
+    vibrar([25,80,25]);
   } else {
+    document.querySelectorAll('.opcao').forEach(el=>el.style.pointerEvents='none');
+    document.getElementById('op-'+q.c).classList.add('certa');
     quizAcertosSeguidos++;
     if(feedback){
-      feedback.textContent = 'Boa! Resposta certa.';
+      // Distingue acerto "limpo" de acerto após pista, para ele perceber a diferença
+      feedback.textContent = quizTentativasNaPergunta === 0 ? 'Boa! Resposta certa.' : 'Foi! Acertaste com a ajuda da pista.';
       feedback.style.color = 'var(--petroleo)';
     }
     tocarSomAcerto();
-    vibrar(40);
+    vibrar([15,40,60]);
   }
   setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1400);
 }
 
 /* ======================= JOGO DA MEMÓRIA ======================= */
+// Três níveis de dificuldade, com o mesmo mecanismo de progressão automática usado nos quizzes
+// (nivelDesbloqueado, guardado por chave — aqui a chave é "memoria"). Mais pares = mais desafio.
+const NIVEIS_MEMORIA = {
+  1: {nome:'Fácil', pares:['🐶','🐱','🐰','🦊']},
+  2: {nome:'Médio', pares:['🐶','🐱','🐰','🦊','🐻','🐼']},
+  3: {nome:'Difícil', pares:['🐶','🐱','🐰','🦊','🐻','🐼','🐸','🦁']},
+};
+
+// Modo Dupla: a mãe/cuidador e o Eduardo alternam a vez a cada jogada (acerte ou erre),
+// jogando como equipa em vez de o Eduardo jogar sozinho. Turn-taking simples e visual,
+// pensado para reciprocidade social — não é competitivo, é cooperativo (um só resultado final).
+let memModoDupla = false;
+let memVezDaMae = false; // false = vez do Eduardo, true = vez da mãe/cuidador
+
 function gerarHtmlMemoria(){
+  const nivel = obterNivelAtual('memoria');
+  const nomeNivel = NIVEIS_MEMORIA[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="estado-jogo" id="estado-memoria">Encontra todos os pares</div>
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${memModoDupla ? '' : 'ativo'}" id="btn-memoria-sozinho">👦 Sozinho</button>
+        <button class="btn-modo-dupla ${memModoDupla ? 'ativo' : ''}" id="btn-memoria-dupla">👩‍👦 Jogar com a mãe</button>
+      </div>
+      <div class="estado-jogo" id="estado-memoria">Nível ${nomeNivel} — encontra todos os pares</div>
+      <div class="vez-modo-dupla" id="vez-modo-dupla" style="display:none;"></div>
       <div class="grelha-memoria" id="grelha-memoria"></div>
     </div>
   `;
 }
-let memCartas = [], memViradas = [], memPares = 0, memBloqueado = false;
+let memCartas = [], memViradas = [], memPares = 0, memBloqueado = false, memNivelAtual = 1, memTotalPares = 4;
 function iniciarMemoria(){
-  const emojis = ['🐶','🐱','🐰','🦊'];
+  memNivelAtual = obterNivelAtual('memoria');
+  const emojis = NIVEIS_MEMORIA[memNivelAtual]?.pares || NIVEIS_MEMORIA[1].pares;
+  memTotalPares = emojis.length;
   const conjunto = [...emojis, ...emojis];
   memCartas = conjunto.sort(()=>Math.random()-0.5);
   memViradas = []; memPares = 0; memBloqueado = false;
+  memVezDaMae = false;
   const g = document.getElementById('grelha-memoria');
   if(!g) return;
   g.innerHTML = memCartas.map((e,i)=>`<div class="carta" id="carta-${i}" onclick="virarCarta(${i})"></div>`).join('');
+
+  const btnSozinho = document.getElementById('btn-memoria-sozinho');
+  const btnDupla = document.getElementById('btn-memoria-dupla');
+  if(btnSozinho && btnDupla){
+    btnSozinho.addEventListener('click', ()=>{
+      memModoDupla = false;
+      btnSozinho.classList.add('ativo'); btnDupla.classList.remove('ativo');
+      document.getElementById('vez-modo-dupla').style.display = 'none';
+    });
+    btnDupla.addEventListener('click', ()=>{
+      memModoDupla = true;
+      memVezDaMae = false;
+      btnDupla.classList.add('ativo'); btnSozinho.classList.remove('ativo');
+      atualizarIndicadorVez();
+    });
+  }
+  atualizarIndicadorVez();
+}
+
+// Mostra de quem é a vez, só quando o Modo Dupla está ativo
+function atualizarIndicadorVez(){
+  const el = document.getElementById('vez-modo-dupla');
+  if(!el) return;
+  if(!memModoDupla){
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  el.textContent = memVezDaMae ? '👩 Vez da mãe' : '👦 Vez do Eduardo';
+  el.className = 'vez-modo-dupla ' + (memVezDaMae ? 'vez-mae' : 'vez-eduardo');
 }
 function virarCarta(i){
   if(memBloqueado) return;
@@ -2218,10 +3567,15 @@ function virarCarta(i){
       memPares++;
       memViradas = []; memBloqueado = false;
       vibrar(40);
-      if(memPares === 4){
-        document.getElementById('estado-memoria').textContent = 'Encontraste todos os pares!';
+      if(memPares === memTotalPares){
+        document.getElementById('estado-memoria').textContent = memModoDupla
+          ? 'Encontraram todos os pares juntos!'
+          : 'Encontraste todos os pares!';
         contadorVitoriasMemoria++;
-        setTimeout(()=> darEstrela('Muito bem!','Completaste o Jogo da Memória'), 500);
+        setTimeout(()=> concluirMemoria(), 500);
+      } else if(memModoDupla){
+        // Acertou o par: mantém a mesma vez (regra comum de jogo da memória — quem acerta joga de novo)
+        atualizarIndicadorVez();
       }
     } else {
       setTimeout(()=>{
@@ -2230,9 +3584,31 @@ function virarCarta(i){
         document.getElementById('carta-'+b).classList.remove('virada');
         document.getElementById('carta-'+b).textContent = '';
         memViradas = []; memBloqueado = false;
+        if(memModoDupla){
+          // Não acertou: passa a vez, como no jogo da memória tradicional
+          memVezDaMae = !memVezDaMae;
+          atualizarIndicadorVez();
+          vibrar(20);
+        }
       }, 800);
     }
   }
+}
+
+// Ao completar um nível: sobe para o próximo (se existir) e dá estrela, tal como no quiz.
+function concluirMemoria(){
+  const proximoNivel = memNivelAtual + 1;
+  const existeProximoNivel = !!NIVEIS_MEMORIA[proximoNivel];
+  if(existeProximoNivel && obterNivelAtual('memoria') <= memNivelAtual){
+    nivelDesbloqueado['memoria'] = proximoNivel;
+    guardarEstado();
+    // Atualiza a etiqueta de nível no cartão de Jogos, para refletir o progresso
+    renderLista('lista-jogos', jogosItens, abrirJogo);
+  }
+  const texto = memModoDupla
+    ? 'Jogaram em equipa e encontraram todos os pares — nível ' + (NIVEIS_MEMORIA[memNivelAtual]?.nome || '')
+    : 'Completaste o Jogo da Memória — nível ' + (NIVEIS_MEMORIA[memNivelAtual]?.nome || '');
+  darEstrela(memModoDupla ? 'Boa equipa!' : 'Muito bem!', texto, memNivelAtual === 3 ? 2 : 1);
 }
 
 /* Observador simples para iniciar o jogo da memória quando a grelha aparece */
@@ -2259,11 +3635,113 @@ function renderConquistas(){
   `).join('');
 }
 
+/* ======================= LOJA DE RECOMPENSAS ======================= */
+
+// Estrelas ainda por gastar (o que o Eduardo vê como "saldo" disponível para trocar)
+function estrelasDisponiveis(){
+  return Math.max(0, estrelas - estrelasGastas);
+}
+
+// Ecrã do Eduardo: mostra cada recompensa com barra de progresso e botão de resgate
+// quando já tem estrelas suficientes.
+function renderLojaRecompensas(){
+  document.getElementById('total-estrelas-loja').textContent = estrelasDisponiveis();
+  const cont = document.getElementById('lista-loja-recompensas');
+  if(recompensasLista.length === 0){
+    cont.innerHTML = `<p style="text-align:center;color:var(--texto-suave);font-size:13.5px;">Ainda não há recompensas configuradas. Pede a um adulto para as adicionar em Configuração.</p>`;
+    return;
+  }
+  const disponiveis = estrelasDisponiveis();
+  cont.innerHTML = recompensasLista.map((r,i)=>{
+    const pct = Math.min(100, Math.round((disponiveis / r.custo) * 100));
+    const podeResgatar = disponiveis >= r.custo;
+    return `
+      <div class="recompensa ${podeResgatar?'resgatavel':''}">
+        <div class="r-icone">${r.icone || '🎁'}</div>
+        <div class="r-info">
+          <div class="t">${r.t}</div>
+          <div class="custo">${podeResgatar ? 'Já podes trocar!' : `${disponiveis} de ${r.custo} estrelas`}</div>
+          <div class="r-barra-fundo"><div class="r-barra-preenchida" style="width:${pct}%"></div></div>
+        </div>
+        <button class="btn-resgatar" ${podeResgatar?'':'disabled'} onclick="resgatarRecompensa(${i})">Trocar</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function resgatarRecompensa(i){
+  const r = recompensasLista[i];
+  if(!r || estrelasDisponiveis() < r.custo) return;
+  estrelasGastas += r.custo;
+  guardarEstado();
+  renderLojaRecompensas();
+  vibrar([40,60,40]);
+  document.getElementById('yay-titulo').textContent = 'Recompensa trocada!';
+  document.getElementById('yay-texto').textContent = `Combina com um adulto: ${r.t}`;
+  document.getElementById('yay-medalha').style.display = 'none';
+  document.getElementById('overlay-yay').classList.add('mostrar');
+  dispararConfetis();
+  tocarOvacao();
+}
+
+// Área de configuração (pais): lista editável de recompensas
+function renderConfigRecompensas(){
+  const cont = document.getElementById('lista-config-recompensas');
+  if(!cont) return;
+  cont.innerHTML = recompensasLista.map((r,i)=>`
+    <div class="recompensa-config-linha">
+      <input type="text" value="${r.t.replace(/"/g,'&quot;')}" placeholder="Nome da recompensa" data-campo="t" data-i="${i}">
+      <input type="number" min="1" value="${r.custo}" data-campo="custo" data-i="${i}">
+      <button onclick="removerRecompensa(${i})" aria-label="Remover recompensa">✕</button>
+    </div>
+  `).join('');
+}
+
+function removerRecompensa(i){
+  recompensasLista.splice(i,1);
+  renderConfigRecompensas();
+}
+
+function configurarLojaRecompensas(){
+  const btnAdd = document.getElementById('btn-add-recompensa');
+  if(btnAdd){
+    btnAdd.addEventListener('click', ()=>{
+      recompensasLista.push({icone:'🎁', t:'', custo:10});
+      renderConfigRecompensas();
+    });
+  }
+  const btnGuardar = document.getElementById('btn-guardar-recompensas');
+  if(btnGuardar){
+    btnGuardar.addEventListener('click', ()=>{
+      const cont = document.getElementById('lista-config-recompensas');
+      cont.querySelectorAll('input[data-campo="t"]').forEach(inp=>{
+        const i = Number(inp.getAttribute('data-i'));
+        if(recompensasLista[i]) recompensasLista[i].t = inp.value.trim();
+      });
+      cont.querySelectorAll('input[data-campo="custo"]').forEach(inp=>{
+        const i = Number(inp.getAttribute('data-i'));
+        const val = Math.max(1, Math.round(Number(inp.value)) || 1);
+        if(recompensasLista[i]) recompensasLista[i].custo = val;
+      });
+      // Remove entradas sem nome, para não aparecerem vazias na loja do Eduardo
+      recompensasLista = recompensasLista.filter(r => r.t && r.t.length > 0);
+      guardarEstado();
+      renderConfigRecompensas();
+      const msg = document.getElementById('msg-recompensas');
+      if(msg){
+        msg.textContent = 'Recompensas guardadas!';
+        setTimeout(()=> msg.textContent = '', 2500);
+      }
+    });
+  }
+}
+
 // Índices fixos na medalhasLista, para não depender da ordem por nome
 const MEDALHA_ESTUDIOSO = 1;
 const MEDALHA_MEMORIA = 2;
 const MEDALHA_CALMA = 3;
 const MEDALHA_STREAK = 4;
+const MEDALHA_PERSISTENCIA = 5;
 
 // Verifica os contadores atuais contra os limiares de cada medalha e desbloqueia
 // as que ainda não estavam. Mostra o ecrã de reforço positivo para cada uma desbloqueada agora.
@@ -2285,6 +3763,10 @@ function verificarMedalhas(){
   if(!medalhasLista[MEDALHA_STREAK].desbloqueada && streakDias >= 7){
     medalhasLista[MEDALHA_STREAK].desbloqueada = true;
     desbloqueiosNovos.push(medalhasLista[MEDALHA_STREAK]);
+  }
+  if(!medalhasLista[MEDALHA_PERSISTENCIA].desbloqueada && contadorQuizzesConcluidos >= 10){
+    medalhasLista[MEDALHA_PERSISTENCIA].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_PERSISTENCIA]);
   }
 
   if(desbloqueiosNovos.length > 0){
@@ -2478,10 +3960,12 @@ const elogiosVariados = [
   'Isso mesmo!', 'Impressionante!', 'Continua assim!', 'Que orgulho!'
 ];
 
-function darEstrela(titulo, texto){
-  estrelas++;
+function darEstrela(titulo, texto, quantidade){
+  quantidade = quantidade || 1;
+  estrelas += quantidade;
   renderConquistas();
   guardarEstado();
+  atualizarHistoricoHoje();
   const medalhasNovas = verificarMedalhas();
   vibrar([40,60,40]);
   // Só varia o título quando vem o genérico "Boa!"/"Muito bem!", para não
@@ -2491,7 +3975,11 @@ function darEstrela(titulo, texto){
     ? elogiosVariados[Math.floor(Math.random()*elogiosVariados.length)]
     : titulo;
   document.getElementById('yay-titulo').textContent = tituloFinal;
-  document.getElementById('yay-texto').textContent = texto;
+  // Quando vale mais do que 1 estrela (ex: desafio difícil sem erros), mostra isso
+  // de forma explícita — o reforço extra só funciona como tal se o Eduardo perceber o porquê.
+  document.getElementById('yay-texto').textContent = quantidade > 1
+    ? texto + ` (+${quantidade} estrelas — foi um desafio difícil e não erraste nenhuma!)`
+    : texto;
   mostrarMedalhaNoOverlay(medalhasNovas);
   document.getElementById('overlay-yay').classList.add('mostrar');
   dispararConfetis();
@@ -2517,11 +4005,34 @@ function fecharYay(){
 /* ======================= MODO CALMA ======================= */
 function abrirCalma(){
   contadorUsosCalma++;
+  const indiceAgora = calcularIndiceAgora();
+  const nomeBloco = indiceAgora !== -1 ? rotinaHoje[indiceAgora].t : 'Sem tarefa associada';
+  registoCalmaPorBloco[nomeBloco] = (registoCalmaPorBloco[nomeBloco] || 0) + 1;
   guardarEstado();
   verificarMedalhas();
+  // Sempre que abre, mostra o passo de respirar primeiro (caso tenha ficado no passo "pos" de uma vez anterior)
+  document.getElementById('calma-passo-respirar').style.display = '';
+  document.getElementById('calma-passo-pos').style.display = 'none';
   document.getElementById('overlay-calma').classList.add('mostrar');
 }
-function fecharCalma(){
+
+// Depois de respirar, mostra a pergunta leve sobre o que vem a seguir (fecha o ciclo ABC:
+// já sabíamos o Antecedente — o bloco da rotina — falta a Consequência)
+function avancarParaPosCalma(){
+  document.getElementById('calma-passo-respirar').style.display = 'none';
+  document.getElementById('calma-passo-pos').style.display = 'flex';
+}
+
+// resultado: 'voltou' | 'ajuda' | null (se saltar, não regista nada — a pergunta é sempre opcional)
+function fecharCalma(resultado){
+  if(resultado){
+    const indiceAgora = calcularIndiceAgora();
+    const nomeBloco = indiceAgora !== -1 ? rotinaHoje[indiceAgora].t : 'Sem tarefa associada';
+    if(!registoPosCalma[nomeBloco]) registoPosCalma[nomeBloco] = {voltou:0, ajuda:0};
+    if(resultado === 'voltou') registoPosCalma[nomeBloco].voltou++;
+    if(resultado === 'ajuda') registoPosCalma[nomeBloco].ajuda++;
+    guardarEstado();
+  }
   document.getElementById('overlay-calma').classList.remove('mostrar');
 }
 
@@ -2585,7 +4096,283 @@ function abrirConfig(){
   renderConfig();
   const interruptor = document.getElementById('interruptor-efeitos-calmos');
   if(interruptor) interruptor.classList.toggle('ligado', efeitosCalmosAtivo);
+  const sliderSom = document.getElementById('slider-volume-som');
+  if(sliderSom) sliderSom.value = Math.round(volumeSomApp * 100);
+  renderEvolucaoParental();
+  renderConfigRecompensas();
   irPara('config');
+}
+
+/* ======================= EVOLUÇÃO DO EDUARDO E DICAS PARA OS PAIS (área parental) ======================= */
+
+const NOMES_MATERIA_PARENTAL = {
+  matematica: 'Matemática', portugues: 'Português', geografia: 'Estudo do Meio',
+  ciencias: 'Ciências', letras: 'Ordenar Letras', numeros: 'Sequências Numéricas', vf: 'Verdadeiro ou Falso',
+};
+const NOMES_NIVEL_PARENTAL = {1:'Fácil', 2:'Médio', 3:'Difícil'};
+
+// Banco de dicas gerais e práticas para pais de crianças autistas, focadas em rotina,
+// comunicação e regulação sensorial. Não são orientação clínica — apenas sugestões
+// de bom senso, com recomendação de acompanhamento profissional quando relevante.
+const dicasParaPais = [
+  {t:'Antecipa as transições', d:'Avisar com alguma antecedência antes de mudar de atividade (ex: "daqui a 5 minutos vamos parar") ajuda a reduzir a ansiedade da mudança.'},
+  {t:'Celebra o processo, não só o resultado', d:'Reconhecer o esforço de tentar (mesmo sem acertar) reforça a confiança mais do que focar só nas respostas certas.'},
+  {t:'Rotinas visuais reduzem incerteza', d:'Manter os horários da app atualizados e consistentes ajuda o Eduardo a saber sempre o que vem a seguir.'},
+  {t:'Pausas sensoriais são produtivas, não distrações', d:'Se o Eduardo pedir para usar o Modo Calma no meio de uma tarefa, isso é autorregulação — vale a pena permitir.'},
+  {t:'Menos é mais em dias difíceis', d:'Nos dias em que a rotina não for cumprida a 100%, está tudo bem — a app tolera 1 dia de folga sem quebrar a sequência, e a melhor sequência de sempre fica sempre guardada.'},
+  {t:'Repetição é aprendizagem, não teimosia', d:'Repetir o mesmo jogo ou vídeo várias vezes é comum e saudável; ajuda a consolidar e a sentir controlo.'},
+  {t:'Linguagem literal e direta', d:'Frases curtas e concretas costumam ser mais fáceis de processar do que expressões figuradas ou sarcasmo.'},
+  {t:'Valoriza pequenos sinais de progresso', d:'Subir de nível numa matéria, mesmo que devagar, é um sinal real de consolidação — vale a pena assinalar isso ao Eduardo.'},
+  {t:'Consistência entre casa e escola ajuda', d:'Partilhar a rotina desta app com professores ou terapeutas pode ajudar a manter previsibilidade em todos os contextos.'},
+  {t:'Procura apoio especializado quando precisares', d:'Esta app é uma ferramenta de apoio ao dia a dia — para questões de desenvolvimento ou comportamento, um terapeuta ocupacional ou psicólogo especializado em autismo é sempre o recurso mais indicado.'},
+];
+
+function renderEvolucaoParental(){
+  renderResumoParental();
+  renderGraficoTarefasSemana();
+  renderNivelPorMateria();
+  renderCalmaContexto();
+  renderPosCalma();
+  renderDicasParaPais();
+}
+
+// Mostra, de forma simples e não alarmista, com que tarefas da rotina o modo Calma
+// costuma coincidir — só aparece depois de haver pelo menos 3 usos registados, para
+// não tirar conclusões precipitadas de 1 ou 2 momentos isolados.
+function renderCalmaContexto(){
+  const cartao = document.getElementById('cartao-calma-contexto');
+  const cont = document.getElementById('lista-calma-contexto');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoCalmaPorBloco);
+  const total = entradas.reduce((soma,[,n]) => soma + n, 0);
+  if(total < 3){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => b[1] - a[1]);
+  cont.innerHTML = entradas.map(([nomeBloco, n]) => `
+    <div class="linha-nivel-materia">
+      <span class="nome-materia">${nomeBloco}</span>
+      <span class="etiqueta et-medio">${n}×</span>
+    </div>
+  `).join('');
+}
+
+// Mostra, por bloco da rotina, quantas vezes o Eduardo indicou que voltou à tarefa
+// vs. que precisou de ajuda, depois de usar o Modo Calma — a "Consequência" do ciclo ABC.
+// Só aparece a partir de 2 respostas registadas, para não tirar conclusões de 1 caso isolado.
+function renderPosCalma(){
+  const cartao = document.getElementById('cartao-pos-calma');
+  const cont = document.getElementById('lista-pos-calma');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoPosCalma);
+  const total = entradas.reduce((soma,[,r]) => soma + r.voltou + r.ajuda, 0);
+  if(total < 2){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => (b[1].voltou+b[1].ajuda) - (a[1].voltou+a[1].ajuda));
+  cont.innerHTML = entradas.map(([nomeBloco, r]) => `
+    <div class="linha-nivel-materia">
+      <span class="nome-materia">${nomeBloco}</span>
+      <span class="etiqueta et-medio">👍 ${r.voltou}</span>
+      <span class="etiqueta et-dificil">🤝 ${r.ajuda}</span>
+    </div>
+  `).join('');
+}
+
+function renderResumoParental(){
+  const cont = document.getElementById('grelha-resumo-parental');
+  if(!cont) return;
+  const ultimos7 = obterUltimosDias(7);
+  const mediaConclusao = ultimos7.length
+    ? Math.round(100 * ultimos7.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimos7.length)
+    : 0;
+  const estrelasSemana = ultimos7.reduce((soma,d)=> soma + d.estrelasGanhas, 0);
+
+  const cartoes = [
+    {num: streakDias, lbl: 'Dias seguidos completos'},
+    {num: recordeStreakDias, lbl: 'Melhor sequência de sempre'},
+    {num: estrelas, lbl: 'Estrelas ao todo'},
+    {num: `${mediaConclusao}%`, lbl: 'Rotina concluída (média 7 dias)'},
+    {num: estrelasSemana, lbl: 'Estrelas esta semana'},
+  ];
+  cont.innerHTML = cartoes.map(c => `
+    <div class="resumo-parental-cartao">
+      <div class="num">${c.num}</div>
+      <div class="lbl">${c.lbl}</div>
+    </div>
+  `).join('');
+}
+
+function renderGraficoTarefasSemana(){
+  const cont = document.getElementById('grafico-tarefas-semana');
+  if(!cont) return;
+  const dias = obterUltimosDias(7);
+  cont.innerHTML = `
+    <div class="grafico-barras">
+      ${dias.map(d => {
+        const fracao = d.tarefasTotal ? (d.tarefasFeitas / d.tarefasTotal) : 0;
+        const alturaPx = Math.max(4, Math.round(fracao * 100));
+        const completo = d.tarefasTotal > 0 && d.tarefasFeitas === d.tarefasTotal;
+        return `
+          <div class="grafico-barra-col">
+            <div class="grafico-barra ${completo ? 'completo' : ''}" style="height:${alturaPx}px;" title="${d.tarefasFeitas}/${d.tarefasTotal}"></div>
+            <div class="grafico-barra-lbl">${d.diaSemana.replace('.','')}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderNivelPorMateria(){
+  const cont = document.getElementById('lista-nivel-materias');
+  if(!cont) return;
+  const chaves = Object.keys(NOMES_MATERIA_PARENTAL);
+  cont.innerHTML = chaves.map(chave => {
+    const nivel = obterNivelAtual(chave);
+    return `
+      <div class="linha-nivel-materia">
+        <span class="nome-materia">${NOMES_MATERIA_PARENTAL[chave]}</span>
+        <span class="etiqueta et-${nivel===1?'facil':nivel===2?'medio':'dificil'}">${NOMES_NIVEL_PARENTAL[nivel]}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// Mostra sempre 2 dicas, escolhidas de forma pseudo-aleatória mas estável para o dia
+// (não mudam a cada abertura do ecrã, só mudam de dia para dia).
+function renderDicasParaPais(){
+  const cont = document.getElementById('lista-dicas-pais');
+  if(!cont) return;
+  const seed = dataHojeChave().split('-').reduce((acc,n)=> acc + parseInt(n,10), 0);
+  const indiceA = seed % dicasParaPais.length;
+  const indiceB = (seed + 1 + Math.floor(dicasParaPais.length/2)) % dicasParaPais.length;
+  const escolhidas = indiceA === indiceB ? [dicasParaPais[indiceA]] : [dicasParaPais[indiceA], dicasParaPais[indiceB]];
+  cont.innerHTML = escolhidas.map(dica => `
+    <div class="cartao-dica">
+      <strong>${dica.t}</strong>
+      ${dica.d}
+    </div>
+  `).join('');
+}
+
+// Monta um resumo dos dados de utilização reais (sem dados de identificação),
+// já reunidos noutras partes da app, para a IA basear a dica em factos concretos
+// em vez de conselhos genéricos.
+function montarResumoUtilizacaoParaIA(){
+  const ultimos7 = obterUltimosDias(7);
+  const mediaConclusao = ultimos7.length
+    ? Math.round(100 * ultimos7.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimos7.length)
+    : 0;
+  const diasCompletos = ultimos7.filter(d => d.tarefasTotal > 0 && d.tarefasFeitas === d.tarefasTotal).length;
+  const niveis = Object.keys(NOMES_MATERIA_PARENTAL).map(chave =>
+    `${NOMES_MATERIA_PARENTAL[chave]}: nível ${NOMES_NIVEL_PARENTAL[obterNivelAtual(chave)]}`
+  ).join('; ');
+  const calmaEntradas = Object.entries(registoCalmaPorBloco).sort((a,b)=> b[1]-a[1]);
+  const calmaTexto = calmaEntradas.length
+    ? calmaEntradas.map(([bloco,n]) => `"${bloco}" (${n}x)`).join(', ')
+    : 'sem registos suficientes ainda';
+  const partes = [
+    `Streak atual de dias com a rotina 100% completa: ${streakDias} (melhor sequência de sempre: ${recordeStreakDias}).`,
+    `Últimos 7 dias: rotina concluída em média ${mediaConclusao}%, com ${diasCompletos} dia(s) completo(s).`,
+    `Estrelas ao todo: ${estrelas}.`,
+    `Nível atual por matéria: ${niveis}.`,
+    `Sessões terminadas até ao fim mesmo com erros (persistência): ${contadorQuizzesConcluidos}.`,
+    `Modo Calma usado ${contadorUsosCalma} vez(es) ao todo; momentos mais associados: ${calmaTexto}.`,
+  ];
+  const contextoEduardo = obterContextoQuestionarioEduardo();
+  if(contextoEduardo) partes.push(`Contexto sobre o Eduardo: ${contextoEduardo}`);
+  return partes.join(' ');
+}
+
+function construirPromptDicaIA(resumo){
+  return `És um consultor de apoio a pais de uma criança autista, com formação em ABA (Applied Behavior Analysis). ` +
+    `Com base nestes dados reais de utilização de uma app de rotina e aprendizagem, escreve UMA dica curta, prática e específica ` +
+    `para os pais — baseada nos dados, não genérica. Português de Portugal, tom calmo e sem jargão técnico desnecessário. ` +
+    `Máximo 3 frases. Não repitas os números em bruto, interpreta-os. Não faças diagnósticos nem uses linguagem clínica alarmista. ` +
+    `Se os dados sugerirem um padrão (ex: dificuldade numa matéria, uso do modo Calma associado a um contexto), foca a dica nisso. ` +
+    `Se os dados forem positivos, celebra isso e sugere um pequeno próximo passo. Termina sempre a lembrar que isto não substitui ` +
+    `avaliação de um profissional.\n\nDados: ${resumo}`;
+}
+
+async function gerarDicaComGemini(chaveApi, prompt){
+  const resposta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent?key=${encodeURIComponent(chaveApi)}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7 },
+    }),
+  });
+  if(!resposta.ok){
+    const corpoErro = await resposta.text().catch(()=> '');
+    throw new Error(mensagemErroAmigavel('Gemini', resposta.status, corpoErro));
+  }
+  const dados = await resposta.json();
+  const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!texto) throw new Error('Gemini não devolveu texto na resposta. Tenta novamente.');
+  return texto.trim();
+}
+
+async function gerarDicaComClaude(prompt){
+  const resposta = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }],
+    }),
+  });
+  if(!resposta.ok){
+    const corpoErro = await resposta.text().catch(()=> '');
+    throw new Error(mensagemErroAmigavel('Claude', resposta.status, corpoErro));
+  }
+  const dados = await resposta.json();
+  const texto = (dados.content || []).map(bloco => bloco.text || '').join('\n').trim();
+  if(!texto) throw new Error('Claude não devolveu texto na resposta. Tenta novamente.');
+  return texto;
+}
+
+async function gerarDicaParaPaisIA(){
+  const btn = document.getElementById('btn-gerar-dica-ia');
+  const msg = document.getElementById('msg-dica-ia');
+  const resultado = document.getElementById('resultado-dica-ia');
+  const fornecedor = document.getElementById('dica-ia-fornecedor').value;
+
+  msg.textContent = '';
+  resultado.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'A analisar...';
+
+  try{
+    const resumo = montarResumoUtilizacaoParaIA();
+    const prompt = construirPromptDicaIA(resumo);
+    let texto;
+    if(fornecedor === 'gemini'){
+      const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
+      if(!chaveGemini) throw new Error('Precisas de guardar uma chave Gemini na área do gerador de perguntas para usar esta opção.');
+      texto = await gerarDicaComGemini(chaveGemini, prompt);
+    } else {
+      texto = await gerarDicaComClaude(prompt);
+    }
+    resultado.style.display = 'block';
+    resultado.innerHTML = `<div class="cartao-dica"><strong>✨ Dica com base na evolução do Eduardo</strong>${texto}</div>`;
+  }catch(e){
+    msg.textContent = mensagemErroDeRede(e, fornecedor);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '✨ Gerar dica sobre a evolução do Eduardo';
+  }
+}
+
+function configurarBotaoDicaIA(){
+  const btn = document.getElementById('btn-gerar-dica-ia');
+  if(btn) btn.addEventListener('click', gerarDicaParaPaisIA);
 }
 
 function renderConfig(){
@@ -2600,10 +4387,43 @@ function renderConfig(){
       <div class="linha">
         <input type="text" data-campo="d" value="${b.d || ''}" placeholder="Descrição (opcional)" aria-label="Descrição">
       </div>
-      <button class="btn-remover-bloco" onclick="removerBlocoConfig(${i})">✕ Remover este bloco</button>
+      <div class="linha">
+        <input type="number" class="campo-duracao" data-campo="duracaoMin" value="${b.duracaoMin || ''}" min="1" max="240" placeholder="Duração em minutos (opcional)" aria-label="Duração em minutos">
+      </div>
+      <div class="linha">
+        <input type="text" data-campo="opcoes" value="${(b.opcoes || []).join(', ')}" placeholder="Opções à escolha, separadas por vírgula (opcional)" aria-label="Opções à escolha">
+      </div>
+      <button class="btn-remover-bloco" data-indice-remover="${i}">✕ Remover este bloco</button>
     </div>
   `).join('');
   document.getElementById('msg-config').textContent = '';
+  cont.querySelectorAll('.btn-remover-bloco').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = parseInt(btn.getAttribute('data-indice-remover'), 10);
+      confirmarRemocao(btn, ()=> removerBlocoConfig(idx));
+    });
+  });
+}
+
+// Confirmação por dois toques: o primeiro toque muda o botão para um aviso,
+// só o segundo toque (dentro de alguns segundos) executa a remoção de facto.
+// Evita apagar um bloco sem querer, sem interromper o fluxo com um popup do sistema.
+function confirmarRemocao(botao, aoConfirmar){
+  if(botao.dataset.confirmando === '1'){
+    if(botao._temporizadorConfirmacao) clearTimeout(botao._temporizadorConfirmacao);
+    aoConfirmar();
+    return;
+  }
+  const textoOriginal = botao.textContent;
+  botao.dataset.confirmando = '1';
+  botao.textContent = '⚠️ Tocar outra vez para confirmar';
+  botao.classList.add('a-confirmar');
+  vibrar(20);
+  botao._temporizadorConfirmacao = setTimeout(()=>{
+    botao.dataset.confirmando = '0';
+    botao.textContent = textoOriginal;
+    botao.classList.remove('a-confirmar');
+  }, 3000);
 }
 
 function removerBlocoConfig(i){
@@ -2619,8 +4439,15 @@ function lerFormularioConfig(){
     const hora = bl.querySelector('[data-campo="hora"]').value || '00:00';
     const t = bl.querySelector('[data-campo="t"]').value.trim();
     const d = bl.querySelector('[data-campo="d"]').value.trim();
+    const duracaoBruta = bl.querySelector('[data-campo="duracaoMin"]').value;
+    const duracaoMin = duracaoBruta ? parseInt(duracaoBruta, 10) : null;
+    const opcoesBrutas = bl.querySelector('[data-campo="opcoes"]').value.trim();
+    const opcoes = opcoesBrutas ? opcoesBrutas.split(',').map(s => s.trim()).filter(Boolean) : [];
     if(t){ // ignora blocos sem nome de tarefa
-      novaRotina.push({hora, icone, t, d, feito:false});
+      const bloco = {hora, icone, t, d, feito:false};
+      if(duracaoMin && duracaoMin > 0){ bloco.duracaoMin = duracaoMin; }
+      if(opcoes.length > 0){ bloco.opcoes = opcoes; }
+      novaRotina.push(bloco);
     }
   });
   return novaRotina;
@@ -2651,6 +4478,434 @@ function adicionarBlocoConfig(){
   if(ultimo) ultimo.querySelector('[data-campo="t"]').focus();
 }
 
+/* ======================= GERADOR DE PERGUNTAS COM IA (área do administrador) ======================= */
+// A chave da API Gemini é guardada só neste dispositivo (localStorage), nunca enviada
+// para nós — só diretamente para a Google ao gerar perguntas. Claude não precisa de chave:
+// usa a chamada já disponibilizada pelo ambiente (tal como no alfateam / LifeWave CRM).
+const CHAVE_GEMINI_API = 'mundoDoEduardo_chaveGemini_v1';
+let perguntasGeradasIA = []; // perguntas ainda em revisão, antes de irem para o banco
+
+function guardarChaveGemini(){
+  try{
+    const valor = document.getElementById('ia-chave-gemini').value.trim();
+    if(valor) localStorage.setItem(CHAVE_GEMINI_API, valor);
+  }catch(e){ /* sem acesso ao localStorage: segue sem guardar */ }
+}
+function carregarChaveGemini(){
+  try{
+    const valor = localStorage.getItem(CHAVE_GEMINI_API);
+    const campo = document.getElementById('ia-chave-gemini');
+    if(valor && campo) campo.value = valor;
+  }catch(e){ /* sem acesso: campo fica vazio */ }
+}
+
+function alternarBlocoChaveGemini(){
+  const fornecedor = document.getElementById('ia-fornecedor').value;
+  const bloco = document.getElementById('bloco-chave-gemini');
+  if(bloco) bloco.style.display = (fornecedor === 'gemini') ? 'flex' : 'none';
+}
+
+/* ======================= QUESTIONÁRIO SOBRE O EDUARDO (área parental) ======================= */
+// Guardado à parte da chave da API e do banco de perguntas — respostas da mãe sobre o Eduardo,
+// usadas para dar contexto automático ao gerador de perguntas por IA (junto do campo de contexto manual).
+const CHAVE_QUESTIONARIO_EDUARDO = 'mundoDoEduardo_questionario_v1';
+
+function guardarQuestionarioEduardo(){
+  const dados = {
+    nome: document.getElementById('quest-nome').value.trim(),
+    idade: document.getElementById('quest-idade').value.trim(),
+    anoEscolar: document.getElementById('quest-ano-escolar').value,
+    dificuldades: document.getElementById('quest-dificuldades').value.trim(),
+    interesses: document.getElementById('quest-interesses').value.trim(),
+    rotina: document.getElementById('quest-rotina').value.trim(),
+    sensorial: document.getElementById('quest-sensorial').value.trim(),
+  };
+  try{
+    localStorage.setItem(CHAVE_QUESTIONARIO_EDUARDO, JSON.stringify(dados));
+    document.getElementById('msg-questionario').textContent = '✓ Respostas guardadas.';
+    aplicarSaudacaoPersonalizada();
+  }catch(e){
+    document.getElementById('msg-questionario').textContent = 'Não foi possível guardar neste dispositivo.';
+  }
+}
+
+function carregarQuestionarioEduardo(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
+    if(!bruto) return;
+    const dados = JSON.parse(bruto);
+    if(!dados || typeof dados !== 'object') return;
+    if(dados.nome) document.getElementById('quest-nome').value = dados.nome;
+    if(dados.idade) document.getElementById('quest-idade').value = dados.idade;
+    if(dados.anoEscolar) document.getElementById('quest-ano-escolar').value = dados.anoEscolar;
+    if(dados.dificuldades) document.getElementById('quest-dificuldades').value = dados.dificuldades;
+    if(dados.interesses) document.getElementById('quest-interesses').value = dados.interesses;
+    if(dados.rotina) document.getElementById('quest-rotina').value = dados.rotina;
+    if(dados.sensorial) document.getElementById('quest-sensorial').value = dados.sensorial;
+  }catch(e){ /* questionário guardado inválido: campos ficam vazios, sem rebentar a app */ }
+}
+
+// Lê o nome guardado no questionário (ou "Eduardo" por omissão) e atualiza a saudação do ecrã inicial.
+function aplicarSaudacaoPersonalizada(){
+  const alvo = document.getElementById('saudacao-nome');
+  if(!alvo) return;
+  let nome = 'Eduardo';
+  try{
+    const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
+    if(bruto){
+      const dados = JSON.parse(bruto);
+      if(dados && typeof dados === 'object' && dados.nome){
+        nome = dados.nome;
+      }
+    }
+  }catch(e){ /* mantém o nome por omissão em caso de dados inválidos */ }
+  alvo.textContent = `Olá, ${nome}!`;
+}
+
+// Monta um texto de contexto a partir das respostas do questionário, para juntar ao prompt da IA.
+// Devolve string vazia se nada tiver sido preenchido ainda.
+function obterContextoQuestionarioEduardo(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
+    if(!bruto) return '';
+    const dados = JSON.parse(bruto);
+    if(!dados || typeof dados !== 'object') return '';
+    const partes = [];
+    if(dados.nome) partes.push(`Nome: ${dados.nome}.`);
+    if(dados.idade) partes.push(`Idade: ${dados.idade} anos.`);
+    if(dados.anoEscolar) partes.push(`Ano escolar: ${dados.anoEscolar}.`);
+    if(dados.dificuldades) partes.push(`Dificuldades específicas: ${dados.dificuldades}.`);
+    if(dados.interesses) partes.push(`Interesses: ${dados.interesses}.`);
+    if(dados.rotina) partes.push(`Rotina diária: ${dados.rotina}.`);
+    if(dados.sensorial) partes.push(`Preferências sensoriais: ${dados.sensorial}.`);
+    return partes.join(' ');
+  }catch(e){ return ''; }
+}
+
+const NOMES_MATERIA_IA = {
+  matematica: 'Matemática', portugues: 'Português', geografia: 'Estudo do Meio / Geografia de Portugal',
+  ciencias: 'Ciências Naturais', letras: 'Ordenar letras para formar uma palavra',
+  numeros: 'Sequências numéricas (completar o padrão)', vf: 'Perguntas de Verdadeiro ou Falso',
+  ingles: 'Inglês (vocabulário e frases simples)', espanhol: 'Espanhol (vocabulário e frases simples)',
+};
+const NOMES_NIVEL_IA = {1:'fácil', 2:'médio', 3:'difícil'};
+
+// Monta o pedido enviado ao modelo, pedindo explicitamente JSON puro, no mesmo formato
+// já usado no banco de perguntas da app: {p, o:[4 opções], c:índice da correta}.
+// Quando há um documento anexado (PDF/foto da matéria), pede para basear as perguntas nele.
+function construirPromptPerguntas(materiaChave, nivel, quantidade, temDocumento, contextoEduardo){
+  const nomeMateria = NOMES_MATERIA_IA[materiaChave] || materiaChave;
+  const nomeNivel = NOMES_NIVEL_IA[nivel] || 'médio';
+  const numOpcoes = (materiaChave === 'vf') ? 2 : 4;
+  return `Gera ${quantidade} perguntas de escolha múltipla de "${nomeMateria}" em português de Portugal, `
+    + `adequadas a um aluno de 12-13 anos com dificuldades de aprendizagem, nível de dificuldade "${nomeNivel}". `
+    + (contextoEduardo ? `Contexto sobre o aluno, a ter em conta ao formular as perguntas (usa isto para tornar os exemplos mais relevantes e motivadores, sem sair do tema da matéria pedida): ${contextoEduardo} ` : '')
+    + (temDocumento ? `Baseia as perguntas APENAS no conteúdo do documento em anexo, que é a matéria que o aluno está a estudar neste momento. Não inventes conteúdo que não esteja no documento. ` : '')
+    + `Frases curtas e diretas, sem ambiguidade. Cada pergunta deve ter exatamente ${numOpcoes} opções de resposta.`
+    + (materiaChave === 'vf' ? ' As opções devem ser sempre exatamente ["Verdadeiro","Falso"].' : '')
+    + (materiaChave === 'letras' ? ' O enunciado deve pedir para ordenar letras dadas (formato "Ordena: X-X-X (dica)") e as opções devem ser palavras formadas com essas letras.' : '')
+    + ` Responde APENAS com um array JSON válido, sem texto antes ou depois, sem markdown, neste formato exato: `
+    + `[{"p":"texto da pergunta","o":["opção A","opção B","opção C","opção D"],"c":0}]`
+    + ` onde "c" é o índice (0 a ${numOpcoes-1}) da opção correta dentro do array "o".`;
+}
+
+// Extrai o primeiro array JSON válido de um texto (remove blocos de código markdown se existirem)
+function extrairJsonDeTexto(texto){
+  const limpo = texto.replace(/```json|```/g, '').trim();
+  const inicio = limpo.indexOf('[');
+  const fim = limpo.lastIndexOf(']');
+  if(inicio === -1 || fim === -1) throw new Error('Resposta sem formato JSON reconhecível.');
+  return JSON.parse(limpo.slice(inicio, fim + 1));
+}
+
+// "Failed to fetch" (TypeError, sem resposta HTTP) acontece antes de qualquer resposta
+// chegar — normalmente por a app estar a correr como ficheiro local (content://) sem
+// ligação de rede liberada para APIs externas, e não é resolvido por tentar de novo.
+// Distingue-se de erros HTTP normais (esses passam por mensagemErroAmigavel).
+function mensagemErroDeRede(erro, fornecedor){
+  const eFalhaDeRede = erro instanceof TypeError || /failed to fetch/i.test(erro.message || '');
+  if(eFalhaDeRede){
+    console.error('Falha de rede ao chamar a API de IA:', erro);
+    if(fornecedor === 'claude'){
+      return 'Não foi possível ligar à Claude a partir desta app (é normal fora do ambiente de pré-visualização). Experimenta a opção Gemini, que funciona com uma chave própria.';
+    }
+    return 'Não foi possível ligar à internet a partir desta app neste dispositivo. Verifica a ligação de dados/Wi-Fi e tenta novamente.';
+  }
+  return erro.message || 'Não foi possível gerar a dica. Tenta novamente.';
+}
+
+// Traduz um código HTTP de erro de API num texto claro e não-técnico para pais/cuidadores.
+// O detalhe técnico original fica só na consola, para eventual depuração.
+function mensagemErroAmigavel(nomeServico, status, corpoErro){
+  console.error(`${nomeServico} devolveu erro ${status}:`, corpoErro);
+  if(status === 401 || status === 403){
+    return `A chave da API ${nomeServico} não é válida ou expirou. Verifica se a colaste corretamente, ou cria uma nova.`;
+  }
+  if(status === 429){
+    return `O limite de pedidos gratuitos da API ${nomeServico} foi atingido por agora. Tenta novamente daqui a alguns minutos.`;
+  }
+  if(status >= 500){
+    return `O serviço ${nomeServico} está temporariamente indisponível. Tenta novamente dentro de instantes.`;
+  }
+  if(status === 400){
+    return `O pedido à API ${nomeServico} não foi aceite — o documento pode ser demasiado grande ou num formato não suportado.`;
+  }
+  if(status === 404){
+    return `O modelo de IA usado por esta app já não está disponível na ${nomeServico}. É preciso atualizar a app para usar um modelo mais recente.`;
+  }
+  return `Não foi possível obter resposta da API ${nomeServico} (erro ${status}). Tenta novamente dentro de instantes.`;
+}
+
+// Nome do modelo Gemini a usar. Isolado numa constante para ser fácil de atualizar
+// no futuro, já que a Google descontinua modelos com regularidade (ex: gemini-2.0-flash
+// foi retirado em 2026). Ver https://ai.google.dev/gemini-api/docs/models para o nome atual.
+const MODELO_GEMINI = 'gemini-2.5-flash';
+
+async function gerarPerguntasComGemini(chaveApi, prompt, documento){
+  const parts = [{ text: prompt }];
+  if(documento){
+    parts.push({ inline_data: { mime_type: documento.mimeType, data: documento.base64 } });
+  }
+  const resposta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent?key=${encodeURIComponent(chaveApi)}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { temperature: 0.8 },
+    }),
+  });
+  if(!resposta.ok){
+    const corpoErro = await resposta.text().catch(()=> '');
+    throw new Error(mensagemErroAmigavel('Gemini', resposta.status, corpoErro));
+  }
+  const dados = await resposta.json();
+  const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!texto) throw new Error('Gemini não devolveu texto na resposta. Tenta novamente.');
+  return extrairJsonDeTexto(texto);
+}
+
+async function gerarPerguntasComClaude(prompt, documento){
+  const content = [];
+  if(documento){
+    const tipoBloco = documento.mimeType === 'application/pdf' ? 'document' : 'image';
+    content.push({ type: tipoBloco, source: { type: 'base64', media_type: documento.mimeType, data: documento.base64 } });
+  }
+  content.push({ type: 'text', text: prompt });
+  const resposta = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content }],
+    }),
+  });
+  if(!resposta.ok){
+    const corpoErro = await resposta.text().catch(()=> '');
+    throw new Error(mensagemErroAmigavel('Claude', resposta.status, corpoErro));
+  }
+  const dados = await resposta.json();
+  const texto = (dados.content || []).map(bloco => bloco.text || '').join('\n');
+  if(!texto) throw new Error('Claude não devolveu texto na resposta. Tenta novamente.');
+  return extrairJsonDeTexto(texto);
+}
+
+function validarPerguntasGeradas(bruto, materiaChave){
+  if(!Array.isArray(bruto)) throw new Error('A resposta não é uma lista de perguntas.');
+  const numOpcoesEsperado = (materiaChave === 'vf') ? 2 : 4;
+  return bruto
+    .filter(q => q && typeof q.p === 'string' && Array.isArray(q.o) && typeof q.c === 'number')
+    .filter(q => q.o.length >= 2 && q.c >= 0 && q.c < q.o.length)
+    .map(q => ({
+      p: q.p.trim(),
+      o: q.o.slice(0, numOpcoesEsperado).map(op => String(op).trim()),
+      c: q.c,
+    }));
+}
+
+// Lê um ficheiro (imagem ou PDF) e devolve {base64, mimeType}, para anexar ao pedido à IA.
+function lerFicheiroComoBase64(ficheiro){
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      const resultado = leitor.result; // "data:<mime>;base64,<dados>"
+      const base64 = resultado.split(',')[1];
+      resolve({ base64, mimeType: ficheiro.type });
+    };
+    leitor.onerror = () => reject(new Error('Não foi possível ler o ficheiro.'));
+    leitor.readAsDataURL(ficheiro);
+  });
+}
+
+function atualizarNomeFicheiroIA(){
+  const input = document.getElementById('ia-ficheiro');
+  const nomeEl = document.getElementById('ia-ficheiro-nome');
+  const btnRemover = document.getElementById('btn-remover-ficheiro-ia');
+  const ficheiro = input.files && input.files[0];
+  if(ficheiro){
+    nomeEl.textContent = `📄 ${ficheiro.name}`;
+    nomeEl.style.display = 'block';
+    btnRemover.style.display = 'inline-block';
+  } else {
+    nomeEl.style.display = 'none';
+    btnRemover.style.display = 'none';
+  }
+}
+
+function removerFicheiroIA(){
+  const input = document.getElementById('ia-ficheiro');
+  input.value = '';
+  atualizarNomeFicheiroIA();
+}
+
+async function gerarPerguntasIA(){
+  const btn = document.getElementById('btn-gerar-ia');
+  const msg = document.getElementById('msg-ia');
+  const cont = document.getElementById('lista-ia-revisao');
+  const btnAdicionar = document.getElementById('btn-adicionar-ia');
+  const fornecedor = document.getElementById('ia-fornecedor').value;
+  const materiaChave = document.getElementById('ia-materia').value;
+  const nivel = parseInt(document.getElementById('ia-nivel').value, 10);
+  const quantidade = Math.min(15, Math.max(1, parseInt(document.getElementById('ia-quantidade').value, 10) || 5));
+  const inputFicheiro = document.getElementById('ia-ficheiro');
+  const ficheiroSelecionado = inputFicheiro.files && inputFicheiro.files[0];
+
+  msg.textContent = '';
+  cont.innerHTML = '';
+  btnAdicionar.style.display = 'none';
+  perguntasGeradasIA = [];
+
+  if(fornecedor === 'gemini'){
+    guardarChaveGemini();
+  }
+  const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
+  if(fornecedor === 'gemini' && !chaveGemini){
+    msg.textContent = 'Cola primeiro a tua chave da API Gemini. Usa o link acima para criares uma gratuitamente.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'A gerar...';
+  cont.innerHTML = `<div class="ia-carregando">${ficheiroSelecionado ? 'A ler o documento e a pensar em perguntas' : 'A pensar em perguntas'} de ${NOMES_MATERIA_IA[materiaChave]}...</div>`;
+
+  try{
+    let documento = null;
+    if(ficheiroSelecionado){
+      documento = await lerFicheiroComoBase64(ficheiroSelecionado);
+    }
+    // Combina o questionário da mãe (permanente) com o campo de contexto manual (só desta vez)
+    const campoContextoManual = document.getElementById('ia-contexto-eduardo');
+    const contextoManual = campoContextoManual ? campoContextoManual.value.trim() : '';
+    const contextoQuestionario = obterContextoQuestionarioEduardo();
+    const contextoCompleto = [contextoQuestionario, contextoManual].filter(Boolean).join(' ');
+    const prompt = construirPromptPerguntas(materiaChave, nivel, quantidade, !!documento, contextoCompleto);
+    const bruto = (fornecedor === 'gemini')
+      ? await gerarPerguntasComGemini(chaveGemini, prompt, documento)
+      : await gerarPerguntasComClaude(prompt, documento);
+    const validas = validarPerguntasGeradas(bruto, materiaChave);
+    if(validas.length === 0){
+      throw new Error('Não foi possível interpretar nenhuma pergunta válida na resposta.');
+    }
+    perguntasGeradasIA = validas.map(q => ({...q, nivel, materiaChave}));
+    renderRevisaoIA();
+    btnAdicionar.style.display = 'block';
+    msg.textContent = `${validas.length} pergunta(s) geradas${documento ? ' a partir do documento' : ''}. Revê, edita se quiseres, e marca a opção correta antes de adicionar.`;
+  }catch(erro){
+    cont.innerHTML = '';
+    msg.textContent = mensagemErroDeRede(erro, fornecedor);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '✨ Gerar perguntas';
+    // O contexto manual só se aplica a esta geração; o questionário da mãe fica guardado e reaplica-se sempre.
+    const campoContextoManual = document.getElementById('ia-contexto-eduardo');
+    if(campoContextoManual) campoContextoManual.value = '';
+  }
+}
+
+function renderRevisaoIA(){
+  const cont = document.getElementById('lista-ia-revisao');
+  cont.innerHTML = perguntasGeradasIA.map((q, i) => `
+    <div class="bloco-pergunta-ia" data-indice-ia="${i}">
+      <textarea class="p-enunciado" rows="2" data-campo-ia="p">${q.p}</textarea>
+      ${q.o.map((op, j) => `
+        <div class="p-opcao">
+          <input type="radio" name="ia-correta-${i}" value="${j}" ${j === q.c ? 'checked' : ''} data-campo-ia="c">
+          <input type="text" value="${op}" data-campo-ia="o" data-opcao-indice="${j}">
+        </div>
+      `).join('')}
+      <button class="p-descartar" data-descartar-ia="${i}">✕ Descartar esta pergunta</button>
+    </div>
+  `).join('');
+
+  cont.querySelectorAll('[data-descartar-ia]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-descartar-ia'), 10);
+      perguntasGeradasIA.splice(idx, 1);
+      renderRevisaoIA();
+      if(perguntasGeradasIA.length === 0){
+        document.getElementById('btn-adicionar-ia').style.display = 'none';
+      }
+    });
+  });
+}
+
+// Lê os campos editados no ecrã de revisão de volta para perguntasGeradasIA,
+// antes de as adicionar ao banco — assim qualquer correção manual é respeitada.
+function sincronizarRevisaoIA(){
+  document.querySelectorAll('#lista-ia-revisao .bloco-pergunta-ia').forEach(bloco => {
+    const idx = parseInt(bloco.getAttribute('data-indice-ia'), 10);
+    if(!perguntasGeradasIA[idx]) return;
+    perguntasGeradasIA[idx].p = bloco.querySelector('[data-campo-ia="p"]').value.trim();
+    perguntasGeradasIA[idx].o = Array.from(bloco.querySelectorAll('[data-campo-ia="o"]')).map(inp => inp.value.trim());
+    const radioMarcado = bloco.querySelector('[data-campo-ia="c"]:checked');
+    perguntasGeradasIA[idx].c = radioMarcado ? parseInt(radioMarcado.value, 10) : 0;
+  });
+}
+
+function adicionarPerguntasIAaoBanco(){
+  sincronizarRevisaoIA();
+  const msg = document.getElementById('msg-ia');
+  if(perguntasGeradasIA.length === 0){
+    msg.textContent = 'Não há perguntas para adicionar.';
+    return;
+  }
+  let adicionadas = 0;
+  perguntasGeradasIA.forEach(q => {
+    if(!q.p || q.o.some(op => !op)) return; // ignora perguntas com campos vazios após edição
+    if(!quizzes[q.materiaChave]) quizzes[q.materiaChave] = [];
+    quizzes[q.materiaChave].push({ p: q.p, o: q.o, c: q.c, nivel: q.nivel });
+    adicionadas++;
+  });
+  guardarBancoPerguntasPersonalizado();
+  perguntasGeradasIA = [];
+  document.getElementById('lista-ia-revisao').innerHTML = '';
+  document.getElementById('btn-adicionar-ia').style.display = 'none';
+  removerFicheiroIA(); // limpa o documento usado, para a próxima geração começar sem ficheiro selecionado
+  vibrar([40,60,40]);
+  msg.textContent = `✓ ${adicionadas} pergunta(s) adicionada(s) ao banco de "${NOMES_MATERIA_IA[document.getElementById('ia-materia').value]}".`;
+}
+
+// Persistência do banco de perguntas (inclui as geradas por IA e já aprovadas),
+// separada da rotina, para sobreviver a fechar a app.
+const CHAVE_BANCO_PERGUNTAS = 'mundoDoEduardo_bancoPerguntas_v1';
+function guardarBancoPerguntasPersonalizado(){
+  try{
+    localStorage.setItem(CHAVE_BANCO_PERGUNTAS, JSON.stringify(quizzes));
+  }catch(e){ /* sem espaço ou acesso: perguntas ficam só em memória nesta sessão */ }
+}
+function carregarBancoPerguntasPersonalizado(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_BANCO_PERGUNTAS);
+    if(!bruto) return;
+    const guardado = JSON.parse(bruto);
+    if(guardado && typeof guardado === 'object'){
+      Object.keys(guardado).forEach(chave => {
+        if(Array.isArray(guardado[chave])) quizzes[chave] = guardado[chave];
+      });
+    }
+  }catch(e){ /* banco guardado inválido: mantém o banco padrão do código */ }
+}
+
 /* ======================= GESTÃO DE VÍDEOS (acesso escondido, área do responsável técnico) ======================= */
 function abrirGestaoVideos(){
   renderGestaoVideos();
@@ -2667,10 +4922,16 @@ function renderGestaoVideos(){
       <div class="linha">
         <input type="text" data-campo="url" value="${v.tipo==='youtube' ? v.urlOriginal : v.tipo==='vimeo' ? v.urlOriginal : v.url}" placeholder="Link do YouTube, Vimeo ou URL do ficheiro (.mp4)" aria-label="Link ou URL do ficheiro">
       </div>
-      <button class="btn-remover-bloco" onclick="removerBlocoVideo(${i})">✕ Remover este vídeo</button>
+      <button class="btn-remover-bloco" data-indice-remover="${i}">✕ Remover este vídeo</button>
     </div>
   `).join('');
   document.getElementById('msg-gestao-videos').textContent = '';
+  cont.querySelectorAll('.btn-remover-bloco').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = parseInt(btn.getAttribute('data-indice-remover'), 10);
+      confirmarRemocao(btn, ()=> removerBlocoVideo(idx));
+    });
+  });
 }
 
 function removerBlocoVideo(i){
@@ -2727,6 +4988,140 @@ function adicionarBlocoVideo(){
   if(ultimo) ultimo.querySelector('[data-campo="titulo"]').focus();
 }
 
+/* ======================= RESET (preparar a app para o Eduardo começar, ou limpar dados de teste) ======================= */
+// Cada opção corresponde a uma chave de localStorage independente. Recarrega a página no fim,
+// para todo o estado em memória (estrelas, rotina, vídeos, etc.) partir sempre de dados coerentes
+// com o que ficou (ou não) no armazenamento — mais seguro do que tentar repor cada variável à mão.
+function executarReset(){
+  const apagarProgresso = document.getElementById('reset-progresso').checked;
+  const apagarRotina = document.getElementById('reset-rotina').checked;
+  const apagarHistorico = document.getElementById('reset-historico').checked;
+  const apagarVideos = document.getElementById('reset-videos').checked;
+  const apagarBancoIA = document.getElementById('reset-banco-ia').checked;
+  const apagarChaveGemini = document.getElementById('reset-chave-gemini').checked;
+
+  if(!apagarProgresso && !apagarRotina && !apagarHistorico && !apagarVideos && !apagarBancoIA && !apagarChaveGemini){
+    document.getElementById('msg-reset').textContent = 'Escolhe pelo menos uma opção para apagar.';
+    return;
+  }
+
+  try{
+    if(apagarProgresso) localStorage.removeItem(CHAVE_ESTADO);
+    if(apagarRotina) localStorage.removeItem(CHAVE_ROTINA);
+    if(apagarHistorico) localStorage.removeItem(CHAVE_HISTORICO);
+    if(apagarVideos) localStorage.removeItem(CHAVE_VIDEOS_REAIS);
+    if(apagarBancoIA) localStorage.removeItem(CHAVE_BANCO_PERGUNTAS);
+    if(apagarChaveGemini) localStorage.removeItem(CHAVE_GEMINI_API);
+  }catch(e){
+    document.getElementById('msg-reset').textContent = 'Não foi possível fazer o reset neste dispositivo.';
+    return;
+  }
+
+  document.getElementById('msg-reset').textContent = '✓ Reset feito. A reiniciar a app...';
+  setTimeout(()=> location.reload(), 700);
+}
+
+function configurarBotaoReset(){
+  const btn = document.getElementById('btn-fazer-reset');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const confirmado = window.confirm('Tens a certeza? Esta ação não pode ser desfeita.');
+    if(confirmado) executarReset();
+  });
+}
+
+/* ======================= BACKUP (exportar/importar progresso e configurações) ======================= */
+// A chave da API Gemini fica de fora de propósito: exportar uma chave de API num ficheiro
+// que pode ser partilhado ou reenviado é um risco de segurança desnecessário.
+const CHAVES_BACKUP = [
+  CHAVE_ESTADO, CHAVE_ROTINA, CHAVE_HISTORICO, CHAVE_VIDEOS_REAIS,
+  CHAVE_ESCALA_TEXTO, CHAVE_VISTA_ROTINA, CHAVE_QUESTIONARIO_EDUARDO, CHAVE_BANCO_PERGUNTAS,
+];
+
+function exportarBackup(){
+  const msg = document.getElementById('msg-backup');
+  try{
+    const dados = {};
+    CHAVES_BACKUP.forEach(chave => {
+      const valor = localStorage.getItem(chave);
+      if(valor !== null) dados[chave] = valor;
+    });
+    const pacote = {
+      app: 'mundoDoEduardo',
+      versao: window.APP_VERSION || '1',
+      criadoEm: new Date().toISOString(),
+      dados,
+    };
+    const blob = new Blob([JSON.stringify(pacote, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dataFicheiro = dataHojeChave();
+    a.href = url;
+    a.download = `mundo-do-eduardo-backup-${dataFicheiro}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if(msg){
+      msg.textContent = '✓ Backup exportado. Guarda o ficheiro num sítio seguro (ex: Google Drive).';
+      msg.style.color = 'var(--texto-suave)';
+    }
+  }catch(e){
+    if(msg){
+      msg.textContent = 'Não foi possível criar o backup neste dispositivo.';
+      msg.style.color = 'var(--coral-suave)';
+    }
+  }
+}
+
+function importarBackup(ficheiro){
+  const msg = document.getElementById('msg-backup');
+  if(!ficheiro) return;
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    try{
+      const pacote = JSON.parse(leitor.result);
+      if(!pacote || pacote.app !== 'mundoDoEduardo' || !pacote.dados || typeof pacote.dados !== 'object'){
+        throw new Error('Ficheiro não reconhecido como um backup desta app.');
+      }
+      const confirmado = window.confirm('Importar este backup vai substituir o progresso e configurações atuais neste dispositivo. Continuar?');
+      if(!confirmado) return;
+      CHAVES_BACKUP.forEach(chave => {
+        if(Object.prototype.hasOwnProperty.call(pacote.dados, chave)){
+          localStorage.setItem(chave, pacote.dados[chave]);
+        }
+      });
+      if(msg){
+        msg.textContent = '✓ Backup importado. A reiniciar a app...';
+        msg.style.color = 'var(--texto-suave)';
+      }
+      setTimeout(()=> location.reload(), 700);
+    }catch(e){
+      if(msg){
+        msg.textContent = 'Não foi possível importar: o ficheiro não é um backup válido desta app.';
+        msg.style.color = 'var(--coral-suave)';
+      }
+    }
+  };
+  leitor.onerror = () => {
+    if(msg) msg.textContent = 'Não foi possível ler o ficheiro selecionado.';
+  };
+  leitor.readAsText(ficheiro);
+}
+
+function configurarBotoesBackup(){
+  const btnExportar = document.getElementById('btn-exportar-backup');
+  if(btnExportar) btnExportar.addEventListener('click', exportarBackup);
+  const inputImportar = document.getElementById('input-importar-backup');
+  if(inputImportar){
+    inputImportar.addEventListener('change', (e) => {
+      const ficheiro = e.target.files && e.target.files[0];
+      importarBackup(ficheiro);
+      inputImportar.value = ''; // permite selecionar o mesmo ficheiro outra vez, se preciso
+    });
+  }
+}
+
 // Toque longo (2s) na engrenagem do cabeçalho. Duração igual ao acesso da mãe,
 // mas caminho e ecrã completamente separados — cada um só vê o seu próprio menu.
 function configurarAcessoGestaoVideos(){
@@ -2759,24 +5154,45 @@ function configurarAcessoGestaoVideos(){
 carregarEscalaTexto();
 carregarRotinaPersonalizada();
 carregarVideosReais();
+carregarBancoPerguntasPersonalizado();
 carregarEstado();
+carregarHistorico();
+carregarVistaRotina();
 aplicarClasseMovimentoReduzido();
 atualizarData();
 renderRotina();
+atualizarHistoricoHoje(); // garante um registo do dia de hoje mesmo antes de qualquer interação
 setInterval(()=>{ verificarNovoDia(); renderRotina(); }, 60000); // deteta novo dia e atualiza o bloco "agora" a cada minuto
 configurarToqueLongoCalma();
 configurarAcessoConfig();
 configurarAcessoGestaoVideos();
+configurarBotaoReset();
+configurarBotoesBackup();
+configurarBotaoDicaIA();
 document.getElementById('btn-add-bloco').addEventListener('click', adicionarBlocoConfig);
 document.getElementById('btn-guardar-config').addEventListener('click', guardarConfig);
 document.getElementById('btn-add-video').addEventListener('click', adicionarBlocoVideo);
 document.getElementById('btn-guardar-videos').addEventListener('click', guardarVideos);
+document.getElementById('btn-vista-agora').addEventListener('click', ()=> definirVistaRotina('agora'));
+document.getElementById('btn-vista-dia').addEventListener('click', ()=> definirVistaRotina('dia'));
+document.getElementById('ia-fornecedor').addEventListener('change', alternarBlocoChaveGemini);
+document.getElementById('btn-gerar-ia').addEventListener('click', gerarPerguntasIA);
+document.getElementById('btn-adicionar-ia').addEventListener('click', adicionarPerguntasIAaoBanco);
+document.getElementById('ia-ficheiro').addEventListener('change', atualizarNomeFicheiroIA);
+document.getElementById('btn-remover-ficheiro-ia').addEventListener('click', removerFicheiroIA);
+carregarChaveGemini();
+carregarQuestionarioEduardo();
+aplicarSaudacaoPersonalizada();
+document.getElementById('btn-guardar-questionario').addEventListener('click', guardarQuestionarioEduardo);
+alternarBlocoChaveGemini();
 renderLista('lista-escola', escolaItens, abrirEscola);
 renderLista('lista-atividades', atividadesItens, abrirAtividade);
 renderLista('lista-jogos', jogosItens, abrirJogo);
 renderLista('lista-videos', videosItens, abrirVideo);
 renderListaVideosReais();
 renderConquistas();
+configurarLojaRecompensas();
+document.getElementById('versao-app').textContent = 'O Mundo do Eduardo — versão ' + window.APP_VERSION;
 
 </script>
 </body>
