@@ -1943,6 +1943,11 @@
       </div>
 
       <p id="versao-app" style="text-align:center;font-size:11px;color:var(--texto-suave);opacity:.6;margin-top:22px;"></p>
+
+      <!-- ===================== TERMINAR SESSÃO ===================== -->
+      <div class="separador-secao"></div>
+      <button class="btn-secundario" id="btn-terminar-sessao" style="margin-top:6px;color:var(--erro,#b3452c);border-color:var(--erro,#b3452c);">🚪 Terminar sessão</button>
+      <p id="msg-terminar-sessao" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
     </section>
 
     <!-- ===================== GESTÃO DE VÍDEOS + IA (área escondida do administrador, acesso pela engrenagem) ===================== -->
@@ -2362,7 +2367,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.18.2';
+window.APP_VERSION = '1.18.3';
 
 /* ======================= DADOS ======================= */
 
@@ -7727,6 +7732,32 @@ renderListaVideosReais();
 renderConquistas();
 configurarLojaRecompensas();
 document.getElementById('versao-app').textContent = 'EduKids — versão ' + window.APP_VERSION;
+
+// Termina a sessão através do Firebase (window.firebaseAuthApi, definido no bloco de
+// autenticação) e limpa o sinal local de "sessão offline" para não reentrar sozinho
+// sem pedir credenciais da próxima vez que a app abrir sem rede.
+function terminarSessao(){
+  const btn = document.getElementById('btn-terminar-sessao');
+  const msg = document.getElementById('msg-terminar-sessao');
+  if(!confirm('Terminar sessão? Vais precisar de entrar de novo com o email e a senha.')) return;
+  if(!window.firebaseAuthApi || typeof window.firebaseAuthApi.sair !== 'function'){
+    if(msg) msg.textContent = 'Não foi possível terminar sessão (autenticação não disponível).';
+    return;
+  }
+  if(btn) btn.disabled = true;
+  window.firebaseAuthApi.sair()
+    .then(()=>{
+      try{ localStorage.removeItem('mundoDoEduardo_sessaoLocal_v1'); }catch(e){}
+      // onAuthStateChanged (no bloco Firebase) trata de esconder a app e mostrar o
+      // ecrã de onboarding assim que o logout for confirmado pelo Firebase.
+    })
+    .catch((erro)=>{
+      console.error('Erro ao terminar sessão:', erro);
+      if(msg) msg.textContent = 'Não foi possível terminar sessão. Tenta novamente.';
+      if(btn) btn.disabled = false;
+    });
+}
+document.getElementById('btn-terminar-sessao').addEventListener('click', terminarSessao);
 
 </script>
 
