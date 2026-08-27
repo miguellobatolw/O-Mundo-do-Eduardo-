@@ -400,6 +400,29 @@
     gap:10px;
     margin:6px 0 18px;
   }
+
+  /* ===== Jogo de Atenção (integração de características: cor + forma + tamanho) ===== */
+  .pedido-caracteristicas{
+    text-align:center; font-size:16px; font-weight:800; color:var(--petroleo);
+    background:var(--branco); border-radius:var(--raio); padding:16px;
+    margin-bottom:16px; box-shadow:var(--sombra);
+  }
+  .grelha-caracteristicas{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-bottom:18px;
+  }
+  .forma-caract{
+    aspect-ratio:1; border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--branco); box-shadow:var(--sombra);
+    cursor:pointer; border:3px solid transparent;
+    padding:14px;
+  }
+  .forma-caract svg{ width:100%; height:100%; display:block; }
+  .forma-caract.certa{ border-color:#4C8C6B; background:#EAF6EF; }
+  .forma-caract.errada{ border-color:var(--coral-suave); opacity:.55; pointer-events:none; }
   .carta{
     aspect-ratio:1/1;
     background:var(--petroleo);
@@ -581,6 +604,95 @@
     font-weight:700;
   }
 
+  /* ===== Tira de storyboard (histórias sociais) — visão geral de todos os passos ===== */
+  .storyboard-tira{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:4px 2px 12px;
+    margin-bottom:6px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .storyboard-miniatura{
+    flex-shrink:0;
+    width:56px; height:56px;
+    border-radius:14px;
+    background:var(--areia-clara);
+    border:2px solid transparent;
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    cursor:pointer;
+    position:relative;
+  }
+  .storyboard-miniatura.atual{
+    border-color:var(--petroleo);
+    background:var(--salva-clara);
+  }
+  .storyboard-miniatura.concluida::after{
+    content:'✓';
+    position:absolute;
+    bottom:-2px; right:-2px;
+    background:var(--verde-sucesso, #6FA97C);
+    color:#fff;
+    width:18px; height:18px;
+    border-radius:50%;
+    font-size:11px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+  .storyboard-miniatura:not(.atual):not(.concluida){
+    opacity:0.45;
+    cursor:default;
+  }
+
+  /* ===== Revisão do Plano (CAA + rotina + história combinados) ===== */
+  .cartao-plano{
+    background:var(--branco);
+    border-radius:var(--raio);
+    box-shadow:var(--sombra);
+    padding:14px 16px;
+    margin-top:14px;
+    border-left:4px solid var(--petroleo);
+  }
+  .cartao-plano.descartado{
+    opacity:0.4;
+  }
+  .cartao-plano .cp-titulo{
+    font-weight:700;
+    font-size:14px;
+    color:var(--texto);
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .cartao-plano .cp-linha-caa{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .cartao-plano .cp-peca-caa{
+    display:flex; flex-direction:column; align-items:center;
+    background:var(--areia-clara);
+    border-radius:12px;
+    padding:6px 10px 4px;
+    min-width:52px;
+  }
+  .cartao-plano .cp-peca-caa .pc-icone{ font-size:22px; line-height:1; }
+  .cartao-plano .cp-peca-caa .pc-texto{ font-size:10.5px; font-weight:700; color:var(--texto); margin-top:2px; }
+  .cartao-plano .cp-acoes{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .cartao-plano .cp-acoes button{
+    flex:1;
+    font-size:12.5px;
+    padding:9px 8px;
+  }
+
   /* ===== Reforço positivo (overlay) ===== */
   .overlay-yay{
     position:fixed; inset:0;
@@ -625,9 +737,6 @@
     padding:30px;
   }
   .overlay-calma.mostrar{ display:flex; }
-  #calma-passo-respirar, #calma-passo-pos{
-    display:flex; flex-direction:column; align-items:center; width:100%;
-  }
   .circulo-respirar{
     width:150px;height:150px;
     border-radius:50%;
@@ -971,6 +1080,30 @@
   }
   .cartao-dica strong{ color:var(--petroleo); display:block; margin-bottom:4px; }
 
+  .cartao-generalizacao{
+    background:#EEF5F0;
+    border:2px solid var(--salva);
+    border-radius:var(--raio);
+    padding:14px;
+    margin-bottom:16px;
+    text-align:left;
+  }
+  .rotulo-generalizacao{
+    display:block;
+    font-size:11.5px;
+    font-weight:800;
+    color:var(--petroleo);
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    margin-bottom:6px;
+  }
+  .cartao-generalizacao p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--texto);
+    line-height:1.5;
+  }
+
   .bloco-pergunta-ia{
     background:var(--branco);
     border-radius:var(--raio);
@@ -1033,6 +1166,101 @@
   .aviso-transicao .icone-aviso{ font-size:20px; flex-shrink:0; }
   .aviso-transicao strong{ color:var(--petroleo); }
 
+  /* ===== Quadro CAA (comunicação) ===== */
+  .botao-caa-flutuante{
+    position:fixed;
+    right:16px;
+    bottom:86px;
+    width:58px; height:58px;
+    border-radius:50%;
+    background:var(--petroleo);
+    color:#fff;
+    font-size:26px;
+    border:none;
+    box-shadow:0 4px 14px rgba(0,0,0,0.22);
+    z-index:60;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .botao-caa-flutuante:active{ transform:scale(0.94); }
+
+  .frase-caa{
+    min-height:64px;
+    background:var(--branco);
+    border-radius:var(--raio);
+    box-shadow:var(--sombra);
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .frase-caa-vazia{ color:var(--texto-suave); font-size:13.5px; }
+  .palavra-caa{
+    display:flex; flex-direction:column; align-items:center;
+    background:var(--areia-clara);
+    border-radius:12px;
+    padding:6px 10px 4px;
+    min-width:52px;
+  }
+  .palavra-caa .pc-icone{ font-size:24px; line-height:1; }
+  .palavra-caa .pc-texto{ font-size:11px; font-weight:700; color:var(--texto); margin-top:2px; }
+
+  .frase-caa-acoes{
+    display:flex; gap:8px; margin-bottom:16px;
+  }
+  .frase-caa-acoes button{ flex:1; font-size:13px; padding:10px 8px; }
+
+  .abas-caa{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    margin-bottom:12px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .aba-caa{
+    flex-shrink:0;
+    padding:9px 16px;
+    border-radius:100px;
+    border:2px solid var(--salva-clara);
+    background:var(--branco);
+    font-family:inherit;
+    font-weight:700;
+    font-size:13px;
+    color:var(--texto-suave);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .aba-caa.ativa{
+    background:var(--petroleo);
+    border-color:var(--petroleo);
+    color:#fff;
+  }
+
+  .grelha-caa{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+  }
+  .peca-caa{
+    background:var(--branco);
+    border-radius:16px;
+    box-shadow:var(--sombra);
+    border:none;
+    padding:14px 4px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .peca-caa:active{ transform:scale(0.95); }
+  .peca-caa .pc-icone{ font-size:34px; line-height:1; }
+  .peca-caa .pc-texto{ font-size:12.5px; font-weight:700; color:var(--texto); text-align:center; }
+
   ::-webkit-scrollbar{ width:0; }
 
   /* ===== Preferência de movimento reduzido (sensibilidade sensorial) =====
@@ -1075,11 +1303,197 @@
   }
   .interruptor.ligado{ background:var(--petroleo); }
   .interruptor.ligado .bola{ transform:translateX(20px); }
+
+  /* ===== Onboarding / Login (conta na nuvem, Firebase) ===== */
+  #onboarding{
+    position:fixed; inset:0;
+    background:var(--fundo);
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    padding:18px 18px 24px;
+    overflow-y:auto;
+  }
+  .ob-topo{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:26px;
+  }
+  .ob-voltar{
+    background:none; border:none;
+    font-size:22px;
+    color:var(--texto-suave);
+    cursor:pointer;
+    padding:4px;
+    flex-shrink:0;
+  }
+  .ob-voltar:disabled{ opacity:0; pointer-events:none; }
+  .ob-barra-fundo{
+    flex:1;
+    height:10px;
+    border-radius:100px;
+    background:var(--salva-clara);
+    overflow:hidden;
+  }
+  .ob-barra-preenchida{
+    height:100%;
+    border-radius:100px;
+    background:linear-gradient(90deg, #F0A860, #8FBF8A, var(--petroleo));
+    transition:width .3s ease;
+  }
+  .ob-mascote-linha{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:28px;
+  }
+  .ob-mascote{
+    font-size:44px;
+    width:72px; height:72px;
+    border-radius:50%;
+    background:var(--salva-clara);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .ob-balao{
+    flex:1;
+    background:var(--branco);
+    border-radius:18px;
+    box-shadow:var(--sombra);
+    padding:14px 16px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--texto);
+    line-height:1.4;
+    position:relative;
+  }
+  .ob-opcoes{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .ob-opcao{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--branco);
+    border:2px solid transparent;
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:var(--sombra);
+    cursor:pointer;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    color:var(--texto);
+    text-align:left;
+  }
+  .ob-opcao .ob-emoji{ font-size:22px; flex-shrink:0; }
+  .ob-opcao.selecionada{
+    border-color:var(--petroleo);
+    background:var(--salva-clara);
+    color:var(--petroleo);
+  }
+  .ob-campo{
+    width:100%;
+    padding:16px 18px;
+    border-radius:16px;
+    border:2px solid var(--salva-clara);
+    background:var(--branco);
+    font-family:inherit;
+    font-size:15px;
+    color:var(--texto);
+    margin-bottom:14px;
+  }
+  .ob-campo-senha{ position:relative; }
+  .ob-campo-senha input{ padding-right:48px; }
+  .ob-olho{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    background:none; border:none; font-size:18px; cursor:pointer; color:var(--texto-suave);
+  }
+  .ob-checkbox-linha{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:12.5px;
+    color:var(--texto-suave);
+    line-height:1.5;
+    margin-bottom:16px;
+  }
+  .ob-checkbox-linha input{ margin-top:3px; flex-shrink:0; width:18px; height:18px; }
+  .ob-checkbox-linha a{ color:var(--petroleo); font-weight:700; text-decoration:underline; }
+  .ob-espaco{ flex:1; }
+  .ob-btn-principal{
+    width:100%;
+    padding:16px;
+    border-radius:100px;
+    border:none;
+    background:var(--petroleo);
+    color:#fff;
+    font-family:inherit;
+    font-size:15.5px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+  }
+  .ob-btn-principal:disabled{ opacity:0.5; cursor:default; }
+  .ob-btn-secundario{
+    width:100%;
+    padding:14px;
+    border-radius:100px;
+    border:2px solid var(--salva-clara);
+    background:transparent;
+    color:var(--petroleo);
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .ob-link-central{
+    text-align:center;
+    margin-top:18px;
+    font-size:13px;
+    color:var(--texto-suave);
+  }
+  .ob-link-central a{ color:var(--petroleo); font-weight:700; text-decoration:underline; cursor:pointer; }
+  .ob-erro{
+    color:#B5493D;
+    font-size:12.5px;
+    font-weight:600;
+    text-align:center;
+    margin-bottom:12px;
+    min-height:16px;
+  }
 </style>
 </head>
 <body>
 
-<div id="app">
+<!-- ===================== ONBOARDING / LOGIN (conta na nuvem, Firebase Auth) =====================
+     Fica visível por cima de tudo até existir uma sessão Firebase válida. O fluxo de perguntas
+     (quem é, nome da criança, nível de autismo, idade, objetivos) só corre na primeira conta —
+     depois disso, entrar é só email + password. Nada disto é guardado localmente até a conta
+     ser criada com sucesso no Firebase; os dados sensíveis (nível de autismo, objetivos) ficam
+     associados ao utilizador autenticado, nunca acessíveis sem login. -->
+<div id="onboarding" style="display:flex;">
+  <div class="ob-topo">
+    <button class="ob-voltar" id="ob-btn-voltar" onclick="obVoltar()">←</button>
+    <div class="ob-barra-fundo"><div class="ob-barra-preenchida" id="ob-barra"></div></div>
+  </div>
+  <div class="ob-mascote-linha">
+    <div class="ob-mascote">🦕</div>
+    <div class="ob-balao" id="ob-pergunta">A carregar…</div>
+  </div>
+  <div id="ob-corpo"></div>
+  <div class="ob-espaco"></div>
+  <p class="ob-erro" id="ob-erro"></p>
+  <button class="ob-btn-principal" id="ob-btn-principal">Continuar</button>
+  <div id="ob-rodape"></div>
+</div>
+
+<div id="app" style="display:none;">
 
   <header>
     <div class="saudacao">
@@ -1227,6 +1641,29 @@
       <div id="conteudo-detalhe"></div>
     </section>
 
+    <!-- ===================== QUADRO CAA (Comunicação Aumentativa e Alternativa) ===================== -->
+    <!-- Sempre acessível via botão flutuante em qualquer ecrã, para que o Eduardo possa pedir
+         algo (comida, ajuda, ir à casa de banho, parar) a qualquer momento, sem ter de navegar
+         até uma secção específica. Toque em cada pictograma diz a palavra em voz alta e junta-a
+         à frase no topo; "Falar" lê a frase completa. -->
+    <section class="ecra" id="ecra-caa">
+      <button class="voltar" onclick="irPara(caaEcraAnterior || 'inicio')">← Voltar</button>
+      <div class="titulo-secao">💬 Quero Dizer</div>
+      <div class="subtitulo-secao">Toca nas imagens para formar uma frase</div>
+
+      <div class="frase-caa" id="frase-caa" role="status" aria-live="polite">
+        <span class="frase-caa-vazia" id="frase-caa-vazia">Toca numa imagem para começar…</span>
+      </div>
+      <div class="frase-caa-acoes">
+        <button class="btn-secundario" id="btn-apagar-caa" onclick="apagarUltimoCaa()">⌫ Apagar</button>
+        <button class="btn-secundario" id="btn-limpar-caa" onclick="limparFraseCaa()">🗑️ Limpar</button>
+        <button class="btn-primario" id="btn-falar-caa" onclick="falarFraseCaa()">🔊 Falar</button>
+      </div>
+
+      <div class="abas-caa" id="abas-caa"></div>
+      <div class="grelha-caa" id="grelha-caa"></div>
+    </section>
+
     <!-- ===================== CONFIGURAÇÃO (só para pais/cuidador) ===================== -->
     <section class="ecra" id="ecra-config">
       <button class="voltar" onclick="irPara('inicio')">← Voltar</button>
@@ -1351,10 +1788,34 @@
         <div id="lista-nivel-materias"></div>
       </div>
 
+      <div class="cartao-grafico" id="cartao-latencia" style="display:none;">
+        <div class="t-grafico">Tempo até à 1ª resposta, por matéria</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Tempo médio a pensar antes de responder pela 1ª vez. Não é uma medida de desempenho — pode simplesmente refletir o quanto uma matéria pede mais processamento.</p>
+        <div id="lista-latencia"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-pista" style="display:none;">
+        <div class="t-grafico">Uso da pista, por matéria</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Percentagem de perguntas em que precisou da pista (2ª hipótese depois de errar). Uma percentagem a descer ao longo do tempo é sinal de que o apoio se está a tornar menos necessário.</p>
+        <div id="lista-pista"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-emocoes" style="display:none;">
+        <div class="t-grafico">Como se tem sentido — Quadro de Emoções</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Últimos registos feitos pelo Eduardo, com o motivo que ele próprio escolheu (quando indicou um). Não é um diagnóstico — só um registo do que ele partilhou.</p>
+        <div id="lista-emocoes"></div>
+      </div>
+
       <div class="cartao-grafico" id="cartao-calma-contexto" style="display:none;">
         <div class="t-grafico">Modo Calma — em que momento costuma ser usado</div>
         <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Só uma contagem simples de utilização, para ajudar a notar padrões — não é um diagnóstico.</p>
         <div id="lista-calma-contexto"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-calma-hora" style="display:none;">
+        <div class="t-grafico">Modo Calma — que altura do dia</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Pode ajudar a perceber se há uma altura do dia sistematicamente mais difícil.</p>
+        <div id="lista-calma-hora"></div>
       </div>
 
       <div class="cartao-grafico" id="cartao-pos-calma" style="display:none;">
@@ -1479,6 +1940,49 @@
       <div id="lista-ia-revisao"></div>
       <button class="btn-primario" id="btn-adicionar-ia" style="margin-top:10px;display:none;">✓ Adicionar estas perguntas ao banco</button>
 
+      <!-- ===================== GERADOR DE HISTÓRIAS SOCIAIS COM IA (só para o administrador) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">📖 Gerar história social com IA</div>
+      <div class="subtitulo-secao">Cria uma história social curta para uma situação específica (ex: ir ao dentista, uma mudança de rotina). Usa o mesmo fornecedor e chave de IA definidos acima. O Eduardo só vê a história depois de a reveres e aprovares aqui — nunca texto gerado ao vivo.</div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Situação a explicar</div>
+          <div class="d">Descreve a situação em poucas palavras. Ex: "primeira vez no dentista", "o que fazer se a excursão da escola for cancelada".</div>
+          <input type="text" id="historia-situacao" placeholder="Ex: Ir ao cabeleireiro pela primeira vez" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Quantas páginas</div>
+          <div class="d">Cada página tem um emoji e uma frase curta, como nas histórias de Curiosidades.</div>
+          <input type="number" id="historia-quantidade" value="5" min="3" max="8" style="margin-top:8px;width:80px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+        </div>
+      </div>
+
+      <button class="btn-primario" id="btn-gerar-historia" style="margin-top:10px;">✨ Gerar história social</button>
+      <p id="msg-historia" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+      <div id="revisao-historia"></div>
+      <button class="btn-primario" id="btn-adicionar-historia" style="margin-top:10px;display:none;">✓ Adicionar esta história às Atividades</button>
+
+      <!-- ===================== PLANO (frase única → CAA + rotina + história, com IA) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🧭 Criar um Plano</div>
+      <div class="subtitulo-secao">Descreve num objetivo o que o Eduardo precisa, e a IA sugere, em conjunto: pictogramas a destacar no Quadro CAA, um bloco de rotina, e uma história social — tudo à volta do mesmo objetivo. Revês e aprovas cada peça antes de ir para o Eduardo, tal como nas outras gerações.</div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">Objetivo</div>
+          <div class="d">Ex: "Nas refeições, precisa de ajuda para pedir mais comida", "Tem dificuldade em avisar quando quer parar uma atividade".</div>
+          <textarea id="plano-objetivo" rows="2" placeholder="Ex: Nas refeições, precisa de ajuda para pedir o que quer" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primario" id="btn-gerar-plano" style="margin-top:10px;">✨ Gerar sugestões do Plano</button>
+      <p id="msg-plano" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+      <div id="revisao-plano"></div>
+
       <!-- ===================== BACKUP (exportar/importar progresso) ===================== -->
       <div class="separador-secao"></div>
       <div class="titulo-secao" style="font-size:18px;">💾 Backup</div>
@@ -1497,7 +2001,7 @@
       <label class="linha-definicao" style="cursor:pointer;">
         <div class="txt-def">
           <div class="t">⭐ Progresso e estrelas</div>
-          <div class="d">Estrelas ganhas, nível desbloqueado em cada matéria, medalhas</div>
+          <div class="d">Estrelas, nível por matéria, medalhas, sequência de dias, recompensas, e os padrões de uso do Modo Calma (por hora do dia, por tarefa, e o que aconteceu depois)</div>
         </div>
         <input type="checkbox" id="reset-progresso" class="checkbox-reset" checked>
       </label>
@@ -1548,6 +2052,10 @@
 
   </main>
 
+  <!-- Botão flutuante fixo: acesso ao Quadro CAA a partir de qualquer ecrã principal,
+       para que o Eduardo consiga comunicar uma necessidade a qualquer momento. -->
+  <button class="botao-caa-flutuante" id="botao-caa-flutuante" onclick="abrirCaa()" aria-label="Quero dizer — abrir quadro de comunicação">💬</button>
+
   <nav>
     <button class="nav-btn ativo" data-nav="inicio" onclick="irPara('inicio')"><span class="ni">🏠</span>Início</button>
     <button class="nav-btn" data-nav="rotina" onclick="irPara('rotina')"><span class="ni">📅</span>O Dia</button>
@@ -1583,8 +2091,122 @@
   </div>
 </div>
 
+<!-- ===================== FIREBASE (autenticação por email/password) =====================
+     PASSOS QUE TU PRECISAS DE FAZER (a Claude não tem acesso à internet para o fazer por ti):
+     1. Vai a https://console.firebase.google.com → "Adicionar projeto" (gratuito).
+     2. No projeto, vai a "Compilação" → "Authentication" → "Get started" → ativa o
+        método "Email/Password".
+     3. Vai a "Definições do projeto" (ícone de engrenagem) → em baixo, "As suas apps" →
+        clica no ícone "</>" (Web) → regista a app com um nome (ex: "Mundo do Eduardo").
+     4. O Firebase mostra-te um bloco "firebaseConfig" com apiKey, authDomain, etc.
+        Substitui os valores de exemplo abaixo por esses, exatamente como aparecem.
+
+     IMPORTANTE: enquanto as chaves não forem substituídas, ou se não houver ligação à
+     internet, esta app mostra um aviso claro no ecrã — nunca fica em branco.
+
+     NOTA SOBRE COMO ABRIR O FICHEIRO: alguns navegadores (incluindo o Chrome no Android,
+     ao abrir diretamente da pasta Downloads via "content://") bloqueiam módulos JavaScript
+     (`type="module"`) quando o ficheiro não é servido por um site (http/https) — chama-se
+     restrição de CORS para `file://`/`content://`. Se o ecrã de aviso não aparecer mesmo
+     ao fim de alguns segundos, essa é a causa mais provável. Formas de contornar:
+       • A forma mais simples: enviar o ficheiro para o Google Drive e abri-lo com o botão
+         "Abrir com" → Chrome, em vez de abrir a partir de Downloads.
+       • Ou publicar o ficheiro num site simples e gratuito (ex: Netlify Drop, GitHub Pages).
+     Isto só afeta o ecrã de login (a parte que depende de internet); o resto da app
+     sempre funcionou 100% local, sem este problema. -->
 <script>
-window.APP_VERSION = '1.17.0';
+  // Mostra um aviso visível no próprio ecrã de onboarding (que já está no HTML e visível
+  // por defeito), sem depender de o módulo Firebase chegar a correr. Corre em modo normal
+  // (não-módulo) para nunca ser bloqueado por um erro de import.
+  function obMostrarAvisoFirebase(mensagem){
+    const pergunta = document.getElementById('ob-pergunta');
+    const erro = document.getElementById('ob-erro');
+    const btn = document.getElementById('ob-btn-principal');
+    const corpo = document.getElementById('ob-corpo');
+    if(pergunta) pergunta.textContent = 'A app ainda não está pronta para entrar.';
+    if(corpo) corpo.innerHTML = '';
+    if(erro) erro.textContent = mensagem;
+    if(btn){ btn.disabled = true; btn.textContent = 'Continuar'; }
+  }
+  // Timeout de segurança: se, por qualquer razão (rede lenta, bloqueio do CDN, etc.), o
+  // módulo Firebase abaixo não responder em 6 segundos, mostra o aviso mesmo assim, em
+  // vez de deixar o ecrã de "A carregar…" parado para sempre.
+  window.setTimeout(()=>{
+    if(!window.firebaseAuthApi && !window.utilizadorAtual){
+      obMostrarAvisoFirebase('⚠️ Não foi possível ligar ao Firebase. Verifica a tua ligação à internet, ou confirma se já colaste as tuas chaves do Firebase no código (ver instruções no início do bloco <script type="module">).');
+    }
+  }, 6000);
+</script>
+<script type="module">
+  try{
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
+    const {
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      sendPasswordResetEmail, onAuthStateChanged, signOut
+    } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js");
+    const {
+      getFirestore, doc, setDoc, getDoc
+    } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
+
+    // ⚠️ SUBSTITUI pelos valores do TEU projeto Firebase (ver instruções acima).
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXYOKlqLAPN0GlWoV9KvNRFOuhQJ_XtFE",
+      authDomain: "o-mundo-do-eduardo.firebaseapp.com",
+      projectId: "o-mundo-do-eduardo",
+      storageBucket: "o-mundo-do-eduardo.firebasestorage.app",
+      messagingSenderId: "227750452856",
+      appId: "1:227750452856:web:3b34ccbe9c3a16f0bad78d",
+    };
+
+    // Se as chaves de exemplo ainda não foram substituídas, nem tenta ligar — mostra
+    // logo o aviso, de forma imediata e clara.
+    if(firebaseConfig.apiKey === "COLA_AQUI_A_TUA_API_KEY"){
+      window.obMostrarAvisoFirebase('⚠️ Firebase ainda não configurado. Segue as instruções no início do código (comentário antes do bloco Firebase) para colar as tuas próprias chaves. Isto é gratuito e demora cerca de 5 minutos.');
+    } else {
+      const firebaseApp = initializeApp(firebaseConfig);
+      const auth = getAuth(firebaseApp);
+      const db = getFirestore(firebaseApp);
+
+      // Exposto em window para o script de onboarding (não-módulo) conseguir chamar estas funções.
+      window.firebaseAuthApi = {
+        criarConta: (email, senha) => createUserWithEmailAndPassword(auth, email, senha),
+        entrar: (email, senha) => signInWithEmailAndPassword(auth, email, senha),
+        recuperarSenha: (email) => sendPasswordResetEmail(auth, email),
+        sair: () => signOut(auth),
+        guardarPerfil: (uid, dados) => setDoc(doc(db, "perfis", uid), dados, { merge: true }),
+        lerPerfil: async (uid) => {
+          const snap = await getDoc(doc(db, "perfis", uid));
+          return snap.exists() ? snap.data() : null;
+        },
+      };
+
+      // Ponto central: reage sempre que o estado de login muda (arranque da app, login, logout).
+      onAuthStateChanged(auth, (user) => {
+        if(user){
+          window.utilizadorAtual = user;
+          document.getElementById('onboarding').style.display = 'none';
+          document.getElementById('app').style.display = '';
+          if(typeof window.aoEntrarNaApp === 'function') window.aoEntrarNaApp(user);
+        } else {
+          window.utilizadorAtual = null;
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('onboarding').style.display = 'flex';
+          if(typeof window.mostrarEcraLogin === 'function') window.mostrarEcraLogin();
+        }
+      }, (erroAuth) => {
+        // Erro na própria ligação de autenticação (ex: projeto mal configurado, rede).
+        obMostrarAvisoFirebase('⚠️ Não foi possível ligar à autenticação. Verifica as chaves do Firebase e a tua ligação à internet. (' + (erroAuth && erroAuth.message ? erroAuth.message : 'erro desconhecido') + ')');
+      });
+    }
+  }catch(erroModulo){
+    // Falha ao carregar os módulos do Firebase (sem rede, CDN bloqueado, etc.) — nunca
+    // deixa a página em branco, mostra sempre uma explicação.
+    obMostrarAvisoFirebase('⚠️ Não foi possível carregar o Firebase (sem ligação à internet, ou o endereço está bloqueado). A app precisa de internet para o login funcionar. Detalhe técnico: ' + (erroModulo && erroModulo.message ? erroModulo.message : String(erroModulo)));
+  }
+</script>
+
+<script>
+window.APP_VERSION = '1.17.3';
 
 /* ======================= DADOS ======================= */
 
@@ -1608,6 +2230,22 @@ const escolaItens = [
   {icone:"🇪🇸", cor:"#FBEFDD", t:"Espanhol — Vocabulário", d:"Palavras e frases simples", tipo:"quiz", dados:"espanhol"},
 ];
 
+// Histórias sociais aprovadas pelo pai/cuidador (geradas com IA e revistas, ou escritas à
+// mão) — guardadas à parte e persistidas, como o banco de perguntas. Começa com um exemplo
+// para o ecrã de Atividades nunca ficar vazio antes da 1ª geração.
+let historiasSociais = [
+  {
+    icone:"🚌", cor:"#EAF0FB", t:"Ir de autocarro", d:"O que esperar numa viagem de autocarro", tipo:"historia",
+    paginas:[
+      {emoji:"🚏", texto:"Às vezes vou de autocarro. Primeiro, espero na paragem até o autocarro chegar."},
+      {emoji:"🚌", texto:"Quando o autocarro chega, entro com calma e mostro o bilhete ou passe ao motorista."},
+      {emoji:"💺", texto:"Procuro um lugar sentado. Se não houver, seguro-me bem a uma barra até haver lugar."},
+      {emoji:"🔊", texto:"O autocarro pode fazer barulho e parar muitas vezes. Isso é normal, faz parte da viagem."},
+      {emoji:"🔔", texto:"Quando estiver perto da minha paragem, toco a campainha e levanto-me com calma para sair."},
+    ]
+  },
+];
+
 const atividadesItens = [
   {icone:"🎨", cor:"#FBEFDD", t:"Pintura Livre", d:"Escolhe cores e desenha à vontade", tipo:"pintura"},
   {icone:"🧩", cor:"#E4EEF0", t:"Puzzle Sensorial", d:"Encaixa as peças com calma", tipo:"info"},
@@ -1618,6 +2256,7 @@ const atividadesItens = [
 
 const jogosItens = [
   {icone:"🧠", cor:"#E4EEF0", t:"Jogo da Memória", d:"Encontra os pares de animais", tipo:"memoria", dados:"memoria"},
+  {icone:"🔷", cor:"#EAF0FB", t:"Jogo de Atenção", d:"Encontra a forma certa", tipo:"caracteristicas", dados:"caracteristicas"},
   {icone:"🔤", cor:"#FBEFDD", t:"Ordena as Letras", d:"Forma a palavra certa", tipo:"quiz", dados:"letras"},
   {icone:"🔢", cor:"#F3E3E0", t:"Sequências Numéricas", d:"Qual é o número a seguir?", tipo:"quiz", dados:"numeros"},
   {icone:"🎯", cor:"#E7F1E8", t:"Verdadeiro ou Falso", d:"Testa o que sabes", tipo:"quiz", dados:"vf"},
@@ -1896,6 +2535,106 @@ let somAtivo = null; // { chave, pararFn } — som ambiente (chuva, etc.) atualm
 // independente da preferência do sistema (prefers-reduced-motion) e do volume do dispositivo.
 let efeitosCalmosAtivo = false;
 
+// ===================== QUADRO CAA (Comunicação Aumentativa e Alternativa) =====================
+// Pictogramas organizados por categoria, inspirados no vocabulário nuclear típico de CAA
+// (ex: sistemas como ARASAAC/PECS): palavras-núcleo de alta frequência primeiro (eu, quero,
+// sim, não, ajuda), depois vocabulário mais específico por tema (comida, casa de banho, etc.).
+// Cada peça tem: ícone (emoji, para funcionar 100% offline), texto (o que é dito/escrito).
+const categoriasCaa = [
+  {
+    id: 'nucleo',
+    nome: '⭐ Principais',
+    pecas: [
+      {icone:'👆', texto:'eu'},
+      {icone:'🫵', texto:'tu'},
+      {icone:'🙋', texto:'quero'},
+      {icone:'🤚', texto:'parar'},
+      {icone:'✅', texto:'sim'},
+      {icone:'❌', texto:'não'},
+      {icone:'🆘', texto:'ajuda'},
+      {icone:'❓', texto:'o quê'},
+      {icone:'⏰', texto:'agora'},
+      {icone:'⏭️', texto:'depois'},
+      {icone:'🏁', texto:'acabou'},
+      {icone:'➕', texto:'mais'},
+    ]
+  },
+  {
+    id: 'sentir',
+    nome: '💛 Como me sinto',
+    pecas: [
+      {icone:'😊', texto:'feliz'},
+      {icone:'😢', texto:'triste'},
+      {icone:'😠', texto:'zangado'},
+      {icone:'😨', texto:'com medo'},
+      {icone:'😣', texto:'dói-me'},
+      {icone:'🥱', texto:'cansado'},
+      {icone:'😵', texto:'barulho a mais'},
+      {icone:'🧘', texto:'preciso de calma'},
+    ]
+  },
+  {
+    id: 'necessidades',
+    nome: '🚻 Necessidades',
+    pecas: [
+      {icone:'🚻', texto:'casa de banho'},
+      {icone:'🍽️', texto:'comer'},
+      {icone:'🥤', texto:'beber'},
+      {icone:'😴', texto:'dormir'},
+      {icone:'🤒', texto:'estou doente'},
+      {icone:'🩹', texto:'magoei-me'},
+      {icone:'🧥', texto:'tenho frio'},
+      {icone:'🥵', texto:'tenho calor'},
+    ]
+  },
+  {
+    id: 'acoes',
+    nome: '🏃 Ações',
+    pecas: [
+      {icone:'🚶', texto:'ir'},
+      {icone:'🎮', texto:'brincar'},
+      {icone:'📖', texto:'ler'},
+      {icone:'✏️', texto:'escrever'},
+      {icone:'👀', texto:'ver'},
+      {icone:'🎧', texto:'ouvir música'},
+      {icone:'🤗', texto:'abraço'},
+      {icone:'🏠', texto:'ir para casa'},
+    ]
+  },
+  {
+    id: 'comida',
+    nome: '🍎 Comida',
+    pecas: [
+      {icone:'🍎', texto:'maçã'},
+      {icone:'🍞', texto:'pão'},
+      {icone:'🥛', texto:'leite'},
+      {icone:'💧', texto:'água'},
+      {icone:'🍝', texto:'massa'},
+      {icone:'🍪', texto:'bolacha'},
+      {icone:'🍌', texto:'banana'},
+      {icone:'🍕', texto:'pizza'},
+    ]
+  },
+  {
+    id: 'pessoas',
+    nome: '👪 Pessoas',
+    pecas: [
+      {icone:'👩', texto:'mãe'},
+      {icone:'👨', texto:'pai'},
+      {icone:'👧', texto:'irmã'},
+      {icone:'👦', texto:'irmão'},
+      {icone:'👵', texto:'avó'},
+      {icone:'👴', texto:'avô'},
+      {icone:'👩‍🏫', texto:'professora'},
+      {icone:'🧑‍⚕️', texto:'médico'},
+    ]
+  },
+];
+
+let categoriaCaaAtiva = 'nucleo';
+let fraseCaaAtual = []; // array de {icone, texto}
+let caaEcraAnterior = 'inicio'; // para o botão "Voltar" regressar ao ecrã de onde veio
+
 // Interruptor geral de som (acerto/erro do quiz e demais efeitos sonoros da app).
 // Independente do som ambiente (chuva, etc.), que tem o seu próprio controlo.
 // Volume geral dos sons de feedback da app (acerto/erro/clique), de 0 (silêncio) a 1 (máximo).
@@ -1924,6 +2663,24 @@ let registoCalmaPorBloco = {}; // { 'Matemática — Frações': 3, 'Sem tarefa 
 // Consequência do Modo Calma, por bloco da rotina: { 'Trabalhos de casa': {voltou:2, ajuda:1} }
 // Fecha o ciclo ABC (Antecedente já estava em registoCalmaPorBloco) — opcional, nunca obrigatório.
 let registoPosCalma = {};
+// Quando, ao longo do dia, o Modo Calma costuma ser aberto — agrupado em 4 períodos largos
+// (não a hora exata, para não sugerir um registo demasiado granular/clínico).
+// Ajuda a notar padrões como "quase sempre ao fim da tarde", úteis para ajustar a rotina.
+let registoCalmaPorHora = {}; // { manha:1, almoco:0, tarde:4, fimDoDia:1 }
+const PERIODOS_CALMA = {
+  manha:    { lbl: 'Manhã',        de: 6,  ate: 12 },
+  almoco:   { lbl: 'Hora de almoço', de: 12, ate: 14 },
+  tarde:    { lbl: 'Tarde',        de: 14, ate: 18 },
+  fimDoDia: { lbl: 'Fim do dia',   de: 18, ate: 23 },
+};
+function periodoCalmaAtual(){
+  const hora = new Date().getHours();
+  for(const chave in PERIODOS_CALMA){
+    const p = PERIODOS_CALMA[chave];
+    if(hora >= p.de && hora < p.ate) return chave;
+  }
+  return 'fimDoDia'; // madrugada (23h-6h), caso improvável de uso — cai no período mais próximo
+}
 
 /* ======================= HISTÓRICO DIÁRIO (para os gráficos da área parental) ======================= */
 // Guarda, por dia, um retrato simples do progresso: tarefas da rotina feitas/total,
@@ -2023,6 +2780,10 @@ function guardarEstado(){
       volumeSomApp: volumeSomApp,
       registoCalmaPorBloco: registoCalmaPorBloco,
       registoPosCalma: registoPosCalma,
+      registoCalmaPorHora: registoCalmaPorHora,
+      registoLatenciaPorMateria: registoLatenciaPorMateria,
+      registoPistaPorMateria: registoPistaPorMateria,
+      registoEmocoes: registoEmocoes,
       recompensasLista: recompensasLista,
       estrelasGastas: estrelasGastas,
     };
@@ -2078,6 +2839,18 @@ function carregarEstado(){
     }
     if(estado.registoPosCalma && typeof estado.registoPosCalma === 'object'){
       registoPosCalma = estado.registoPosCalma;
+    }
+    if(estado.registoCalmaPorHora && typeof estado.registoCalmaPorHora === 'object'){
+      registoCalmaPorHora = estado.registoCalmaPorHora;
+    }
+    if(estado.registoLatenciaPorMateria && typeof estado.registoLatenciaPorMateria === 'object'){
+      registoLatenciaPorMateria = estado.registoLatenciaPorMateria;
+    }
+    if(estado.registoPistaPorMateria && typeof estado.registoPistaPorMateria === 'object'){
+      registoPistaPorMateria = estado.registoPistaPorMateria;
+    }
+    if(Array.isArray(estado.registoEmocoes)){
+      registoEmocoes = estado.registoEmocoes;
     }
     if(Array.isArray(estado.recompensasLista)) recompensasLista = estado.recompensasLista;
     if(typeof estado.estrelasGastas === 'number') estrelasGastas = estado.estrelasGastas;
@@ -2350,6 +3123,18 @@ function irPara(ecra){
   const btn = document.querySelector('.nav-btn[data-nav="'+ecra+'"]');
   if(btn) btn.classList.add('ativo');
   document.getElementById('main').scrollTop = 0;
+  atualizarVisibilidadeBotaoCaa(ecra);
+}
+
+// Esconde o botão flutuante do CAA nos ecrãs onde não faz sentido sobrepor
+// (dentro do próprio quadro CAA, na configuração dos pais, ou na gestão de vídeos).
+// Mantém-se visível mesmo durante quizzes/atividades (ecrã "detalhe"), porque é
+// precisamente aí que o Eduardo pode precisar de dizer "parar" ou "preciso de ajuda".
+function atualizarVisibilidadeBotaoCaa(ecra){
+  const btnCaa = document.getElementById('botao-caa-flutuante');
+  if(!btnCaa) return;
+  const escondeEm = ['caa', 'config', 'gestao-videos'];
+  btnCaa.style.display = escondeEm.includes(ecra) ? 'none' : 'flex';
 }
 
 function irParaDetalhe(html, tituloVoltar){
@@ -2360,6 +3145,7 @@ function irParaDetalhe(html, tituloVoltar){
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-detalhe').classList.add('ativo');
   document.getElementById('main').scrollTop = 0;
+  atualizarVisibilidadeBotaoCaa('detalhe');
 }
 
 // Mostra um pequeno aviso amigável antes de sair de um quiz a meio, com opção de continuar ou sair.
@@ -2848,7 +3634,8 @@ function renderLista(id, itens, funcaoClicar){
     // Para itens de quiz (fichas de escola), a etiqueta reflete o nível REAL já alcançado
     // pelo Eduardo (obterNivelAtual), não um valor fixo escrito no código.
     const nivelReal = (it.tipo === 'quiz' && it.dados) ? obterNivelAtual(it.dados)
-      : (it.tipo === 'memoria' && it.dados) ? obterNivelAtual(it.dados) : null;
+      : (it.tipo === 'memoria' && it.dados) ? obterNivelAtual(it.dados)
+      : (it.tipo === 'caracteristicas' && it.dados) ? obterNivelAtual(it.dados) : null;
     const chaveNivel = nivelReal === 1 ? 'facil' : nivelReal === 2 ? 'medio' : nivelReal === 3 ? 'dificil' : it.nivel;
     const nomeNivel = chaveNivel === 'facil' ? 'Fácil' : chaveNivel === 'medio' ? 'Médio' : chaveNivel === 'dificil' ? 'Desafio' : '';
     const etiquetaHtml = chaveNivel ? `<span class="etiqueta et-${chaveNivel}">${nomeNivel}</span>` : '';
@@ -2879,7 +3666,9 @@ function renderLista(id, itens, funcaoClicar){
 }
 
 function abrirEscola(i){ abrirItemGenerico(escolaItens[i], 'escola'); }
-function abrirAtividade(i){ abrirItemGenerico(atividadesItens[i], 'atividades'); }
+// Cobre tanto as atividades fixas como as histórias sociais aprovadas, já que ambas
+// são mostradas na mesma lista (ver renderLista('lista-atividades', ...) mais abaixo).
+function abrirAtividadeOuHistoria(i){ abrirItemGenerico(atividadesItens.concat(historiasSociais)[i], 'atividades'); }
 function abrirJogo(i){ abrirItemGenerico(jogosItens[i], 'jogos'); }
 /* ======================= NARRAÇÃO POR VOZ (Web Speech API) ======================= */
 let vozAtiva = false;
@@ -2905,6 +3694,99 @@ function narrar(texto, aoTerminar){
   fala.onend = ()=>{ vozAtiva = false; if(aoTerminar) aoTerminar(); };
   fala.onerror = ()=>{ vozAtiva = false; };
   window.speechSynthesis.speak(fala);
+}
+
+// ===================== QUADRO CAA =====================
+
+// Abre o quadro CAA a partir de qualquer ecrã, guardando de onde veio para o "Voltar" funcionar bem.
+function abrirCaa(){
+  const ecraAtual = document.querySelector('.ecra.ativo');
+  if(ecraAtual && ecraAtual.id !== 'ecra-caa'){
+    caaEcraAnterior = ecraAtual.id.replace('ecra-', '');
+  }
+  renderAbasCaa();
+  renderGrelhaCaa();
+  renderFraseCaa();
+  document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
+  document.getElementById('ecra-caa').classList.add('ativo');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
+  document.getElementById('main').scrollTop = 0;
+  tocarSomClique();
+}
+
+function renderAbasCaa(){
+  const cont = document.getElementById('abas-caa');
+  cont.innerHTML = categoriasCaa.map(cat => `
+    <button class="aba-caa ${cat.id===categoriaCaaAtiva?'ativa':''}" data-cat="${cat.id}">${cat.nome}</button>
+  `).join('');
+  cont.querySelectorAll('.aba-caa').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      categoriaCaaAtiva = btn.dataset.cat;
+      renderAbasCaa();
+      renderGrelhaCaa();
+      vibrar(15);
+    });
+  });
+}
+
+function renderGrelhaCaa(){
+  const cat = categoriasCaa.find(c => c.id === categoriaCaaAtiva) || categoriasCaa[0];
+  const cont = document.getElementById('grelha-caa');
+  cont.innerHTML = cat.pecas.map((p,i) => `
+    <button class="peca-caa" data-icone="${p.icone}" data-texto="${p.texto}">
+      <span class="pc-icone">${p.icone}</span>
+      <span class="pc-texto">${p.texto}</span>
+    </button>
+  `).join('');
+  cont.querySelectorAll('.peca-caa').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      adicionarPalavraCaa({icone: btn.dataset.icone, texto: btn.dataset.texto});
+    });
+  });
+}
+
+// Adiciona uma palavra à frase em construção, diz a palavra sozinha de imediato
+// (feedback rápido de que o toque funcionou) e vibra ligeiramente.
+function adicionarPalavraCaa(palavra){
+  fraseCaaAtual.push(palavra);
+  renderFraseCaa();
+  vibrar(20);
+  narrar(palavra.texto);
+}
+
+function apagarUltimoCaa(){
+  if(fraseCaaAtual.length === 0) return;
+  fraseCaaAtual.pop();
+  renderFraseCaa();
+  vibrar(15);
+}
+
+function limparFraseCaa(){
+  if(fraseCaaAtual.length === 0) return;
+  fraseCaaAtual = [];
+  renderFraseCaa();
+  vibrar(15);
+}
+
+// Lê a frase completa em voz alta, palavra a palavra na ordem em que foi construída.
+function falarFraseCaa(){
+  if(fraseCaaAtual.length === 0) return;
+  const texto = fraseCaaAtual.map(p => p.texto).join(', ');
+  narrar(texto);
+}
+
+function renderFraseCaa(){
+  const cont = document.getElementById('frase-caa');
+  if(fraseCaaAtual.length === 0){
+    cont.innerHTML = '<span class="frase-caa-vazia" id="frase-caa-vazia">Toca numa imagem para começar…</span>';
+    return;
+  }
+  cont.innerHTML = fraseCaaAtual.map(p => `
+    <div class="palavra-caa">
+      <span class="pc-icone">${p.icone}</span>
+      <span class="pc-texto">${p.texto}</span>
+    </div>
+  `).join('');
 }
 
 let temaAtual = null, paginaAtual = 0, origemTema = 'curiosidades';
@@ -3004,10 +3886,19 @@ function renderPaginaTema(){
   const total = temaAtual.paginas.length;
   const pag = temaAtual.paginas[paginaAtual];
   const pct = Math.round(((paginaAtual+1)/total)*100);
+  const ehHistoriaSocial = temaAtual.tipo === 'historia';
+  const storyboard = ehHistoriaSocial ? `
+    <div class="storyboard-tira" id="storyboard-tira">
+      ${temaAtual.paginas.map((p,i)=>`
+        <div class="storyboard-miniatura ${i===paginaAtual?'atual':''} ${i<paginaAtual?'concluida':''}" data-indice="${i}" data-navegavel="${i<=paginaAtual}">${p.emoji}</div>
+      `).join('')}
+    </div>
+  ` : '';
   irParaDetalhe(`
     <div class="painel">
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
       <h2 style="margin-bottom:14px;">${temaAtual.t}</h2>
+      ${storyboard}
       <div class="pagina-tema">
         <div class="pagina-emoji">${pag.emoji}</div>
         <p class="pagina-texto">${pag.texto}</p>
@@ -3020,6 +3911,19 @@ function renderPaginaTema(){
       </div>
     </div>
   `, origemTema);
+
+  if(ehHistoriaSocial){
+    document.querySelectorAll('.storyboard-miniatura').forEach(min=>{
+      // Só permite voltar a páginas já vistas (ou a atual) — não saltar para a frente,
+      // porque numa história social a ordem dos passos é parte do que se está a ensinar.
+      if(min.dataset.navegavel !== 'true') return;
+      min.addEventListener('click', ()=>{
+        pararNarracao();
+        paginaAtual = Number(min.dataset.indice);
+        renderPaginaTema();
+      });
+    });
+  }
 
   document.getElementById('btn-ouvir').addEventListener('click', ()=>{
     const btn = document.getElementById('btn-ouvir');
@@ -3049,13 +3953,83 @@ function renderPaginaTema(){
   });
 }
 
+// Histórias sociais: mesmo leitor de páginas usado nos temas de enciclopédia (temaAtual/
+// paginaAtual/origemTema, renderPaginaTema), só muda a origem e o que acontece na última
+// página. Nunca são texto gerado ao vivo — só as que o pai/cuidador reviu e aprovou
+// (ver ecrã de revisão na área de administração), guardadas em historiasSociais.
+function abrirHistoriaSocial(it, origem){
+  temaAtual = it;
+  paginaAtual = 0;
+  origemTema = origem;
+  renderPaginaTema();
+}
+
+// Pares de afinidade entre matérias, usados para oferecer escolha (ver PRT: escolha entre
+// exemplares) antes de começar um quiz. Não é uma taxonomia rígida — só serve para sugerir
+// uma 2ª opção com sentido, em vez de impor sempre a mesma sequência ao Eduardo.
+const PARES_AFINIDADE_QUIZ = {
+  matematica: 'numeros',
+  numeros: 'matematica',
+  portugues: 'letras',
+  letras: 'portugues',
+  ciencias: 'geografia',
+  geografia: 'ciencias',
+  ingles: 'espanhol',
+  espanhol: 'ingles',
+  vf: 'ciencias',
+};
+
+// Antes de entrar no quiz, dá ao Eduardo a escolha entre 2 sub-temas (o que tocou +
+// um relacionado), em vez de o levar logo para a 1ª pergunta. Reforça motivação
+// intrínseca ao dar controlo sobre o "o quê", não só sobre o "como responder".
+function abrirEscolhaQuiz(it, origem){
+  const todosOsItens = [...escolaItens, ...jogosItens];
+  const chaveParceira = PARES_AFINIDADE_QUIZ[it.dados];
+  const itemParceiro = chaveParceira ? todosOsItens.find(x => x.tipo === 'quiz' && x.dados === chaveParceira) : null;
+
+  if(!itemParceiro){
+    // Sem par de afinidade disponível (ex: matéria isolada): segue direto, sem ecrã extra
+    iniciarQuiz(it.dados, it.t, origem);
+    return;
+  }
+
+  const opcoes = [it, itemParceiro];
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="icone-grande" style="background:${it.cor}">🤔</div>
+      <h2>O que queres treinar?</h2>
+      <p class="desc">Escolhe uma das duas.</p>
+      ${opcoes.map((op, i) => `
+        <div class="opcao" id="escolha-quiz-${i}" style="text-align:center;justify-content:center;" role="button" tabindex="0" aria-label="${op.t}">
+          <span style="font-size:20px;">${op.icone}</span>
+          <span>${op.t}</span>
+        </div>
+      `).join('')}
+    </div>
+  `, origem);
+  opcoes.forEach((op, i) => {
+    const el = document.getElementById('escolha-quiz-'+i);
+    if(el){
+      const escolher = ()=> iniciarQuiz(op.dados, op.t, origem);
+      el.addEventListener('click', escolher);
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); escolher(); }
+      });
+    }
+  });
+}
+
 function abrirItemGenerico(it, origem){
   if(it.tipo === 'quiz'){
-    iniciarQuiz(it.dados, it.t, origem);
+    abrirEscolhaQuiz(it, origem);
     return;
   }
   if(it.tipo === 'memoria'){
     irParaDetalhe(gerarHtmlMemoria(), origem);
+    return;
+  }
+  if(it.tipo === 'caracteristicas'){
+    irParaDetalhe(gerarHtmlCaracteristicas(), origem);
     return;
   }
   if(it.tipo === 'calma'){
@@ -3064,6 +4038,10 @@ function abrirItemGenerico(it, origem){
   }
   if(it.tipo === 'sons'){
     abrirSons(origem);
+    return;
+  }
+  if(it.tipo === 'historia'){
+    abrirHistoriaSocial(it, origem);
     return;
   }
   let extra = '';
@@ -3126,13 +4104,46 @@ function abrirPorqueEmocao(emocao, origem){
   `, origem);
   document.querySelectorAll('.opcao-motivo').forEach(el=>{
     el.addEventListener('click', ()=>{
-      const motivo = el.getAttribute('data-motivo');
-      darEstrela('Obrigado por partilhares', `Registámos: ${emocao} — ${motivo}`);
+      concluirRegistoEmocao(emocao, el.getAttribute('data-motivo'), origem);
     });
   });
   document.getElementById('btn-saltar-motivo').addEventListener('click', ()=>{
-    darEstrela('Obrigado por partilhares', 'Registámos: ' + emocao);
+    concluirRegistoEmocao(emocao, null, origem);
   });
+}
+
+// Emoções onde vale a pena, no próprio momento (não só depois, na área parental),
+// oferecer o Modo Calma — sempre como opção, nunca forçado, para fechar o ciclo
+// antecedente → comportamento → consequência o mais perto possível do momento real.
+const EMOCOES_QUE_SUGEREM_CALMA = ['Preocupado', 'Triste', 'Zangado'];
+
+function concluirRegistoEmocao(emocao, motivo, origem){
+  registarEmocaoNoHistorico(emocao, motivo);
+  guardarEstado();
+  const texto = motivo ? `Registámos: ${emocao} — ${motivo}` : 'Registámos: ' + emocao;
+  if(EMOCOES_QUE_SUGEREM_CALMA.includes(emocao)){
+    mostrarSugestaoCalmaAposEmocao(emocao, origem);
+  } else {
+    darEstrela('Obrigado por partilhares', texto);
+  }
+}
+
+// Oferece o Modo Calma de forma gentil, sem forçar — o Eduardo pode sempre dizer
+// que está bem e seguir em frente com o reforço normal.
+function mostrarSugestaoCalmaAposEmocao(emocao, origem){
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="icone-grande" style="background:var(--salva-clara)">🌿</div>
+      <h2>Obrigado por partilhares</h2>
+      <p class="desc">Registámos que te sentes "${emocao}". Está tudo bem sentir isso.<br>Queres experimentar o Modo Calma agora?</p>
+      <button class="btn-primario" id="btn-ir-calma-emocao">🌿 Sim, vamos acalmar</button>
+      <button class="btn-secundario" id="btn-nao-calma-emocao">Não, estou bem</button>
+    </div>
+  `, origem);
+  const btnSim = document.getElementById('btn-ir-calma-emocao');
+  if(btnSim) btnSim.addEventListener('click', abrirCalma);
+  const btnNao = document.getElementById('btn-nao-calma-emocao');
+  if(btnNao) btnNao.addEventListener('click', ()=> darEstrela('Obrigado por partilhares', 'Registámos: ' + emocao));
 }
 /* ======================= SONS RELAXANTES (Web Audio API) ======================= */
 
@@ -3321,6 +4332,47 @@ let quizAcertosSeguidos = 0, quizTeveErro = false;
 // Controla a hierarquia de dicas (prompt fading) dentro da pergunta atual:
 // 0 = ainda sem tentativa; 1 = já errou uma vez nesta pergunta (opção eliminada, dá 2ª hipótese)
 let quizTentativasNaPergunta = 0;
+// Latência de resposta: marca quando a pergunta apareceu no ecrã, para medir quanto tempo
+// até à 1ª tentativa (não conta o tempo de "pensar de novo" depois de uma pista, que mede
+// outra coisa). É um indicador de hesitação/processamento, não de desempenho — por isso
+// nunca aparece por pergunta individual, só como média por matéria, e só depois de haver
+// dados suficientes (ver renderLatenciaMedia).
+let quizMarcaTempoPergunta = 0;
+// { matematica: {somaMs: 12345, n: 6}, ... } — agregado por matéria, guardado com o resto do estado
+let registoLatenciaPorMateria = {};
+// { matematica: {perguntas: 20, comPista: 4}, ... } — quantas perguntas precisaram da pista
+// (1º erro) por matéria, para acompanhar se o apoio está a esbater-se com o tempo ou a manter-se.
+let registoPistaPorMateria = {};
+
+function registarUsoPergunta(chave, precisouPista){
+  if(!registoPistaPorMateria[chave]) registoPistaPorMateria[chave] = {perguntas:0, comPista:0};
+  registoPistaPorMateria[chave].perguntas += 1;
+  if(precisouPista) registoPistaPorMateria[chave].comPista += 1;
+}
+
+// Histórico de registos do Quadro de Emoções, com data/hora e motivo (quando dado),
+// para os pais poderem ver como o Eduardo se tem sentido — não só no momento, mas ao
+// longo do tempo. Guarda só os mais recentes, para não crescer sem fim.
+const MAX_REGISTOS_EMOCOES = 60;
+let registoEmocoes = [];
+
+function registarEmocaoNoHistorico(emocao, motivo){
+  registoEmocoes.push({ emocao, motivo: motivo || null, quando: new Date().toISOString() });
+  if(registoEmocoes.length > MAX_REGISTOS_EMOCOES){
+    registoEmocoes = registoEmocoes.slice(-MAX_REGISTOS_EMOCOES);
+  }
+}
+
+function registarLatenciaResposta(chave){
+  if(!quizMarcaTempoPergunta) return;
+  const ms = Date.now() - quizMarcaTempoPergunta;
+  quizMarcaTempoPergunta = 0;
+  // Descarta valores absurdos (app em segundo plano, ecrã bloqueado) para não distorcer a média
+  if(ms < 300 || ms > 5 * 60 * 1000) return;
+  if(!registoLatenciaPorMateria[chave]) registoLatenciaPorMateria[chave] = {somaMs: 0, n: 0};
+  registoLatenciaPorMateria[chave].somaMs += ms;
+  registoLatenciaPorMateria[chave].n += 1;
+}
 
 function iniciarQuiz(chave, titulo, origem){
   quizAtual = montarQuizProgressivo(chave);
@@ -3333,6 +4385,33 @@ function iniciarQuiz(chave, titulo, origem){
   quizEmCurso = true;
   renderQuiz();
 }
+// Sugestões de generalização: uma ação concreta para o Eduardo (ou os pais, lida com ele)
+// experimentar fora da app, ligada ao que acabou de treinar. O maior desafio no autismo não
+// é aprender uma competência isolada, é transferi-la para fora do contexto onde foi treinada —
+// por isso aparece só na vitória limpa, quando ele já está confiante e regulado.
+const GENERALIZACAO_QUIZ = {
+  matematica: 'Na loja ou em casa, experimenta somar os preços de 2 coisas antes de perguntares o total.',
+  numeros: 'Repara nos números das portas ou das casas na rua — consegues ver algum padrão?',
+  portugues: 'Da próxima vez que leres um livro, tenta encontrar um verbo e um adjetivo numa frase.',
+  letras: 'Escolhe uma palavra numa embalagem ou cartaz e tenta lê-la letra a letra.',
+  geografia: 'Procura Portugal num mapa ou globo em casa e mostra onde ficam Lisboa e o Porto.',
+  ciencias: 'Da próxima vez que estiveres ao ar livre, repara no tempo — está sol, nuvens ou vento?',
+  vf: 'Experimenta inventar uma frase verdadeira e outra falsa para alguém em casa adivinhar.',
+  ingles: 'Tenta dizer "hello" e "thank you" a alguém em casa, em inglês.',
+  espanhol: 'Tenta dizer "hola" e "gracias" a alguém em casa, em espanhol.',
+};
+
+function renderCartaoGeneralizacao(chave){
+  const sugestao = GENERALIZACAO_QUIZ[chave];
+  if(!sugestao) return '';
+  return `
+    <div class="cartao-generalizacao">
+      <span class="rotulo-generalizacao">🌱 Para experimentar fora da app</span>
+      <p>${sugestao}</p>
+    </div>
+  `;
+}
+
 function renderQuiz(){
   pararNarracao();
   if(quizIndex >= quizAtual.length){
@@ -3376,6 +4455,7 @@ function renderQuiz(){
         <div class="icone-grande" style="background:var(--salva-clara)">🎉</div>
         <h2>Terminaste!</h2>
         <p class="desc">Acertaste tudo em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). Muito bem, Eduardo!</p>
+        ${renderCartaoGeneralizacao(quizChave)}
         <button class="btn-primario" id="btn-quiz-final">Receber estrela</button>
       </div>
     `, quizOrigem);
@@ -3386,18 +4466,32 @@ function renderQuiz(){
       const bancoDaMateria = quizzes[quizChave] || [];
       const proximoNivel = nivelDaSessao + 1;
       const existeProximoNivel = bancoDaMateria.some(q => q.nivel === proximoNivel);
+      const jaEstavaConsolidado = !existeProximoNivel && obterNivelAtual(quizChave) > nivelDaSessao;
       if(existeProximoNivel && obterNivelAtual(quizChave) <= nivelDaSessao){
         nivelDesbloqueado[quizChave] = proximoNivel;
         // Atualiza a etiqueta de nível na lista de origem (Escola ou Jogos), para refletir o progresso
         renderLista('lista-escola', escolaItens, abrirEscola);
         renderLista('lista-jogos', jogosItens, abrirJogo);
       }
-      darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo, nivelDaSessao === 3 ? 2 : 1);
+      // Reforço variável (thinning), só em prática de manutenção — quando a matéria já
+      // não tem nível novo para desbloquear e o Eduardo está a repetir por vontade própria,
+      // não por progressão. Nunca no 1º contacto com um nível: aí o reforço é sempre 1:1,
+      // previsível, como convém à fase de aquisição. A estrela base nunca falha; só o
+      // bónus surpresa é intermitente (~1 em cada 4), para manter o comportamento sem
+      // depender de reforço contínuo, evitando também que se torne previsível de mais.
+      const ganhouBonusSurpresa = jaEstavaConsolidado && Math.random() < 0.25;
+      const quantidadeBase = nivelDaSessao === 3 ? 2 : 1;
+      if(ganhouBonusSurpresa){
+        darEstrela('Bónus surpresa!', 'Completaste: ' + quizTitulo + ' — já dominas isto tão bem que ganhaste uma estrela extra!', quantidadeBase + 1);
+      } else {
+        darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo, quantidadeBase);
+      }
     });
     return;
   }
   const q = quizAtual[quizIndex];
   quizTentativasNaPergunta = 0; // nova pergunta: reinicia a hierarquia de dicas
+  quizMarcaTempoPergunta = Date.now(); // início da contagem de latência para esta pergunta
   const pct = Math.round((quizAcertosSeguidos/quizAtual.length)*100);
   const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
   const classesNivel = {1:'et-facil', 2:'et-medio', 3:'et-dificil'};
@@ -3433,6 +4527,11 @@ function responderQuiz(i){
   pararNarracao();
   const q = quizAtual[quizIndex];
   const feedback = document.getElementById('feedback-quiz');
+  // Só regista latência na 1ª tentativa da pergunta — depois de uma pista, o tempo
+  // seguinte mede outra coisa (releitura/correção), não hesitação inicial.
+  if(quizTentativasNaPergunta === 0){
+    registarLatenciaResposta(quizChave);
+  }
 
   if(i !== q.c){
     quizTeveErro = true;
@@ -3463,6 +4562,7 @@ function responderQuiz(i){
       feedback.style.color = 'var(--coral-suave)';
     }
     vibrar([25,80,25]);
+    registarUsoPergunta(quizChave, true);
   } else {
     document.querySelectorAll('.opcao').forEach(el=>el.style.pointerEvents='none');
     document.getElementById('op-'+q.c).classList.add('certa');
@@ -3474,6 +4574,7 @@ function responderQuiz(i){
     }
     tocarSomAcerto();
     vibrar([15,40,60]);
+    registarUsoPergunta(quizChave, quizTentativasNaPergunta > 0);
   }
   setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1400);
 }
@@ -3617,8 +4718,199 @@ const observador = new MutationObserver(()=>{
     document.getElementById('grelha-memoria').dataset.iniciado = '1';
     iniciarMemoria();
   }
+  if(document.getElementById('grelha-caracteristicas') && !document.getElementById('grelha-caracteristicas').dataset.iniciado){
+    document.getElementById('grelha-caracteristicas').dataset.iniciado = '1';
+    iniciarJogoCaracteristicas();
+  }
 });
 observador.observe(document.getElementById('conteudo-detalhe'), {childList:true, subtree:true});
+
+/* ======================= JOGO DE ATENÇÃO (múltiplas características) =======================
+   Inspirado no princípio de "Mental Synthesis" usado pela app MITA: em vez de treinar
+   conteúdo escolar, treina o processo cognitivo de segurar 2-3 características de um
+   objeto ao mesmo tempo (cor + forma + tamanho), em vez de reagir a só uma de cada vez
+   (sobresseletividade de estímulo, comum no autismo). Reaproveita o mesmo sistema de
+   níveis/progressão do resto da app (obterNivelAtual, nivelDesbloqueado, darEstrela). */
+
+const NIVEIS_CARACTERISTICAS = {
+  1: {nome:'Fácil', atributos:['cor'], rondas:5},
+  2: {nome:'Médio', atributos:['cor','forma'], rondas:6},
+  3: {nome:'Difícil', atributos:['cor','forma','tamanho'], rondas:7},
+};
+const CORES_CARACT = [
+  {chave:'azul', nome:'azul', valor:'#4A7C9E'},
+  {chave:'vermelho', nome:'vermelho', valor:'#C96B5A'},
+  {chave:'verde', nome:'verde', valor:'#4C8C6B'},
+  {chave:'amarelo', nome:'amarelo', valor:'#D9A441'},
+];
+const FORMAS_CARACT = ['circulo','quadrado','triangulo'];
+const TAMANHOS_CARACT = [
+  {chave:'grande', nome:'grande', escala:1},
+  {chave:'pequeno', nome:'pequeno', escala:0.55},
+];
+
+let caractNivelAtual = 1, caractRondaAtual = 0, caractTotalRondas = 5, caractErrouNestaRonda = false, caractTeveErro = false;
+let caractAlvoAtual = null;
+let caractTextoPedidoAtual = '';
+
+function gerarHtmlCaracteristicas(){
+  const nivel = obterNivelAtual('caracteristicas');
+  const nomeNivel = NIVEIS_CARACTERISTICAS[nivel]?.nome || 'Fácil';
+  return `
+    <div class="painel">
+      <div class="estado-jogo" id="estado-caracteristicas">Nível ${nomeNivel} — toca na forma certa</div>
+      <div class="pedido-caracteristicas" id="pedido-caracteristicas">A preparar...</div>
+      <button class="btn-pagina" id="btn-ouvir-caracteristicas" style="margin-bottom:12px;">🔊 Ouvir</button>
+      <div class="grelha-caracteristicas" id="grelha-caracteristicas"></div>
+    </div>
+  `;
+}
+
+// Gera o SVG de uma forma (círculo, quadrado ou triângulo) com a cor e escala dadas
+function svgFormaCaract(forma, corValor, escala){
+  const tamanho = Math.round(70 * escala);
+  const offset = Math.round((70 - tamanho) / 2);
+  if(forma === 'circulo'){
+    return `<svg viewBox="0 0 70 70"><circle cx="35" cy="35" r="${tamanho/2}" fill="${corValor}"/></svg>`;
+  }
+  if(forma === 'quadrado'){
+    return `<svg viewBox="0 0 70 70"><rect x="${offset}" y="${offset}" width="${tamanho}" height="${tamanho}" rx="6" fill="${corValor}"/></svg>`;
+  }
+  // triângulo
+  const meio = 35, topo = offset, base = offset + tamanho;
+  return `<svg viewBox="0 0 70 70"><polygon points="${meio},${topo} ${offset},${base} ${base},${base}" fill="${corValor}"/></svg>`;
+}
+
+function iniciarJogoCaracteristicas(){
+  caractNivelAtual = obterNivelAtual('caracteristicas');
+  const config = NIVEIS_CARACTERISTICAS[caractNivelAtual] || NIVEIS_CARACTERISTICAS[1];
+  caractTotalRondas = config.rondas;
+  caractRondaAtual = 0;
+  caractTeveErro = false;
+  proximaRondaCaracteristicas();
+}
+
+// Gera uma nova ronda: escolhe um alvo aleatório (com os atributos do nível atual) e
+// distratores que partilham pelo menos 1 atributo com o alvo, para forçar a integração
+// de todas as características em vez de bastar reconhecer 1 delas.
+function proximaRondaCaracteristicas(){
+  if(caractRondaAtual >= caractTotalRondas){
+    concluirJogoCaracteristicas();
+    return;
+  }
+  caractErrouNestaRonda = false;
+  const config = NIVEIS_CARACTERISTICAS[caractNivelAtual] || NIVEIS_CARACTERISTICAS[1];
+  const usaCor = config.atributos.includes('cor');
+  const usaForma = config.atributos.includes('forma');
+  const usaTamanho = config.atributos.includes('tamanho');
+
+  const corAlvo = CORES_CARACT[Math.floor(Math.random()*CORES_CARACT.length)];
+  const formaAlvo = usaForma ? FORMAS_CARACT[Math.floor(Math.random()*FORMAS_CARACT.length)] : 'circulo';
+  const tamanhoAlvo = usaTamanho ? TAMANHOS_CARACT[Math.floor(Math.random()*TAMANHOS_CARACT.length)] : TAMANHOS_CARACT[0];
+  caractAlvoAtual = {cor:corAlvo, forma:formaAlvo, tamanho:tamanhoAlvo};
+
+  // Monta a frase-pedido só com os atributos relevantes ao nível atual
+  const nomeForma = nomeFormaPt(formaAlvo);
+  const artigo = nomeForma === 'círculo' ? 'o' : (nomeForma === 'quadrado' ? 'o' : 'o');
+  const partesPedido = [];
+  if(usaTamanho) partesPedido.push(tamanhoAlvo.nome);
+  partesPedido.push(usaForma ? nomeForma : 'forma');
+  if(usaCor) partesPedido.push(corAlvo.nome);
+  caractTextoPedidoAtual = `Encontra ${artigo} ${partesPedido.join(' ')}`;
+  document.getElementById('pedido-caracteristicas').textContent = caractTextoPedidoAtual;
+  configurarBotaoOuvirCaracteristicas();
+
+  // Gera 5 formas ao todo: 1 alvo + 4 distratores, cada um partilhando pelo menos
+  // um atributo com o alvo (senão seria óbvio demais e não treinaria integração).
+  const formas = [caractAlvoAtual];
+  let tentativas = 0;
+  while(formas.length < 5 && tentativas < 100){
+    tentativas++;
+    const cor = usaCor ? CORES_CARACT[Math.floor(Math.random()*CORES_CARACT.length)] : corAlvo;
+    const forma = usaForma ? FORMAS_CARACT[Math.floor(Math.random()*FORMAS_CARACT.length)] : 'circulo';
+    const tamanho = usaTamanho ? TAMANHOS_CARACT[Math.floor(Math.random()*TAMANHOS_CARACT.length)] : TAMANHOS_CARACT[0];
+    const candidato = {cor, forma, tamanho};
+    const igualAoAlvo = candidato.cor.chave === caractAlvoAtual.cor.chave
+      && candidato.forma === caractAlvoAtual.forma
+      && candidato.tamanho.chave === caractAlvoAtual.tamanho.chave;
+    const duplicado = formas.some(f => f.cor.chave === candidato.cor.chave && f.forma === candidato.forma && f.tamanho.chave === candidato.tamanho.chave);
+    if(!igualAoAlvo && !duplicado) formas.push(candidato);
+  }
+  const formasEmbaralhadas = embaralhar(formas);
+  const indiceAlvo = formasEmbaralhadas.indexOf(caractAlvoAtual);
+
+  const grelha = document.getElementById('grelha-caracteristicas');
+  grelha.innerHTML = formasEmbaralhadas.map((f,i)=>`
+    <div class="forma-caract" id="forma-caract-${i}" onclick="responderCaracteristicas(${i}, ${i===indiceAlvo})">
+      ${svgFormaCaract(f.forma, f.cor.valor, f.tamanho.escala)}
+    </div>
+  `).join('');
+}
+
+// Liga (ou volta a ligar, a cada nova ronda) o botão que lê o pedido em voz alta —
+// mesmo padrão de toggle usado no quiz (narrar / pararNarracao / vozAtiva).
+function configurarBotaoOuvirCaracteristicas(){
+  const btnOuvir = document.getElementById('btn-ouvir-caracteristicas');
+  if(!btnOuvir) return;
+  pararNarracao();
+  btnOuvir.textContent = '🔊 Ouvir';
+  btnOuvir.onclick = () => {
+    if(vozAtiva){
+      pararNarracao();
+      btnOuvir.textContent = '🔊 Ouvir';
+    } else {
+      btnOuvir.textContent = '⏸ A ouvir...';
+      narrar(caractTextoPedidoAtual, ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
+    }
+  };
+}
+
+function nomeFormaPt(forma){
+  if(forma === 'circulo') return 'círculo';
+  if(forma === 'quadrado') return 'quadrado';
+  return 'triângulo';
+}
+
+function responderCaracteristicas(i, correto){
+  document.querySelectorAll('.forma-caract').forEach(el => el.style.pointerEvents = 'none');
+  const el = document.getElementById('forma-caract-'+i);
+  if(correto){
+    el.classList.add('certa');
+    tocarSomAcerto();
+    vibrar([15,40,60]);
+  } else {
+    el.classList.add('errada');
+    caractErrouNestaRonda = true;
+    caractTeveErro = true;
+    tocarSomErro();
+    vibrar([25,80,25]);
+    // Não revela a resposta certa de imediato — prompt fading: dá 2ª hipótese
+    // eliminando só a opção errada, tal como no quiz.
+    setTimeout(()=>{
+      document.querySelectorAll('.forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
+    }, 400);
+    return;
+  }
+  caractRondaAtual++;
+  setTimeout(proximaRondaCaracteristicas, 900);
+}
+
+function concluirJogoCaracteristicas(){
+  const proximoNivel = caractNivelAtual + 1;
+  const existeProximoNivel = !!NIVEIS_CARACTERISTICAS[proximoNivel];
+  // Só sobe de nível se completou sem qualquer erro, tal como nos outros jogos/quizzes da app
+  if(!caractTeveErro && existeProximoNivel && obterNivelAtual('caracteristicas') <= caractNivelAtual){
+    nivelDesbloqueado['caracteristicas'] = proximoNivel;
+    guardarEstado();
+    renderLista('lista-jogos', jogosItens, abrirJogo);
+  }
+  const nomeNivel = NIVEIS_CARACTERISTICAS[caractNivelAtual]?.nome || 'Fácil';
+  darEstrela(
+    caractTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
+    'Completaste o Jogo de Atenção — nível ' + nomeNivel,
+    (!caractTeveErro && caractNivelAtual === 3) ? 2 : 1
+  );
+}
 
 /* ======================= CONQUISTAS ======================= */
 function renderConquistas(){
@@ -4008,6 +5300,8 @@ function abrirCalma(){
   const indiceAgora = calcularIndiceAgora();
   const nomeBloco = indiceAgora !== -1 ? rotinaHoje[indiceAgora].t : 'Sem tarefa associada';
   registoCalmaPorBloco[nomeBloco] = (registoCalmaPorBloco[nomeBloco] || 0) + 1;
+  const periodo = periodoCalmaAtual();
+  registoCalmaPorHora[periodo] = (registoCalmaPorHora[periodo] || 0) + 1;
   guardarEstado();
   verificarMedalhas();
   // Sempre que abre, mostra o passo de respirar primeiro (caso tenha ficado no passo "pos" de uma vez anterior)
@@ -4034,6 +5328,12 @@ function fecharCalma(resultado){
     guardarEstado();
   }
   document.getElementById('overlay-calma').classList.remove('mostrar');
+  // Reforço diferencial: pedir ajuda a um adulto é o comportamento alternativo que
+  // queremos que substitua desistir ou ter um comportamento mais difícil — por isso
+  // ganha reforço próprio aqui, distinto do reforço por tarefa concluída.
+  if(resultado === 'ajuda'){
+    setTimeout(()=> darEstrela('Boa escolha!', 'Pedir ajuda a um adulto foi a decisão certa.'), 300);
+  }
 }
 
 // Toque longo no avatar (± 600ms) abre o Modo Calma diretamente,
@@ -4108,6 +5408,7 @@ function abrirConfig(){
 const NOMES_MATERIA_PARENTAL = {
   matematica: 'Matemática', portugues: 'Português', geografia: 'Estudo do Meio',
   ciencias: 'Ciências', letras: 'Ordenar Letras', numeros: 'Sequências Numéricas', vf: 'Verdadeiro ou Falso',
+  ingles: 'Inglês', espanhol: 'Espanhol',
 };
 const NOMES_NIVEL_PARENTAL = {1:'Fácil', 2:'Médio', 3:'Difícil'};
 
@@ -4131,9 +5432,101 @@ function renderEvolucaoParental(){
   renderResumoParental();
   renderGraficoTarefasSemana();
   renderNivelPorMateria();
+  renderLatenciaMedia();
+  renderPistaPorMateria();
+  renderRegistoEmocoes();
   renderCalmaContexto();
+  renderCalmaPorHora();
   renderPosCalma();
   renderDicasParaPais();
+}
+
+// Mostra o tempo médio até à 1ª resposta, por matéria — em segundos, arredondado, nunca
+// por pergunta individual. Só aparece a partir de 3 registos numa matéria, pelo mesmo
+// motivo dos outros cartões: um valor isolado não é um padrão. Ordenado do mais lento
+// para o mais rápido, para destacar onde o Eduardo tende a demorar mais a processar.
+function renderLatenciaMedia(){
+  const cartao = document.getElementById('cartao-latencia');
+  const cont = document.getElementById('lista-latencia');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoLatenciaPorMateria).filter(([,r]) => r.n >= 3);
+  if(entradas.length === 0){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => (b[1].somaMs/b[1].n) - (a[1].somaMs/a[1].n));
+  cont.innerHTML = entradas.map(([chave, r]) => {
+    const nome = NOMES_MATERIA_PARENTAL[chave] || chave;
+    const segundos = Math.round(r.somaMs / r.n / 1000);
+    return `
+      <div class="linha-nivel-materia">
+        <span class="nome-materia">${nome}</span>
+        <span class="etiqueta et-medio">~${segundos}s</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// Mostra a percentagem de perguntas que precisaram da pista (2ª hipótese após erro), por
+// matéria — mesmo limiar (n≥3) e mesma lógica de ordenação de renderLatenciaMedia, para dar
+// aos pais um sinal de esbatimento de apoio: se a percentagem descer com o tempo, o Eduardo
+// está a precisar cada vez menos do prompt para chegar à resposta certa.
+function renderPistaPorMateria(){
+  const cartao = document.getElementById('cartao-pista');
+  const cont = document.getElementById('lista-pista');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoPistaPorMateria).filter(([,r]) => r.perguntas >= 3);
+  if(entradas.length === 0){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => (b[1].comPista/b[1].perguntas) - (a[1].comPista/a[1].perguntas));
+  cont.innerHTML = entradas.map(([chave, r]) => {
+    const nome = NOMES_MATERIA_PARENTAL[chave] || chave;
+    const pct = Math.round(100 * r.comPista / r.perguntas);
+    return `
+      <div class="linha-nivel-materia">
+        <span class="nome-materia">${nome}</span>
+        <span class="etiqueta et-medio">${pct}%</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// Emojis correspondentes a cada emoção registada, para leitura rápida pelos pais.
+const EMOJI_POR_EMOCAO = {
+  'Feliz':'😊', 'Calmo':'😌', 'Normal':'😐', 'Preocupado':'😟', 'Triste':'😢', 'Zangado':'😠'
+};
+
+// Mostra os registos mais recentes do Quadro de Emoções, do mais novo para o mais antigo,
+// incluindo o motivo quando o Eduardo o indicou. Ao contrário dos outros cartões parentais
+// (que só mostram agregados), este mostra eventos individuais — por isso aparece a partir
+// de 1 único registo, não de um limiar de 3: mesmo um só registo já é informação útil aos
+// pais sobre como ele se sentiu naquele momento.
+function renderRegistoEmocoes(){
+  const cartao = document.getElementById('cartao-emocoes');
+  const cont = document.getElementById('lista-emocoes');
+  if(!cartao || !cont) return;
+  if(registoEmocoes.length === 0){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  const recentes = registoEmocoes.slice(-15).reverse();
+  cont.innerHTML = recentes.map(r => {
+    const data = new Date(r.quando);
+    const dataFmt = data.toLocaleDateString('pt-PT', {day:'2-digit', month:'2-digit'});
+    const horaFmt = data.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+    const emoji = EMOJI_POR_EMOCAO[r.emocao] || '❔';
+    return `
+      <div class="linha-nivel-materia">
+        <span class="nome-materia">${emoji} ${r.emocao}${r.motivo ? ' — ' + r.motivo : ''}</span>
+        <span class="etiqueta et-medio">${dataFmt} ${horaFmt}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 // Mostra, de forma simples e não alarmista, com que tarefas da rotina o modo Calma
@@ -4154,6 +5547,29 @@ function renderCalmaContexto(){
   cont.innerHTML = entradas.map(([nomeBloco, n]) => `
     <div class="linha-nivel-materia">
       <span class="nome-materia">${nomeBloco}</span>
+      <span class="etiqueta et-medio">${n}×</span>
+    </div>
+  `).join('');
+}
+
+// Mostra em que período do dia o Modo Calma costuma ser aberto (ver PERIODOS_CALMA).
+// Só aparece a partir de 3 registos, pelo mesmo motivo do cartão por bloco: um padrão
+// de horário só é útil aos pais se houver alguma repetição por trás.
+function renderCalmaPorHora(){
+  const cartao = document.getElementById('cartao-calma-hora');
+  const cont = document.getElementById('lista-calma-hora');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoCalmaPorHora).filter(([,n]) => n > 0);
+  const total = entradas.reduce((soma,[,n]) => soma + n, 0);
+  if(total < 3){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => b[1] - a[1]);
+  cont.innerHTML = entradas.map(([periodo, n]) => `
+    <div class="linha-nivel-materia">
+      <span class="nome-materia">${PERIODOS_CALMA[periodo] ? PERIODOS_CALMA[periodo].lbl : periodo}</span>
       <span class="etiqueta et-medio">${n}×</span>
     </div>
   `).join('');
@@ -4263,6 +5679,10 @@ function renderDicasParaPais(){
 // Monta um resumo dos dados de utilização reais (sem dados de identificação),
 // já reunidos noutras partes da app, para a IA basear a dica em factos concretos
 // em vez de conselhos genéricos.
+// Guarda a última dica de IA gerada para os pais, junto com a data, para evitar
+// chamadas repetidas à API no mesmo dia (ver gerarDicaParaPaisIA).
+const CHAVE_CACHE_DICA_IA = 'mundoDoEduardo_cacheDicaIA_v1';
+
 function montarResumoUtilizacaoParaIA(){
   const ultimos7 = obterUltimosDias(7);
   const mediaConclusao = ultimos7.length
@@ -4276,6 +5696,28 @@ function montarResumoUtilizacaoParaIA(){
   const calmaTexto = calmaEntradas.length
     ? calmaEntradas.map(([bloco,n]) => `"${bloco}" (${n}x)`).join(', ')
     : 'sem registos suficientes ainda';
+  // Consequência do ciclo ABC: depois de usar o Modo Calma, o Eduardo voltou sozinho à tarefa
+  // ou pediu ajuda? Só entra no resumo com pelo menos 2 respostas registadas (mesmo limiar
+  // usado no cartão "cartao-pos-calma" da área parental), para não sugerir um padrão a partir
+  // de 1 caso isolado.
+  const posCalmaEntradas = Object.entries(registoPosCalma);
+  const posCalmaTotal = posCalmaEntradas.reduce((soma,[,r]) => soma + r.voltou + r.ajuda, 0);
+  const posCalmaTexto = posCalmaTotal >= 2
+    ? posCalmaEntradas
+        .filter(([,r]) => r.voltou + r.ajuda > 0)
+        .sort((a,b)=> (b[1].voltou+b[1].ajuda) - (a[1].voltou+a[1].ajuda))
+        .map(([bloco,r]) => `"${bloco}": voltou sozinho ${r.voltou}x, pediu ajuda ${r.ajuda}x`)
+        .join('; ')
+    : 'sem registos suficientes ainda';
+  // Mesmo limiar (3) do cartão "cartao-calma-hora" da área parental.
+  const horaEntradas = Object.entries(registoCalmaPorHora).filter(([,n]) => n > 0);
+  const horaTotal = horaEntradas.reduce((soma,[,n]) => soma + n, 0);
+  const horaTexto = horaTotal >= 3
+    ? horaEntradas
+        .sort((a,b)=> b[1]-a[1])
+        .map(([periodo,n]) => `${PERIODOS_CALMA[periodo] ? PERIODOS_CALMA[periodo].lbl : periodo} (${n}x)`)
+        .join(', ')
+    : 'sem registos suficientes ainda';
   const partes = [
     `Streak atual de dias com a rotina 100% completa: ${streakDias} (melhor sequência de sempre: ${recordeStreakDias}).`,
     `Últimos 7 dias: rotina concluída em média ${mediaConclusao}%, com ${diasCompletos} dia(s) completo(s).`,
@@ -4283,6 +5725,8 @@ function montarResumoUtilizacaoParaIA(){
     `Nível atual por matéria: ${niveis}.`,
     `Sessões terminadas até ao fim mesmo com erros (persistência): ${contadorQuizzesConcluidos}.`,
     `Modo Calma usado ${contadorUsosCalma} vez(es) ao todo; momentos mais associados: ${calmaTexto}.`,
+    `Modo Calma por altura do dia: ${horaTexto}.`,
+    `Depois do Modo Calma, o que aconteceu a seguir por bloco: ${posCalmaTexto}.`,
   ];
   const contextoEduardo = obterContextoQuestionarioEduardo();
   if(contextoEduardo) partes.push(`Contexto sobre o Eduardo: ${contextoEduardo}`);
@@ -4338,11 +5782,22 @@ async function gerarDicaComClaude(prompt){
   return texto;
 }
 
-async function gerarDicaParaPaisIA(){
+async function gerarDicaParaPaisIA(forcarNova){
   const btn = document.getElementById('btn-gerar-dica-ia');
   const msg = document.getElementById('msg-dica-ia');
   const resultado = document.getElementById('resultado-dica-ia');
   const fornecedor = document.getElementById('dica-ia-fornecedor').value;
+
+  // Evita gastar chamadas de API sem necessidade: os dados de utilização não mudam
+  // de um minuto para o outro, por isso reaproveita a dica já gerada hoje, a não ser
+  // que o próprio pai/cuidador peça explicitamente uma nova.
+  if(!forcarNova){
+    const cache = obterCacheDicaIA();
+    if(cache && cache.data === dataHojeChave()){
+      mostrarDicaIA(cache.texto, true);
+      return;
+    }
+  }
 
   msg.textContent = '';
   resultado.style.display = 'none';
@@ -4360,13 +5815,40 @@ async function gerarDicaParaPaisIA(){
     } else {
       texto = await gerarDicaComClaude(prompt);
     }
-    resultado.style.display = 'block';
-    resultado.innerHTML = `<div class="cartao-dica"><strong>✨ Dica com base na evolução do Eduardo</strong>${texto}</div>`;
+    guardarCacheDicaIA(texto);
+    mostrarDicaIA(texto, false);
   }catch(e){
     msg.textContent = mensagemErroDeRede(e, fornecedor);
   }finally{
     btn.disabled = false;
     btn.textContent = '✨ Gerar dica sobre a evolução do Eduardo';
+  }
+}
+
+// Guarda a última dica gerada, junto com a data, dentro do mesmo objeto de estado
+// (não precisa de chave própria no backup — viaja com o resto do estado).
+function guardarCacheDicaIA(texto){
+  try{
+    localStorage.setItem(CHAVE_CACHE_DICA_IA, JSON.stringify({ texto, data: dataHojeChave() }));
+  }catch(e){ /* sem acesso ao localStorage: a dica só fica visível nesta sessão */ }
+}
+function obterCacheDicaIA(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_CACHE_DICA_IA);
+    return bruto ? JSON.parse(bruto) : null;
+  }catch(e){ return null; }
+}
+function mostrarDicaIA(texto, veioDaCache){
+  const msg = document.getElementById('msg-dica-ia');
+  const resultado = document.getElementById('resultado-dica-ia');
+  resultado.style.display = 'block';
+  resultado.innerHTML = `<div class="cartao-dica"><strong>✨ Dica com base na evolução do Eduardo</strong>${texto}</div>`;
+  msg.innerHTML = veioDaCache
+    ? `Esta é a dica de hoje. <a href="#" id="link-gerar-dica-nova" style="color:var(--petroleo);">Gerar uma nova mesmo assim</a>`
+    : '';
+  if(veioDaCache){
+    const link = document.getElementById('link-gerar-dica-nova');
+    if(link) link.addEventListener('click', (e)=>{ e.preventDefault(); gerarDicaParaPaisIA(true); });
   }
 }
 
@@ -4906,6 +6388,420 @@ function carregarBancoPerguntasPersonalizado(){
   }catch(e){ /* banco guardado inválido: mantém o banco padrão do código */ }
 }
 
+// Persistência das histórias sociais (inclui as geradas por IA e já aprovadas),
+// separada da rotina, para sobreviver a fechar a app — mesmo padrão do banco de perguntas.
+const CHAVE_HISTORIAS_SOCIAIS = 'mundoDoEduardo_historiasSociais_v1';
+function guardarHistoriasSociais(){
+  try{
+    localStorage.setItem(CHAVE_HISTORIAS_SOCIAIS, JSON.stringify(historiasSociais));
+  }catch(e){ /* sem espaço ou acesso: histórias ficam só em memória nesta sessão */ }
+}
+function carregarHistoriasSociais(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_HISTORIAS_SOCIAIS);
+    if(!bruto) return;
+    const guardado = JSON.parse(bruto);
+    if(Array.isArray(guardado) && guardado.length > 0) historiasSociais = guardado;
+  }catch(e){ /* guardado inválido: mantém o exemplo padrão do código */ }
+}
+
+/* ======================= GERADOR DE HISTÓRIAS SOCIAIS COM IA (área do administrador) ======================= */
+// Reutiliza gerarDicaComGemini/gerarDicaComClaude (texto livre) e extrairJsonDeTexto (já
+// usada no gerador de perguntas) — não duplica nenhuma chamada de API nova.
+function construirPromptHistoriaSocial(situacao, quantidade, contextoEduardo){
+  const contexto = contextoEduardo ? ` Contexto sobre a criança: ${contextoEduardo}` : '';
+  return `Escreve uma história social curta, em português de Portugal, para preparar uma criança autista de 13 anos ` +
+    `para esta situação: "${situacao}".${contexto} ` +
+    `Segue os princípios de histórias sociais (Carol Gray): frases descritivas e curtas, tom calmo, sem alarmismo, ` +
+    `linguagem literal e concreta (evita expressões figuradas), 1ª pessoa ("eu"), foco no que vai acontecer e no que ` +
+    `a criança pode fazer, sem juízos de valor. Exatamente ${quantidade} páginas. ` +
+    `Devolve APENAS um array JSON, sem texto antes ou depois, neste formato: ` +
+    `[{"emoji":"🚌","texto":"Frase curta e concreta desta página."}]. Um emoji relevante por página.`;
+}
+
+let historiaGeradaIA = null; // { situacao, paginas: [...] } — pendente de revisão, ainda não aprovada
+
+async function gerarHistoriaSocialIA(){
+  const btn = document.getElementById('btn-gerar-historia');
+  const msg = document.getElementById('msg-historia');
+  const cont = document.getElementById('revisao-historia');
+  const btnAdicionar = document.getElementById('btn-adicionar-historia');
+  const situacao = document.getElementById('historia-situacao').value.trim();
+  const quantidade = Math.min(8, Math.max(3, parseInt(document.getElementById('historia-quantidade').value, 10) || 5));
+  const fornecedor = document.getElementById('ia-fornecedor').value; // mesmo seletor do gerador de perguntas
+
+  if(!situacao){
+    msg.textContent = 'Descreve primeiro a situação que queres explicar.';
+    return;
+  }
+  const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
+  if(fornecedor === 'gemini' && !chaveGemini){
+    msg.textContent = 'Cola primeiro a tua chave da API Gemini, na secção acima.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'A escrever...';
+  cont.innerHTML = '';
+  btnAdicionar.style.display = 'none';
+  msg.textContent = '';
+
+  try{
+    const contextoEduardo = obterContextoQuestionarioEduardo();
+    const prompt = construirPromptHistoriaSocial(situacao, quantidade, contextoEduardo);
+    const texto = (fornecedor === 'gemini')
+      ? await gerarDicaComGemini(chaveGemini, prompt)
+      : await gerarDicaComClaude(prompt);
+    const paginas = extrairJsonDeTexto(texto)
+      .filter(p => p && typeof p.texto === 'string' && p.texto.trim())
+      .map(p => ({ emoji: (p.emoji || '📖').trim(), texto: p.texto.trim() }));
+    if(paginas.length === 0){
+      throw new Error('Não foi possível interpretar nenhuma página válida na resposta.');
+    }
+    historiaGeradaIA = { situacao, paginas };
+    renderRevisaoHistoria();
+    btnAdicionar.style.display = 'block';
+    msg.textContent = `${paginas.length} página(s) geradas. Revê, edita se quiseres, e aprova antes de mostrar ao Eduardo.`;
+  }catch(erro){
+    msg.textContent = mensagemErroDeRede(erro, fornecedor);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '✨ Gerar história social';
+  }
+}
+
+// Mesmo padrão do ecrã de revisão de perguntas (renderRevisaoIA): textarea editável por
+// página, com opção de descartar cada uma antes de aprovar o conjunto todo.
+function renderRevisaoHistoria(){
+  const cont = document.getElementById('revisao-historia');
+  if(!historiaGeradaIA){ cont.innerHTML = ''; return; }
+  cont.innerHTML = historiaGeradaIA.paginas.map((p, i) => `
+    <div class="bloco-pergunta-ia" data-indice-historia="${i}">
+      <input type="text" value="${p.emoji.replace(/"/g,'&quot;')}" maxlength="4" style="width:50px;text-align:center;font-size:20px;margin-bottom:6px;" data-campo-historia="emoji">
+      <textarea class="p-enunciado" rows="2" data-campo-historia="texto">${p.texto}</textarea>
+      <button class="p-descartar" data-descartar-historia="${i}">✕ Descartar esta página</button>
+    </div>
+  `).join('');
+  cont.querySelectorAll('[data-descartar-historia]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-descartar-historia'), 10);
+      historiaGeradaIA.paginas.splice(idx, 1);
+      renderRevisaoHistoria();
+      if(historiaGeradaIA.paginas.length === 0){
+        document.getElementById('btn-adicionar-historia').style.display = 'none';
+      }
+    });
+  });
+}
+
+function sincronizarRevisaoHistoria(){
+  if(!historiaGeradaIA) return;
+  document.querySelectorAll('#revisao-historia .bloco-pergunta-ia').forEach(bloco => {
+    const idx = parseInt(bloco.getAttribute('data-indice-historia'), 10);
+    if(!historiaGeradaIA.paginas[idx]) return;
+    historiaGeradaIA.paginas[idx].emoji = bloco.querySelector('[data-campo-historia="emoji"]').value.trim() || '📖';
+    historiaGeradaIA.paginas[idx].texto = bloco.querySelector('[data-campo-historia="texto"]').value.trim();
+  });
+}
+
+// Só depois deste passo é que a história fica visível na lista de Atividades do Eduardo.
+function adicionarHistoriaSocialAoBanco(){
+  sincronizarRevisaoHistoria();
+  const msg = document.getElementById('msg-historia');
+  if(!historiaGeradaIA || historiaGeradaIA.paginas.length === 0 || historiaGeradaIA.paginas.some(p => !p.texto)){
+    msg.textContent = 'Revê as páginas — há campos vazios ou não há páginas para adicionar.';
+    return;
+  }
+  historiasSociais.push({
+    icone: historiaGeradaIA.paginas[0].emoji,
+    cor: '#EAF0FB',
+    t: historiaGeradaIA.situacao,
+    d: 'História social',
+    tipo: 'historia',
+    paginas: historiaGeradaIA.paginas,
+  });
+  guardarHistoriasSociais();
+  renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
+  historiaGeradaIA = null;
+  document.getElementById('revisao-historia').innerHTML = '';
+  document.getElementById('btn-adicionar-historia').style.display = 'none';
+  document.getElementById('historia-situacao').value = '';
+  vibrar([40,60,40]);
+  msg.textContent = '✓ História adicionada às Atividades do Eduardo.';
+}
+
+/* ======================= PLANO: frase única → CAA + rotina + história (área do administrador) =======================
+   Gera, num único pedido de IA, três sugestões ligadas ao mesmo objetivo funcional:
+   1) pictogramas a destacar/adicionar no Quadro CAA
+   2) um bloco de rotina (hora + tarefa)
+   3) uma história social curta (mesmo formato das páginas já usadas em historiasSociais)
+   Cada peça é revista e aprovada SEPARADAMENTE — o pai/terapeuta pode aceitar só a rotina
+   e descartar a história, por exemplo. Nada chega ao Eduardo sem aprovação explícita. */
+
+let planoGerado = null; // { objetivo, caa: [...], rotina: {...}|null, historia: {...}|null }
+const decisoesPlano = { caa: true, rotina: true, historia: true }; // true = aceite, false = descartado
+
+function construirPromptPlano(objetivo, contextoEduardo){
+  const contexto = contextoEduardo ? ` Contexto sobre a criança: ${contextoEduardo}` : '';
+  return `Um pai/cuidador de uma criança autista de 13 anos com dificuldade de aprendizagem descreveu este ` +
+    `objetivo: "${objetivo}".${contexto} ` +
+    `Sugere três coisas relacionadas com este objetivo, em português de Portugal, linguagem simples e literal: ` +
+    `1) Até 6 pictogramas de comunicação (CAA) úteis para este objetivo — palavras curtas e concretas (ex: "quero", "mais", "ajuda"), cada um com um emoji representativo. ` +
+    `2) UM bloco de rotina diária relacionado (uma hora sugerida no formato HH:MM, um emoji, um título curto, e uma descrição de uma frase). ` +
+    `3) Uma história social curta (Carol Gray: frases descritivas, tom calmo, 1ª pessoa, literal, sem alarmismo) com exatamente 4 páginas sobre esta situação, cada página com emoji e frase curta. ` +
+    `Devolve APENAS um objeto JSON, sem texto antes ou depois, neste formato exato: ` +
+    `{"caa":[{"icone":"🙋","texto":"quero"}],"rotina":{"hora":"12:30","icone":"🍽️","titulo":"Hora de almoço","descricao":"Descrição curta"},"historia":{"titulo":"Título curto","paginas":[{"emoji":"🍽️","texto":"Frase curta desta página."}]}}`;
+}
+
+async function gerarPlanoIA(){
+  const btn = document.getElementById('btn-gerar-plano');
+  const msg = document.getElementById('msg-plano');
+  const cont = document.getElementById('revisao-plano');
+  const objetivo = document.getElementById('plano-objetivo').value.trim();
+  const fornecedor = document.getElementById('ia-fornecedor').value;
+
+  if(!objetivo){
+    msg.textContent = 'Descreve primeiro o objetivo para este Plano.';
+    return;
+  }
+  const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
+  if(fornecedor === 'gemini' && !chaveGemini){
+    msg.textContent = 'Cola primeiro a tua chave da API Gemini, na secção acima.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'A preparar o Plano...';
+  cont.innerHTML = '';
+  msg.textContent = '';
+
+  try{
+    const contextoEduardo = obterContextoQuestionarioEduardo();
+    const prompt = construirPromptPlano(objetivo, contextoEduardo);
+    const texto = (fornecedor === 'gemini')
+      ? await gerarDicaComGemini(chaveGemini, prompt)
+      : await gerarDicaComClaude(prompt);
+    const resultado = extrairObjetoJsonDeTexto(texto);
+    if(!resultado) throw new Error('Não foi possível interpretar a resposta da IA.');
+
+    const caa = Array.isArray(resultado.caa)
+      ? resultado.caa.filter(p => p && p.texto).map(p => ({icone: (p.icone||'⭐').trim(), texto: String(p.texto).trim()})).slice(0,6)
+      : [];
+    const rotina = (resultado.rotina && resultado.rotina.titulo)
+      ? {
+          hora: /^\d{2}:\d{2}$/.test(resultado.rotina.hora) ? resultado.rotina.hora : '12:00',
+          icone: (resultado.rotina.icone || '⭐').trim(),
+          titulo: String(resultado.rotina.titulo).trim(),
+          descricao: String(resultado.rotina.descricao || '').trim(),
+        }
+      : null;
+    const historia = (resultado.historia && Array.isArray(resultado.historia.paginas) && resultado.historia.paginas.length > 0)
+      ? {
+          titulo: String(resultado.historia.titulo || objetivo).trim(),
+          paginas: resultado.historia.paginas
+            .filter(p => p && p.texto)
+            .map(p => ({emoji: (p.emoji||'📖').trim(), texto: String(p.texto).trim()})),
+        }
+      : null;
+
+    if(caa.length === 0 && !rotina && !historia){
+      throw new Error('A resposta não trouxe nenhuma sugestão válida.');
+    }
+
+    planoGerado = { objetivo, caa, rotina, historia };
+    decisoesPlano.caa = true; decisoesPlano.rotina = true; decisoesPlano.historia = true;
+    renderRevisaoPlano();
+    msg.textContent = 'Revê cada parte abaixo. Podes aceitar ou descartar cada uma à parte.';
+  }catch(erro){
+    msg.textContent = mensagemErroDeRede(erro, fornecedor);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '✨ Gerar sugestões do Plano';
+  }
+}
+
+// Extrai um objeto JSON (não array) de um texto livre devolvido pela IA — mesmo espírito
+// de extrairJsonDeTexto, mas para {} em vez de [].
+function extrairObjetoJsonDeTexto(texto){
+  try{
+    const inicio = texto.indexOf('{');
+    const fim = texto.lastIndexOf('}');
+    if(inicio === -1 || fim === -1 || fim <= inicio) return null;
+    return JSON.parse(texto.slice(inicio, fim+1));
+  }catch(e){
+    return null;
+  }
+}
+
+function renderRevisaoPlano(){
+  const cont = document.getElementById('revisao-plano');
+  if(!planoGerado){ cont.innerHTML = ''; return; }
+  const { caa, rotina, historia } = planoGerado;
+
+  let html = '';
+
+  if(caa.length > 0){
+    html += `
+      <div class="cartao-plano ${decisoesPlano.caa ? '' : 'descartado'}" data-parte="caa">
+        <div class="cp-titulo">💬 Pictogramas sugeridos para o Quadro CAA</div>
+        <div class="cp-linha-caa">
+          ${caa.map(p => `<div class="cp-peca-caa"><span class="pc-icone">${p.icone}</span><span class="pc-texto">${p.texto}</span></div>`).join('')}
+        </div>
+        <div class="cp-acoes">
+          <button class="btn-secundario" data-toggle-parte="caa">${decisoesPlano.caa ? '✕ Descartar' : '↺ Reativar'}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if(rotina){
+    html += `
+      <div class="cartao-plano ${decisoesPlano.rotina ? '' : 'descartado'}" data-parte="rotina">
+        <div class="cp-titulo">📅 Bloco de rotina sugerido</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" value="${rotina.hora}" data-campo-plano="hora" style="width:64px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;text-align:center;">
+          <input type="text" value="${rotina.icone}" data-campo-plano="icone" style="width:44px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:16px;text-align:center;">
+          <input type="text" value="${rotina.titulo.replace(/"/g,'&quot;')}" data-campo-plano="titulo" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;">
+        </div>
+        <textarea rows="2" data-campo-plano="descricao" style="margin-top:8px;width:100%;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;resize:vertical;">${rotina.descricao}</textarea>
+        <div class="cp-acoes">
+          <button class="btn-secundario" data-toggle-parte="rotina">${decisoesPlano.rotina ? '✕ Descartar' : '↺ Reativar'}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if(historia){
+    html += `
+      <div class="cartao-plano ${decisoesPlano.historia ? '' : 'descartado'}" data-parte="historia">
+        <div class="cp-titulo">📖 História social sugerida: "${historia.titulo}"</div>
+        ${historia.paginas.map((p,i) => `<p style="font-size:12.5px;color:var(--texto-suave);margin:4px 0;">${p.emoji} ${p.texto}</p>`).join('')}
+        <div class="cp-acoes">
+          <button class="btn-secundario" data-toggle-parte="historia">${decisoesPlano.historia ? '✕ Descartar' : '↺ Reativar'}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `<button class="btn-primario" id="btn-aplicar-plano" style="margin-top:14px;">✓ Aplicar as partes aceites</button>`;
+  cont.innerHTML = html;
+
+  cont.querySelectorAll('[data-toggle-parte]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const parte = btn.dataset.toggleParte;
+      decisoesPlano[parte] = !decisoesPlano[parte];
+      renderRevisaoPlano();
+    });
+  });
+  const btnAplicar = document.getElementById('btn-aplicar-plano');
+  if(btnAplicar) btnAplicar.addEventListener('click', aplicarPlanoAceite);
+}
+
+// Lê os campos editáveis do bloco de rotina (se ainda estiver visível/aceite) antes de aplicar,
+// para respeitar quaisquer edições manuais feitas na revisão.
+function sincronizarCamposRotinaPlano(){
+  if(!planoGerado || !planoGerado.rotina) return;
+  const bloco = document.querySelector('.cartao-plano[data-parte="rotina"]');
+  if(!bloco) return;
+  planoGerado.rotina.hora = bloco.querySelector('[data-campo-plano="hora"]').value.trim() || '12:00';
+  planoGerado.rotina.icone = bloco.querySelector('[data-campo-plano="icone"]').value.trim() || '⭐';
+  planoGerado.rotina.titulo = bloco.querySelector('[data-campo-plano="titulo"]').value.trim();
+  planoGerado.rotina.descricao = bloco.querySelector('[data-campo-plano="descricao"]').value.trim();
+}
+
+// Aplica só as partes ainda marcadas como aceites: adiciona os pictogramas a uma categoria
+// "Do meu Plano" no Quadro CAA, acrescenta o bloco à rotina, e/ou adiciona a história às Atividades.
+function aplicarPlanoAceite(){
+  if(!planoGerado) return;
+  sincronizarCamposRotinaPlano();
+  const msg = document.getElementById('msg-plano');
+  let aplicadas = [];
+
+  if(decisoesPlano.caa && planoGerado.caa.length > 0){
+    let categoriaPlano = categoriasCaa.find(c => c.id === 'plano');
+    if(!categoriaPlano){
+      categoriaPlano = { id:'plano', nome:'🧭 Do meu Plano', pecas: [] };
+      categoriasCaa.push(categoriaPlano);
+    }
+    planoGerado.caa.forEach(p => categoriaPlano.pecas.push({icone: p.icone, texto: p.texto}));
+    guardarCategoriasCaaPersonalizadas();
+    aplicadas.push('pictogramas adicionados ao Quadro CAA (categoria "Do meu Plano")');
+  }
+
+  if(decisoesPlano.rotina && planoGerado.rotina && planoGerado.rotina.titulo){
+    rotinaHoje.push({
+      hora: planoGerado.rotina.hora,
+      icone: planoGerado.rotina.icone,
+      t: planoGerado.rotina.titulo,
+      d: planoGerado.rotina.descricao,
+      feito: false,
+    });
+    rotinaHoje.sort((a,b)=> a.hora.localeCompare(b.hora));
+    guardarEstado();
+    guardarRotinaPersonalizada();
+    renderRotina();
+    aplicadas.push('bloco adicionado à rotina de hoje');
+  }
+
+  if(decisoesPlano.historia && planoGerado.historia && planoGerado.historia.paginas.length > 0){
+    historiasSociais.push({
+      icone: planoGerado.historia.paginas[0].emoji,
+      cor: '#EAF0FB',
+      t: planoGerado.historia.titulo,
+      d: 'História social — do Plano',
+      tipo: 'historia',
+      paginas: planoGerado.historia.paginas,
+    });
+    guardarHistoriasSociais();
+    renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
+    aplicadas.push('história social adicionada às Atividades');
+  }
+
+  if(aplicadas.length === 0){
+    msg.textContent = 'Nenhuma parte estava aceite — nada foi aplicado.';
+    return;
+  }
+  vibrar([40,60,40]);
+  msg.textContent = '✓ Aplicado: ' + aplicadas.join(', ') + '.';
+  planoGerado = null;
+  document.getElementById('revisao-plano').innerHTML = '';
+  document.getElementById('plano-objetivo').value = '';
+}
+
+const CHAVE_CAA_PERSONALIZADO = 'mundoDoEduardo_caaPersonalizado_v1';
+function guardarCategoriasCaaPersonalizadas(){
+  try{
+    const extra = categoriasCaa.filter(c => c.id === 'plano');
+    localStorage.setItem(CHAVE_CAA_PERSONALIZADO, JSON.stringify(extra));
+  }catch(e){ /* sem acesso ao localStorage: segue sem guardar */ }
+}
+function carregarCategoriasCaaPersonalizadas(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_CAA_PERSONALIZADO);
+    if(!bruto) return;
+    const extra = JSON.parse(bruto);
+    if(Array.isArray(extra)){
+      extra.forEach(catGuardada => {
+        if(!categoriasCaa.find(c => c.id === catGuardada.id)){
+          categoriasCaa.push(catGuardada);
+        }
+      });
+    }
+  }catch(e){ /* estado inválido: segue com as categorias base */ }
+}
+
+function configurarBotoesHistoriaSocial(){
+  const btnGerar = document.getElementById('btn-gerar-historia');
+  if(btnGerar) btnGerar.addEventListener('click', gerarHistoriaSocialIA);
+  const btnAdicionar = document.getElementById('btn-adicionar-historia');
+  if(btnAdicionar) btnAdicionar.addEventListener('click', adicionarHistoriaSocialAoBanco);
+}
+
+function configurarBotaoPlano(){
+  const btnGerar = document.getElementById('btn-gerar-plano');
+  if(btnGerar) btnGerar.addEventListener('click', gerarPlanoIA);
+}
+
 /* ======================= GESTÃO DE VÍDEOS (acesso escondido, área do responsável técnico) ======================= */
 function abrirGestaoVideos(){
   renderGestaoVideos();
@@ -5036,6 +6932,7 @@ function configurarBotaoReset(){
 const CHAVES_BACKUP = [
   CHAVE_ESTADO, CHAVE_ROTINA, CHAVE_HISTORICO, CHAVE_VIDEOS_REAIS,
   CHAVE_ESCALA_TEXTO, CHAVE_VISTA_ROTINA, CHAVE_QUESTIONARIO_EDUARDO, CHAVE_BANCO_PERGUNTAS,
+  CHAVE_HISTORIAS_SOCIAIS,
 ];
 
 function exportarBackup(){
@@ -5155,6 +7052,7 @@ carregarEscalaTexto();
 carregarRotinaPersonalizada();
 carregarVideosReais();
 carregarBancoPerguntasPersonalizado();
+carregarHistoriasSociais();
 carregarEstado();
 carregarHistorico();
 carregarVistaRotina();
@@ -5169,6 +7067,9 @@ configurarAcessoGestaoVideos();
 configurarBotaoReset();
 configurarBotoesBackup();
 configurarBotaoDicaIA();
+configurarBotoesHistoriaSocial();
+configurarBotaoPlano();
+carregarCategoriasCaaPersonalizadas();
 document.getElementById('btn-add-bloco').addEventListener('click', adicionarBlocoConfig);
 document.getElementById('btn-guardar-config').addEventListener('click', guardarConfig);
 document.getElementById('btn-add-video').addEventListener('click', adicionarBlocoVideo);
@@ -5186,7 +7087,7 @@ aplicarSaudacaoPersonalizada();
 document.getElementById('btn-guardar-questionario').addEventListener('click', guardarQuestionarioEduardo);
 alternarBlocoChaveGemini();
 renderLista('lista-escola', escolaItens, abrirEscola);
-renderLista('lista-atividades', atividadesItens, abrirAtividade);
+renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
 renderLista('lista-jogos', jogosItens, abrirJogo);
 renderLista('lista-videos', videosItens, abrirVideo);
 renderListaVideosReais();
@@ -5194,6 +7095,328 @@ renderConquistas();
 configurarLojaRecompensas();
 document.getElementById('versao-app').textContent = 'O Mundo do Eduardo — versão ' + window.APP_VERSION;
 
+</script>
+
+<script>
+/* ======================= ONBOARDING / LOGIN (fluxo de perguntas + Firebase Auth) =======================
+   Sequência de ecrãs, cada um com pergunta + opções (ou campo de texto). As respostas ficam em
+   `obRespostas` e só são gravadas no Firestore (associadas à conta) depois de "Criar conta" ter
+   sucesso — nunca antes, e nunca sem autenticação. O ecrã de "Entrar" (conta já existente) salta
+   este questionário todo. */
+
+let obPassoAtual = 0;
+let obModo = 'inicio'; // 'inicio' | 'perguntas' | 'criarConta' | 'entrar'
+let obRespostas = { quemE:'', nomeCrianca:'', nivelAutismo:'', idade:'', objetivos:[] };
+
+const obPassosPerguntas = [
+  {
+    chave: 'quemE',
+    pergunta: 'Quem está a criar esta conta?',
+    tipo: 'opcoes-unica',
+    opcoes: [
+      {v:'pai_mae', emoji:'👪', t:'Pai / Mãe / Cuidador(a)'},
+      {v:'terapeuta', emoji:'🧑‍⚕️', t:'Terapeuta'},
+      {v:'psicologo', emoji:'🧠', t:'Psicólogo(a)'},
+      {v:'medico', emoji:'⚕️', t:'Médico/a'},
+      {v:'docente', emoji:'🏫', t:'Docente / Professor(a)'},
+      {v:'outro', emoji:'👤', t:'Outro'},
+    ],
+  },
+  {
+    chave: 'nomeCrianca',
+    pergunta: 'Como se chama a criança?',
+    tipo: 'texto',
+    placeholder: 'Nome',
+  },
+  {
+    chave: 'idade',
+    pergunta: 'Qual é a idade de quem vai usar?',
+    tipo: 'opcoes-unica',
+    opcoes: [
+      {v:'0-5', emoji:'👶', t:'0-5 anos'},
+      {v:'6-12', emoji:'🧒', t:'6-12 anos'},
+      {v:'13-18', emoji:'🧑', t:'13-18 anos'},
+      {v:'adulto', emoji:'🧑‍🦱', t:'Adulto com autismo'},
+    ],
+  },
+  {
+    chave: 'nivelAutismo',
+    pergunta: 'Qual é o nível de autismo? (opcional — só se souberes)',
+    tipo: 'opcoes-unica',
+    opcoes: [
+      {v:'1', emoji:'①', t:'Nível 1'},
+      {v:'2', emoji:'②', t:'Nível 2'},
+      {v:'3', emoji:'③', t:'Nível 3'},
+      {v:'nao_diagnosticado', emoji:'🔍', t:'Ainda não diagnosticado'},
+    ],
+  },
+  {
+    chave: 'objetivos',
+    pergunta: 'O que ajudaria mais? (escolhe até 2)',
+    tipo: 'opcoes-multipla',
+    maximo: 2,
+    opcoes: [
+      {v:'comunicacao', emoji:'💬', t:'Desenvolver comunicação'},
+      {v:'crises', emoji:'🌊', t:'Apoio em crises / colapsos'},
+      {v:'rotinas', emoji:'📅', t:'Suportes visuais para rotinas'},
+      {v:'leitura', emoji:'📖', t:'Apoios de leitura e escrita'},
+      {v:'regulacao', emoji:'🧘', t:'Ferramentas de regulação emocional'},
+    ],
+  },
+];
+
+function obTotalPassos(){
+  return obPassosPerguntas.length + 1; // +1 para o ecrã final de criar conta
+}
+
+function obAtualizarBarra(){
+  const pct = Math.round(((obPassoAtual) / obTotalPassos()) * 100);
+  document.getElementById('ob-barra').style.width = pct + '%';
+  document.getElementById('ob-btn-voltar').disabled = (obPassoAtual === 0 && obModo !== 'entrar');
+}
+
+// Ecrã inicial: "Bem-vindo — Começar / Já tenho conta", como a 2ª imagem de referência.
+window.mostrarEcraLogin = function(){
+  obModo = 'inicio';
+  obPassoAtual = 0;
+  document.getElementById('ob-pergunta').textContent = 'Bem-vindo ao Mundo do Eduardo! Pronto para começar?';
+  document.getElementById('ob-erro').textContent = '';
+  document.getElementById('ob-corpo').innerHTML = '';
+  obAtualizarBarra();
+  const btn = document.getElementById('ob-btn-principal');
+  btn.textContent = 'Começar';
+  btn.disabled = false;
+  btn.onclick = ()=>{ obModo = 'perguntas'; obPassoAtual = 0; obRenderPassoPergunta(); };
+  document.getElementById('ob-rodape').innerHTML = `
+    <button class="ob-btn-secundario" id="ob-btn-ja-tenho-conta">Já tenho uma conta</button>
+  `;
+  document.getElementById('ob-btn-ja-tenho-conta').onclick = obRenderEcraEntrar;
+};
+
+function obVoltar(){
+  if(obModo === 'entrar'){ window.mostrarEcraLogin(); return; }
+  if(obModo === 'criarConta'){ obPassoAtual = obPassosPerguntas.length - 1; obRenderPassoPergunta(); return; }
+  if(obModo === 'perguntas'){
+    if(obPassoAtual === 0){ window.mostrarEcraLogin(); return; }
+    obPassoAtual--;
+    obRenderPassoPergunta();
+  }
+}
+
+function obRenderPassoPergunta(){
+  const passo = obPassosPerguntas[obPassoAtual];
+  document.getElementById('ob-pergunta').textContent = passo.pergunta;
+  document.getElementById('ob-erro').textContent = '';
+  obAtualizarBarra();
+  const corpo = document.getElementById('ob-corpo');
+
+  if(passo.tipo === 'texto'){
+    corpo.innerHTML = `<input type="text" class="ob-campo" id="ob-input-texto" placeholder="${passo.placeholder}" value="${obRespostas[passo.chave] || ''}">`;
+  } else {
+    const valorAtual = obRespostas[passo.chave];
+    const ehMultipla = passo.tipo === 'opcoes-multipla';
+    corpo.innerHTML = `<div class="ob-opcoes">` + passo.opcoes.map(op => {
+      const selecionada = ehMultipla ? (Array.isArray(valorAtual) && valorAtual.includes(op.v)) : (valorAtual === op.v);
+      return `<button class="ob-opcao ${selecionada?'selecionada':''}" data-valor="${op.v}"><span class="ob-emoji">${op.emoji}</span>${op.t}</button>`;
+    }).join('') + `</div>`;
+    corpo.querySelectorAll('.ob-opcao').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(ehMultipla){
+          let atual = Array.isArray(obRespostas[passo.chave]) ? obRespostas[passo.chave] : [];
+          const v = btn.dataset.valor;
+          if(atual.includes(v)){
+            atual = atual.filter(x => x !== v);
+          } else {
+            if(atual.length >= (passo.maximo || 99)) return; // já atingiu o máximo
+            atual = [...atual, v];
+          }
+          obRespostas[passo.chave] = atual;
+        } else {
+          obRespostas[passo.chave] = btn.dataset.valor;
+        }
+        obRenderPassoPergunta();
+      });
+    });
+  }
+
+  const btn = document.getElementById('ob-btn-principal');
+  btn.textContent = 'Continuar';
+  btn.disabled = false;
+  btn.onclick = ()=>{
+    if(passo.tipo === 'texto'){
+      obRespostas[passo.chave] = document.getElementById('ob-input-texto').value.trim();
+    }
+    if(obPassoAtual < obPassosPerguntas.length - 1){
+      obPassoAtual++;
+      obRenderPassoPergunta();
+    } else {
+      obModo = 'criarConta';
+      obRenderEcraCriarConta();
+    }
+  };
+  document.getElementById('ob-rodape').innerHTML = '';
+}
+
+function obRenderEcraCriarConta(){
+  document.getElementById('ob-pergunta').textContent = 'Quase lá! Cria a tua conta';
+  document.getElementById('ob-erro').textContent = '';
+  obAtualizarBarra();
+  document.getElementById('ob-corpo').innerHTML = `
+    <input type="text" class="ob-campo" id="ob-nome-conta" placeholder="Insira o seu nome completo">
+    <input type="email" class="ob-campo" id="ob-email-conta" placeholder="Insira o seu email">
+    <div class="ob-campo-senha">
+      <input type="password" class="ob-campo" id="ob-senha-conta" placeholder="Crie uma palavra-passe (mín. 6 caracteres)">
+      <button type="button" class="ob-olho" id="ob-olho-senha">👁️</button>
+    </div>
+    <label class="ob-checkbox-linha">
+      <input type="checkbox" id="ob-aceitar-termos">
+      <span>Li e concordo com os Termos de Serviço e a Política de Privacidade.</span>
+    </label>
+  `;
+  document.getElementById('ob-olho-senha').addEventListener('click', ()=>{
+    const campo = document.getElementById('ob-senha-conta');
+    campo.type = campo.type === 'password' ? 'text' : 'password';
+  });
+  const btn = document.getElementById('ob-btn-principal');
+  btn.textContent = 'Criar conta';
+  btn.disabled = false;
+  btn.onclick = obSubmeterCriarConta;
+  document.getElementById('ob-rodape').innerHTML = '';
+}
+
+async function obSubmeterCriarConta(){
+  const erro = document.getElementById('ob-erro');
+  const nome = document.getElementById('ob-nome-conta').value.trim();
+  const email = document.getElementById('ob-email-conta').value.trim();
+  const senha = document.getElementById('ob-senha-conta').value;
+  const aceitou = document.getElementById('ob-aceitar-termos').checked;
+
+  if(!nome || !email || !senha){ erro.textContent = 'Preenche o nome, email e palavra-passe.'; return; }
+  if(senha.length < 6){ erro.textContent = 'A palavra-passe precisa de pelo menos 6 caracteres.'; return; }
+  if(!aceitou){ erro.textContent = 'Precisas de aceitar os Termos e a Política de Privacidade.'; return; }
+  if(!window.firebaseAuthApi){ erro.textContent = 'Ainda a carregar a ligação segura — tenta de novo em instantes.'; return; }
+
+  const btn = document.getElementById('ob-btn-principal');
+  btn.disabled = true;
+  btn.textContent = 'A criar conta...';
+  erro.textContent = '';
+
+  try{
+    const credencial = await window.firebaseAuthApi.criarConta(email, senha);
+    // Só depois de a conta existir de facto é que os dados sensíveis (nível de autismo,
+    // objetivos) ficam gravados, associados ao uid — nunca antes, nunca sem autenticação.
+    await window.firebaseAuthApi.guardarPerfil(credencial.user.uid, {
+      nomeResponsavel: nome,
+      email: email,
+      quemE: obRespostas.quemE,
+      nomeCrianca: obRespostas.nomeCrianca,
+      idade: obRespostas.idade,
+      nivelAutismo: obRespostas.nivelAutismo,
+      objetivos: obRespostas.objetivos,
+      criadoEm: new Date().toISOString(),
+    });
+    // onAuthStateChanged trata da transição para a app — não é preciso fazer mais nada aqui.
+  }catch(e){
+    erro.textContent = obTraduzirErroFirebase(e);
+    btn.disabled = false;
+    btn.textContent = 'Criar conta';
+  }
+}
+
+function obRenderEcraEntrar(){
+  obModo = 'entrar';
+  document.getElementById('ob-pergunta').textContent = 'Olá de novo! Vamos entrar';
+  document.getElementById('ob-erro').textContent = '';
+  obAtualizarBarra();
+  document.getElementById('ob-corpo').innerHTML = `
+    <input type="email" class="ob-campo" id="ob-email-entrar" placeholder="Insira o seu email">
+    <div class="ob-campo-senha">
+      <input type="password" class="ob-campo" id="ob-senha-entrar" placeholder="Insira a sua palavra-passe">
+      <button type="button" class="ob-olho" id="ob-olho-senha-entrar">👁️</button>
+    </div>
+  `;
+  document.getElementById('ob-olho-senha-entrar').addEventListener('click', ()=>{
+    const campo = document.getElementById('ob-senha-entrar');
+    campo.type = campo.type === 'password' ? 'text' : 'password';
+  });
+  const btn = document.getElementById('ob-btn-principal');
+  btn.textContent = 'Entrar';
+  btn.disabled = false;
+  btn.onclick = obSubmeterEntrar;
+  document.getElementById('ob-rodape').innerHTML = `
+    <p class="ob-link-central"><a id="ob-link-recuperar">Esqueceu a palavra-passe?</a></p>
+    <p class="ob-link-central">Não tem uma conta? <a id="ob-link-registar">Registar</a></p>
+  `;
+  document.getElementById('ob-link-recuperar').addEventListener('click', obPedirRecuperacaoSenha);
+  document.getElementById('ob-link-registar').addEventListener('click', ()=>{ obModo = 'perguntas'; obPassoAtual = 0; obRenderPassoPergunta(); });
+}
+
+async function obSubmeterEntrar(){
+  const erro = document.getElementById('ob-erro');
+  const email = document.getElementById('ob-email-entrar').value.trim();
+  const senha = document.getElementById('ob-senha-entrar').value;
+  if(!email || !senha){ erro.textContent = 'Preenche o email e a palavra-passe.'; return; }
+  if(!window.firebaseAuthApi){ erro.textContent = 'Ainda a carregar a ligação segura — tenta de novo em instantes.'; return; }
+
+  const btn = document.getElementById('ob-btn-principal');
+  btn.disabled = true;
+  btn.textContent = 'A entrar...';
+  erro.textContent = '';
+  try{
+    await window.firebaseAuthApi.entrar(email, senha);
+    // onAuthStateChanged trata da transição para a app.
+  }catch(e){
+    erro.textContent = obTraduzirErroFirebase(e);
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
+
+async function obPedirRecuperacaoSenha(){
+  const email = document.getElementById('ob-email-entrar').value.trim();
+  const erro = document.getElementById('ob-erro');
+  if(!email){ erro.textContent = 'Escreve primeiro o teu email no campo acima.'; return; }
+  try{
+    await window.firebaseAuthApi.recuperarSenha(email);
+    erro.style.color = 'var(--petroleo)';
+    erro.textContent = 'Enviámos um email com instruções para repor a palavra-passe.';
+  }catch(e){
+    erro.style.color = '';
+    erro.textContent = obTraduzirErroFirebase(e);
+  }
+}
+
+function obTraduzirErroFirebase(e){
+  const codigo = e && e.code ? e.code : '';
+  const mapa = {
+    'auth/email-already-in-use': 'Já existe uma conta com este email. Tenta entrar em vez de criar conta.',
+    'auth/invalid-email': 'Este email não parece válido.',
+    'auth/weak-password': 'A palavra-passe precisa de pelo menos 6 caracteres.',
+    'auth/user-not-found': 'Não encontrámos nenhuma conta com este email.',
+    'auth/wrong-password': 'Palavra-passe incorreta.',
+    'auth/invalid-credential': 'Email ou palavra-passe incorretos.',
+    'auth/network-request-failed': 'Sem ligação à internet. Verifica a tua rede e tenta de novo.',
+    'auth/too-many-requests': 'Demasiadas tentativas. Espera um pouco antes de tentar de novo.',
+  };
+  return mapa[codigo] || 'Não foi possível concluir. Tenta novamente.';
+}
+
+// Chamado pelo módulo Firebase assim que há uma sessão válida (login novo ou já existente
+// ao reabrir a app). Carrega o perfil guardado (nome da criança, etc.) para dentro da app
+// já iniciada pelo script principal, sem repetir o questionário.
+window.aoEntrarNaApp = async function(user){
+  try{
+    const perfil = await window.firebaseAuthApi.lerPerfil(user.uid);
+    if(perfil && perfil.nomeCrianca){
+      const nomeEl = document.getElementById('saudacao-nome');
+      if(nomeEl) nomeEl.textContent = 'Olá, ' + perfil.nomeCrianca + '!';
+      document.title = 'O Mundo do ' + perfil.nomeCrianca;
+    }
+  }catch(e){
+    // Se a leitura do perfil falhar (ex: sem rede momentânea), a app continua a funcionar
+    // normalmente com os valores locais já guardados em localStorage.
+  }
+};
 </script>
 </body>
 </html>
