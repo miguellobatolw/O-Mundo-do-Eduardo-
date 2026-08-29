@@ -1912,8 +1912,14 @@
 
       <div class="cartao-grafico" id="cartao-pos-calma" style="display:none;">
         <div class="t-grafico">Modo Calma — o que aconteceu depois</div>
-        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Resposta opcional do Eduardo após cada pausa — ajuda a perceber se a pausa está a ajudar a regressar à tarefa.</p>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Resposta opcional do Eduardo após cada pausa — ajuda a perceber se a pausa está a ajudar a regressar à tarefa. 👍 voltou sozinho · 🤝 pediu ajuda a um adulto · 💬 preferiu comunicar pelo quadro CAA.</p>
         <div id="lista-pos-calma"></div>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-uso-caa" style="display:none;">
+        <div class="t-grafico">Quadro CAA — palavras mais usadas</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">O que o Eduardo mais tem tentado comunicar através do quadro de comunicação.</p>
+        <div id="lista-uso-caa"></div>
       </div>
 
       <!-- ===================== LOJA DE RECOMPENSAS (configuração dos pais) ===================== -->
@@ -2098,7 +2104,7 @@
       <label class="linha-definicao" style="cursor:pointer;">
         <div class="txt-def">
           <div class="t">⭐ Progresso e estrelas</div>
-          <div class="d">Estrelas, nível por matéria, medalhas, sequência de dias, recompensas, e os padrões de uso do Modo Calma (por hora do dia, por tarefa, e o que aconteceu depois)</div>
+          <div class="d">Estrelas, nível por matéria, medalhas, sequência de dias, recompensas, os padrões de uso do Modo Calma (por hora do dia, por tarefa, e o que aconteceu depois), e as palavras mais usadas no quadro CAA</div>
         </div>
         <input type="checkbox" id="reset-progresso" class="checkbox-reset" checked>
       </label>
@@ -2141,6 +2147,14 @@
           <div class="d">Vais ter de a colar novamente para gerar mais perguntas</div>
         </div>
         <input type="checkbox" id="reset-chave-gemini" class="checkbox-reset">
+      </label>
+
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">🔒 PIN da área dos pais</div>
+          <div class="d">Se a mãe esquecer o PIN, marca isto para ela poder definir um novo da próxima vez que entrar — não mexe no teu PIN de administração</div>
+        </div>
+        <input type="checkbox" id="reset-pin-config" class="checkbox-reset">
       </label>
 
       <button class="btn-primario" id="btn-fazer-reset" style="margin-top:14px;background:var(--coral-suave);">🔄 Fazer reset</button>
@@ -2187,6 +2201,24 @@
       <button class="btn-cancelar-pin" onclick="fecharModalPin()">Cancelar</button>
       <button class="btn-confirmar-pin" onclick="confirmarPin()">Entrar</button>
     </div>
+    <button id="btn-esqueci-pin" onclick="mostrarAjudaEsqueciPin()" style="margin-top:14px;background:none;border:none;text-decoration:underline;font-size:12px;color:var(--texto-suave);cursor:pointer;padding:4px;">Esqueci-me do PIN</button>
+  </div>
+</div>
+
+<!-- Instruções para recuperar o acesso sem o PIN, caso seja esquecido. Não contorna a
+     proteção dentro da app — exige acesso físico ao telemóvel e à consola do browser,
+     o que é consistente com o nível de proteção pretendido (evitar acesso acidental,
+     não bloquear definitivamente quem tem o dispositivo na mão). -->
+<div class="overlay-pin" id="overlay-ajuda-pin">
+  <div class="caixa-pin">
+    <h3>🔑 Recuperar acesso</h3>
+    <p style="text-align:left;">Se esqueceste o PIN, podes limpá-lo através da consola do browser (Chrome: menu ⋮ → Mais ferramentas → Ferramentas de programador → separador "Console") e escrever exatamente um destes comandos, consoante a área:</p>
+    <p style="text-align:left;font-family:monospace;font-size:12px;background:var(--areia-clara);padding:8px;border-radius:8px;">Área dos pais:<br>localStorage.removeItem('mundoDoEduardo_pinHashConfig_v1')</p>
+    <p style="text-align:left;font-family:monospace;font-size:12px;background:var(--areia-clara);padding:8px;border-radius:8px;">Área de administração:<br>localStorage.removeItem('mundoDoEduardo_pinHashAdmin_v1')</p>
+    <p style="text-align:left;">Depois de carregar em Enter na consola, volta a tentar aceder — a app vai pedir para criares um PIN novo, como da primeira vez.</p>
+    <div class="botoes-pin">
+      <button class="btn-confirmar-pin" onclick="document.getElementById('overlay-ajuda-pin').classList.remove('mostrar')">Percebi</button>
+    </div>
   </div>
 </div>
 
@@ -2201,6 +2233,7 @@
     <p style="margin-bottom:20px;">E agora, o que vai acontecer?</p>
     <button class="btn-pos" onclick="fecharCalma('voltou')">👍 Vou voltar à tarefa</button>
     <button class="btn-pos" onclick="fecharCalma('ajuda')">🤝 Vou pedir ajuda a um adulto</button>
+    <button class="btn-pos" onclick="fecharCalmaEAbrirCaa()">💬 Quero mostrar como me sinto</button>
     <button class="btn-saltar" onclick="fecharCalma(null)">Saltar</button>
   </div>
 </div>
@@ -2237,11 +2270,44 @@
     const erro = document.getElementById('ob-erro');
     const btn = document.getElementById('ob-btn-principal');
     const corpo = document.getElementById('ob-corpo');
+    const rodape = document.getElementById('ob-rodape');
     if(pergunta) pergunta.textContent = 'A app ainda não está pronta para entrar.';
     if(corpo) corpo.innerHTML = '';
     if(erro) erro.textContent = mensagem;
     if(btn){ btn.disabled = true; btn.textContent = 'Continuar'; }
+    // Nenhuma das funcionalidades locais (rotina, jogos, quadro CAA, curiosidades) precisa
+    // de conta nem de internet — só o login/sincronização precisa. Por isso, mesmo sem
+    // conseguir ligar ao Firebase, o Eduardo pode continuar a usar a app localmente.
+    if(rodape){
+      rodape.innerHTML = `
+        <p class="ob-link-central"><a id="ob-btn-sem-conta">Continuar sem conta (só neste dispositivo)</a></p>
+      `;
+      const btnSemConta = document.getElementById('ob-btn-sem-conta');
+      if(btnSemConta){
+        btnSemConta.addEventListener('click', ()=>{
+          if(typeof window.entrarModoLocalSemConta === 'function'){
+            window.entrarModoLocalSemConta();
+          }
+        });
+      }
+    }
   }
+
+  // Modo local sem conta: usado quando não há rede nem sessão anterior guardada.
+  // Os dados ficam só neste dispositivo (localStorage), sem sincronizar com o Firebase.
+  // Se mais tarde o Eduardo criar conta ou entrar com uma já existente, os dados locais
+  // continuam a existir normalmente — só não sobem automaticamente para a nuvem.
+  window.entrarModoLocalSemConta = function(){
+    window.utilizadorAtual = { uid: 'local-sem-conta', email: '', semConta: true };
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('app').style.display = '';
+    const avisoOffline = document.getElementById('aviso-modo-offline');
+    if(avisoOffline){
+      avisoOffline.style.display = 'block';
+      avisoOffline.textContent = '📴 A usar sem conta — os dados ficam só neste dispositivo.';
+    }
+    if(typeof window.aoEntrarNaApp === 'function') window.aoEntrarNaApp(window.utilizadorAtual);
+  };
 
   // Se este dispositivo já teve uma sessão válida antes (login com sucesso em algum
   // momento anterior), entra diretamente na app em modo offline, em vez de bloquear
@@ -2275,12 +2341,46 @@
   // Timeout de segurança: se, por qualquer razão (rede lenta, bloqueio do CDN, etc.), o
   // módulo Firebase abaixo não responder em 6 segundos, tenta entrar offline (se já
   // houver sessão local guardada); só mostra o aviso bloqueante se isso também falhar.
+  // Envolvido em try/catch e com um timeout mais curto por baixo: se ALGO dentro deste
+  // bloco falhar de forma inesperada, nunca deve deixar o ecrã preso em "A carregar…"
+  // sem pelo menos mostrar o botão de continuar sem conta.
   window.setTimeout(()=>{
-    if(!window.firebaseAuthApi && !window.utilizadorAtual){
-      if(window.tentarEntrarOffline()) return;
-      obMostrarAvisoFirebase('⚠️ Não foi possível ligar ao Firebase. Verifica a tua ligação à internet, ou confirma se já colaste as tuas chaves do Firebase no código (ver instruções no início do bloco <script type="module">).');
+    try{
+      if(!window.firebaseAuthApi && !window.utilizadorAtual){
+        if(window.tentarEntrarOffline()) return;
+        obMostrarAvisoFirebase('⚠️ Não foi possível ligar ao Firebase. Verifica a tua ligação à internet, ou confirma se já colaste as tuas chaves do Firebase no código (ver instruções no início do bloco <script type="module">).');
+      }
+    }catch(erroTimeout){
+      // Rede de segurança final: mesmo que algo acima falhe de forma inesperada,
+      // nunca deixa o ecrã preso — mostra sempre pelo menos a opção de continuar sem conta.
+      console.error('Erro no timeout de arranque:', erroTimeout);
+      try{
+        obMostrarAvisoFirebase('⚠️ Ocorreu um erro inesperado ao iniciar. Detalhe técnico: ' + (erroTimeout && erroTimeout.message ? erroTimeout.message : String(erroTimeout)));
+      }catch(erroAviso){
+        // Último recurso: nem o próprio aviso conseguiu ser mostrado — ainda assim,
+        // garante visivelmente que o Eduardo não fica preso sem explicação nenhuma.
+        const pergunta = document.getElementById('ob-pergunta');
+        if(pergunta) pergunta.textContent = 'Ocorreu um erro. Tenta fechar e abrir a app outra vez.';
+      }
     }
   }, 6000);
+
+  // Segunda rede de segurança, independente da primeira: se por qualquer razão o
+  // timeout de 6s acima nunca chegar a correr (ex: um erro de sintaxe mais acima no
+  // mesmo ficheiro impediu este script de ser totalmente interpretado), este segundo
+  // temporizador, mais tardio, verifica outra vez ao fim de 10s.
+  window.setTimeout(()=>{
+    const pergunta = document.getElementById('ob-pergunta');
+    const rodapeAtual = document.getElementById('ob-rodape');
+    const aindaPreso = pergunta && pergunta.textContent && pergunta.textContent.indexOf('A carregar') !== -1;
+    if(aindaPreso && rodapeAtual && !rodapeAtual.innerHTML){
+      try{
+        obMostrarAvisoFirebase('⚠️ A app demorou demasiado tempo a iniciar. Isto costuma acontecer quando o ficheiro é aberto diretamente das Transferências, sem ligação à internet.');
+      }catch(e){
+        if(pergunta) pergunta.textContent = 'Ocorreu um erro. Tenta fechar e abrir a app outra vez.';
+      }
+    }
+  }, 10000);
 </script>
 <script type="module">
   try{
@@ -2367,7 +2467,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.18.3';
+window.APP_VERSION = '1.21.0';
 
 /* ======================= DADOS ======================= */
 
@@ -2877,6 +2977,11 @@ let registoPosCalma = {};
 // (não a hora exata, para não sugerir um registo demasiado granular/clínico).
 // Ajuda a notar padrões como "quase sempre ao fim da tarde", úteis para ajustar a rotina.
 let registoCalmaPorHora = {}; // { manha:1, almoco:0, tarde:4, fimDoDia:1 }
+// Contagem de vezes que cada palavra/frase do quadro CAA foi "falada" pelo Eduardo,
+// para os pais notarem o que ele mais tem tentado comunicar (ex: "cansado", "dor",
+// "quero pausa"). Guarda o texto da palavra, não a frase inteira nem quando/onde foi
+// usada — suficiente para ver padrões de vocabulário sem um registo demasiado granular.
+let registoUsoCaa = {}; // { 'quero': 5, 'cansado': 2, 'ajuda': 3 }
 const PERIODOS_CALMA = {
   manha:    { lbl: 'Manhã',        de: 6,  ate: 12 },
   almoco:   { lbl: 'Hora de almoço', de: 12, ate: 14 },
@@ -2991,6 +3096,7 @@ function guardarEstado(){
       registoCalmaPorBloco: registoCalmaPorBloco,
       registoPosCalma: registoPosCalma,
       registoCalmaPorHora: registoCalmaPorHora,
+      registoUsoCaa: registoUsoCaa,
       registoLatenciaPorMateria: registoLatenciaPorMateria,
       registoPistaPorMateria: registoPistaPorMateria,
       registoEmocoes: registoEmocoes,
@@ -3052,6 +3158,9 @@ function carregarEstado(){
     }
     if(estado.registoCalmaPorHora && typeof estado.registoCalmaPorHora === 'object'){
       registoCalmaPorHora = estado.registoCalmaPorHora;
+    }
+    if(estado.registoUsoCaa && typeof estado.registoUsoCaa === 'object'){
+      registoUsoCaa = estado.registoUsoCaa;
     }
     if(estado.registoLatenciaPorMateria && typeof estado.registoLatenciaPorMateria === 'object'){
       registoLatenciaPorMateria = estado.registoLatenciaPorMateria;
@@ -4014,23 +4123,49 @@ function pararNarracao(){
   vozAtiva = false;
 }
 
-function narrar(texto, aoTerminar){
+// aoTerminar: chamado quando a fala acaba. estiloEmotivo: quando true, sobe tom e
+// velocidade acima do configurado nas Definições — usado só nos elogios/reforços
+// (overlay de estrelas, resposta certa), para soar mais animado e brincalhão, tipo
+// "boneco animado". A leitura normal (histórias, perguntas) mantém sempre o tom
+// neutro escolhido nas Definições, para não ficar cansativo ao longo do texto todo.
+function narrar(texto, aoTerminar, estiloEmotivo){
   if(!('speechSynthesis' in window)){
     if(aoTerminar) aoTerminar();
     return;
   }
   window.speechSynthesis.cancel();
-  const fala = new SpeechSynthesisUtterance(texto);
+  // Remove sequências de underscores (usadas visualmente em "completa a sequência" ou
+  // analogias, ex: "___") em vez de as ler em voz alta. Se ficarem no fim da frase
+  // (com ou sem "?" já escrito a seguir), troca por "?" para soar a pergunta em aberto.
+  // No meio da frase, remove por completo e limpa a pontuação e espaços a dobrar que sobram.
+  const textoFalado = texto
+    .replace(/\s*_{2,}\s*\??\s*$/, '?')
+    .replace(/_{2,}/g, '')
+    .replace(/,\s*,/g, ',')
+    .replace(/ {2,}/g, ' ');
+  const fala = new SpeechSynthesisUtterance(textoFalado);
   fala.lang = 'pt-PT';
-  fala.rate = NIVEIS_VELOCIDADE_VOZ[indiceVelocidadeVoz];
-  fala.pitch = NIVEIS_TOM_VOZ[indiceTomVoz];
+  const pitchBase = NIVEIS_TOM_VOZ[indiceTomVoz];
+  const rateBase = NIVEIS_VELOCIDADE_VOZ[indiceVelocidadeVoz];
+  if(estiloEmotivo){
+    // +0.35 de tom (limitado a 2, o máximo da Web Speech API) e um toque mais rápido —
+    // dá uma sensação de entusiasmo/animação sem distorcer a voz até ficar estranha.
+    fala.pitch = Math.min(2, pitchBase + 0.35);
+    fala.rate = Math.min(1.35, rateBase + 0.12);
+  } else {
+    fala.pitch = pitchBase;
+    fala.rate = rateBase;
+  }
   if(vozEscolhidaURI){
     const vozEscolhida = vozesDisponiveis.find(v => v.voiceURI === vozEscolhidaURI);
     if(vozEscolhida) fala.voice = vozEscolhida;
   }
   vozAtiva = true;
   fala.onend = ()=>{ vozAtiva = false; if(aoTerminar) aoTerminar(); };
-  fala.onerror = ()=>{ vozAtiva = false; };
+  // Se a fala falhar a meio (voz indisponível, erro do motor, etc.), chama aoTerminar
+  // na mesma — sem isto, um fluxo que espera pela fala para avançar (como o quiz) ficaria
+  // preso indefinidamente sempre que a síntese de voz desse erro.
+  fala.onerror = ()=>{ vozAtiva = false; if(aoTerminar) aoTerminar(); };
   window.speechSynthesis.speak(fala);
 }
 
@@ -4107,9 +4242,15 @@ function limparFraseCaa(){
 }
 
 // Lê a frase completa em voz alta, palavra a palavra na ordem em que foi construída.
+// Regista cada palavra usada (não a frase completa) para os pais notarem padrões de
+// vocabulário na área parental — só quando há de facto uma frase para "falar".
 function falarFraseCaa(){
   if(fraseCaaAtual.length === 0) return;
   const texto = fraseCaaAtual.map(p => p.texto).join(', ');
+  fraseCaaAtual.forEach(p => {
+    registoUsoCaa[p.texto] = (registoUsoCaa[p.texto] || 0) + 1;
+  });
+  guardarEstado();
   narrar(texto);
 }
 
@@ -5034,8 +5175,24 @@ function responderQuiz(i){
     quizAcertosSeguidos++;
     if(feedback){
       // Distingue acerto "limpo" de acerto após pista, para ele perceber a diferença
-      feedback.textContent = quizTentativasNaPergunta === 0 ? 'Boa! Resposta certa.' : 'Foi! Acertaste com a ajuda da pista.';
+      const acertoLimpo = quizTentativasNaPergunta === 0;
+      // Para acerto limpo, o elogio tem texto (ecrã) e fala (voz, com ênfase marcada)
+      // separados. Para acerto com pista, a mesma frase serve para os dois.
+      const elogio = acertoLimpo ? elogioRespostaCertaAoAcaso() : null;
+      const textoEcra = elogio ? elogio.texto : 'Foi! Acertaste com a ajuda da pista.';
+      const textoFalado = elogio ? elogio.fala : 'Foi! Acertaste com a ajuda da pista.';
+      feedback.textContent = textoEcra;
       feedback.style.color = 'var(--petroleo)';
+      tocarSomAcerto();
+      vibrar([15,40,60]);
+      registarUsoPergunta(quizChave, quizTentativasNaPergunta > 0);
+      // Só avança para a pergunta seguinte depois de a frase de elogio acabar de ser
+      // dita (+ uma pequena pausa de respiro) — antes disso o setTimeout fixo de 1.4s
+      // cortava a fala a meio sempre que a frase era mais longa do que isso.
+      narrar(textoFalado, ()=>{
+        setTimeout(()=>{ quizIndex++; renderQuiz(); }, 500);
+      }, acertoLimpo);
+      return;
     }
     tocarSomAcerto();
     vibrar([15,40,60]);
@@ -5729,6 +5886,35 @@ const elogiosVariados = [
   'Isso mesmo!', 'Impressionante!', 'Continua assim!', 'Que orgulho!'
 ];
 
+// Frases curtas de acerto pergunta-a-pergunta (dentro do quiz/jogo), separadas das
+// de elogiosVariados porque aparecem no texto de feedback inline por baixo das opções,
+// não no título grande do overlay de estrelas — precisam de caber numa linha.
+// Formato "reação, elogio" (ex: "Acertaste, boa!") em vez de frases inteiras formais —
+// soa mais a alguém a reagir na hora do que a ler um texto escrito.
+// Cada entrada tem texto (mostrado no ecrã, ortografia normal) e fala (só para a síntese
+// de voz, com a sílaba tónica em maiúsculas) — algumas vozes do sistema usam isso como
+// pista de ênfase e ficam com entoação mais animada; outras ignoram e leem na mesma.
+const elogiosRespostaCerta = [
+  { texto: 'Boa!', fala: 'BOa!' },
+  { texto: 'Isso mesmo, muito bem!', fala: 'Isso mesmo, muito bEm!' },
+  { texto: 'Sim, conseguiste!', fala: 'Sim, consegUIste!' },
+  { texto: 'Certo, és muito inteligente!', fala: 'Certo, és muito inteligEnte!' },
+  { texto: 'Boa, genial!', fala: 'BOa, geniAl!' },
+  { texto: 'Boa, mandaste bem!', fala: 'BOa, mandÁste bem!' },
+  { texto: 'Isso, és o maior!', fala: 'Isso, és o maiOr!' },
+  { texto: 'Certo, impressionante!', fala: 'Certo, impressionAnte!' },
+  { texto: 'Muito bem, parabéns!', fala: 'Muito bEm, parabéns!' },
+  { texto: 'Certo, é isso mesmo!', fala: 'Certo, é isso mEsmo!' },
+  { texto: 'Boa, és craque nisto!', fala: 'BOa, és crAque nisto!' },
+  { texto: 'Exato, muito bem pensado!', fala: 'ExAto, muito bem pensAdo!' },
+  { texto: 'Certo, continua assim!', fala: 'Certo, continUa assim!' },
+  { texto: 'Boa, acertaste em cheio!', fala: 'BOa, acertAste em cheio!' },
+  { texto: 'Exato, arrasaste!', fala: 'ExAto, arrasÁste!' }
+];
+function elogioRespostaCertaAoAcaso(){
+  return elogiosRespostaCerta[Math.floor(Math.random()*elogiosRespostaCerta.length)];
+}
+
 function darEstrela(titulo, texto, quantidade){
   quantidade = quantidade || 1;
   estrelas += quantidade;
@@ -5749,6 +5935,7 @@ function darEstrela(titulo, texto, quantidade){
   document.getElementById('yay-texto').textContent = quantidade > 1
     ? texto + ` (+${quantidade} estrelas — foi um desafio difícil e não erraste nenhuma!)`
     : texto;
+  narrar(tituloFinal, null, true);
   mostrarMedalhaNoOverlay(medalhasNovas);
   document.getElementById('overlay-yay').classList.add('mostrar');
   dispararConfetis();
@@ -5794,23 +5981,36 @@ function avancarParaPosCalma(){
   document.getElementById('calma-passo-pos').style.display = 'flex';
 }
 
-// resultado: 'voltou' | 'ajuda' | null (se saltar, não regista nada — a pergunta é sempre opcional)
+// resultado: 'voltou' | 'ajuda' | 'caa' | null (se saltar, não regista nada — a pergunta é sempre opcional)
 function fecharCalma(resultado){
   if(resultado){
     const indiceAgora = calcularIndiceAgora();
     const nomeBloco = indiceAgora !== -1 ? rotinaHoje[indiceAgora].t : 'Sem tarefa associada';
-    if(!registoPosCalma[nomeBloco]) registoPosCalma[nomeBloco] = {voltou:0, ajuda:0};
+    if(!registoPosCalma[nomeBloco]) registoPosCalma[nomeBloco] = {voltou:0, ajuda:0, caa:0};
     if(resultado === 'voltou') registoPosCalma[nomeBloco].voltou++;
     if(resultado === 'ajuda') registoPosCalma[nomeBloco].ajuda++;
+    if(resultado === 'caa'){
+      if(typeof registoPosCalma[nomeBloco].caa !== 'number') registoPosCalma[nomeBloco].caa = 0;
+      registoPosCalma[nomeBloco].caa++;
+    }
     guardarEstado();
   }
   document.getElementById('overlay-calma').classList.remove('mostrar');
-  // Reforço diferencial: pedir ajuda a um adulto é o comportamento alternativo que
-  // queremos que substitua desistir ou ter um comportamento mais difícil — por isso
-  // ganha reforço próprio aqui, distinto do reforço por tarefa concluída.
+  // Reforço diferencial: pedir ajuda a um adulto (verbalmente ou através do quadro CAA)
+  // é o comportamento alternativo que queremos que substitua desistir ou ter um
+  // comportamento mais difícil — por isso ganha reforço próprio aqui, distinto do
+  // reforço por tarefa concluída.
   if(resultado === 'ajuda'){
     setTimeout(()=> darEstrela('Boa escolha!', 'Pedir ajuda a um adulto foi a decisão certa.'), 300);
   }
+}
+
+// Fecha o Modo Calma registando que o Eduardo escolheu comunicar através do quadro CAA
+// em vez de voltar direto à tarefa ou pedir ajuda por palavras — e abre o quadro de
+// seguida, já que é isso que ele indicou que queria fazer.
+function fecharCalmaEAbrirCaa(){
+  fecharCalma('caa');
+  abrirCaa();
 }
 
 // Toque longo no avatar (± 600ms) abre o Modo Calma diretamente,
@@ -5845,8 +6045,12 @@ function configurarToqueLongoCalma(){
 /* ======================= PIN de acesso à área parental/admin =======================
    Usa um hash simples (não é criptografia forte) só para não deixar o PIN em texto
    legível no localStorage — adequado ao nível de proteção necessário aqui (evitar
-   que uma criança entre por acidente ou curiosidade), não para dados sensíveis. */
-const CHAVE_PIN = 'mundoDoEduardo_pinHash_v1';
+   que uma criança entre por acidente ou curiosidade), não para dados sensíveis.
+   Dois PINs independentes: um para a área da mãe/cuidador (rotina, questionário,
+   dicas) e outro para a área de administração técnica (vídeos, IA, backup) — assim
+   cada acesso fica protegido mesmo que a outra pessoa saiba o seu próprio PIN. */
+const CHAVE_PIN_CONFIG = 'mundoDoEduardo_pinHashConfig_v1';
+const CHAVE_PIN_ADMIN = 'mundoDoEduardo_pinHashAdmin_v1';
 let pinDestinoPendente = null; // 'config' ou 'gestaoVideos' — para onde ir depois de validar
 
 function hashPin(pin){
@@ -5857,9 +6061,13 @@ function hashPin(pin){
   return String(h);
 }
 
-function obterPinGuardado(){
+function chavePinParaDestino(destino){
+  return destino === 'gestaoVideos' ? CHAVE_PIN_ADMIN : CHAVE_PIN_CONFIG;
+}
+
+function obterPinGuardado(destino){
   try{
-    return localStorage.getItem(CHAVE_PIN);
+    return localStorage.getItem(chavePinParaDestino(destino));
   }catch(e){
     return null;
   }
@@ -5876,11 +6084,12 @@ function abrirGestaoVideos(){
 }
 
 function pedirPin(){
-  const jaExistePin = !!obterPinGuardado();
+  const jaExistePin = !!obterPinGuardado(pinDestinoPendente);
+  const nomeArea = pinDestinoPendente === 'gestaoVideos' ? 'de administração' : 'dos pais';
   document.getElementById('pin-titulo').textContent = jaExistePin ? '🔒 Área reservada' : '🔒 Criar PIN de acesso';
   document.getElementById('pin-subtitulo').textContent = jaExistePin
-    ? 'Introduz o PIN para continuar.'
-    : 'Ainda não há PIN definido. Escolhe 4 dígitos para proteger esta área a partir de agora.';
+    ? `Introduz o PIN da área ${nomeArea} para continuar.`
+    : `Ainda não há PIN definido para a área ${nomeArea}. Escolhe 4 dígitos para a proteger a partir de agora — pode ser diferente do PIN da outra área.`;
   document.getElementById('erro-pin').textContent = '';
   const input = document.getElementById('input-pin');
   input.value = '';
@@ -5893,6 +6102,10 @@ function fecharModalPin(){
   pinDestinoPendente = null;
 }
 
+function mostrarAjudaEsqueciPin(){
+  document.getElementById('overlay-ajuda-pin').classList.add('mostrar');
+}
+
 function confirmarPin(){
   const input = document.getElementById('input-pin');
   const valor = (input.value || '').trim();
@@ -5903,12 +6116,13 @@ function confirmarPin(){
     return;
   }
 
-  const pinGuardado = obterPinGuardado();
+  const pinGuardado = obterPinGuardado(pinDestinoPendente);
 
   if(!pinGuardado){
-    // Primeira utilização: este PIN passa a ser o PIN da app a partir de agora.
+    // Primeira utilização desta área: este PIN passa a ser o PIN dela a partir de agora.
+    // Guardado numa chave própria, independente do PIN da outra área.
     try{
-      localStorage.setItem(CHAVE_PIN, hashPin(valor));
+      localStorage.setItem(chavePinParaDestino(pinDestinoPendente), hashPin(valor));
     }catch(e){
       // Sem suporte a localStorage: deixa entrar mesmo assim nesta sessão,
       // para não bloquear o acesso por completo.
@@ -6054,6 +6268,7 @@ function renderEvolucaoParental(){
   renderCalmaContexto();
   renderCalmaPorHora();
   renderPosCalma();
+  renderUsoCaa();
   renderDicasParaPais();
 }
 
@@ -6191,6 +6406,29 @@ function renderCalmaPorHora(){
   `).join('');
 }
 
+// Mostra as palavras mais usadas pelo Eduardo no quadro CAA, para os pais notarem
+// o que ele mais tenta comunicar. Só a partir de 5 usos no total, e só as 8 palavras
+// mais frequentes — um uso isolado de uma palavra não é um padrão que valha a pena mostrar.
+function renderUsoCaa(){
+  const cartao = document.getElementById('cartao-uso-caa');
+  const cont = document.getElementById('lista-uso-caa');
+  if(!cartao || !cont) return;
+  const entradas = Object.entries(registoUsoCaa).filter(([,n]) => n > 0);
+  const total = entradas.reduce((soma,[,n]) => soma + n, 0);
+  if(total < 5){
+    cartao.style.display = 'none';
+    return;
+  }
+  cartao.style.display = '';
+  entradas.sort((a,b) => b[1] - a[1]);
+  cont.innerHTML = entradas.slice(0, 8).map(([palavra, n]) => `
+    <div class="linha-nivel-materia">
+      <span class="nome-materia">${palavra}</span>
+      <span class="etiqueta et-medio">${n}×</span>
+    </div>
+  `).join('');
+}
+
 // Mostra, por bloco da rotina, quantas vezes o Eduardo indicou que voltou à tarefa
 // vs. que precisou de ajuda, depois de usar o Modo Calma — a "Consequência" do ciclo ABC.
 // Só aparece a partir de 2 respostas registadas, para não tirar conclusões de 1 caso isolado.
@@ -6199,18 +6437,19 @@ function renderPosCalma(){
   const cont = document.getElementById('lista-pos-calma');
   if(!cartao || !cont) return;
   const entradas = Object.entries(registoPosCalma);
-  const total = entradas.reduce((soma,[,r]) => soma + r.voltou + r.ajuda, 0);
+  const total = entradas.reduce((soma,[,r]) => soma + r.voltou + r.ajuda + (r.caa || 0), 0);
   if(total < 2){
     cartao.style.display = 'none';
     return;
   }
   cartao.style.display = '';
-  entradas.sort((a,b) => (b[1].voltou+b[1].ajuda) - (a[1].voltou+a[1].ajuda));
+  entradas.sort((a,b) => (b[1].voltou+b[1].ajuda+(b[1].caa||0)) - (a[1].voltou+a[1].ajuda+(a[1].caa||0)));
   cont.innerHTML = entradas.map(([nomeBloco, r]) => `
     <div class="linha-nivel-materia">
       <span class="nome-materia">${nomeBloco}</span>
       <span class="etiqueta et-medio">👍 ${r.voltou}</span>
       <span class="etiqueta et-dificil">🤝 ${r.ajuda}</span>
+      ${r.caa ? `<span class="etiqueta et-facil">💬 ${r.caa}</span>` : ''}
     </div>
   `).join('');
 }
@@ -7530,8 +7769,9 @@ function executarReset(){
   const apagarVideos = document.getElementById('reset-videos').checked;
   const apagarBancoIA = document.getElementById('reset-banco-ia').checked;
   const apagarChaveGemini = document.getElementById('reset-chave-gemini').checked;
+  const apagarPinConfig = document.getElementById('reset-pin-config').checked;
 
-  if(!apagarProgresso && !apagarRotina && !apagarHistorico && !apagarVideos && !apagarBancoIA && !apagarChaveGemini){
+  if(!apagarProgresso && !apagarRotina && !apagarHistorico && !apagarVideos && !apagarBancoIA && !apagarChaveGemini && !apagarPinConfig){
     document.getElementById('msg-reset').textContent = 'Escolhe pelo menos uma opção para apagar.';
     return;
   }
@@ -7543,6 +7783,7 @@ function executarReset(){
     if(apagarVideos) localStorage.removeItem(CHAVE_VIDEOS_REAIS);
     if(apagarBancoIA) localStorage.removeItem(CHAVE_BANCO_PERGUNTAS);
     if(apagarChaveGemini) localStorage.removeItem(CHAVE_GEMINI_API);
+    if(apagarPinConfig) localStorage.removeItem(CHAVE_PIN_CONFIG);
   }catch(e){
     document.getElementById('msg-reset').textContent = 'Não foi possível fazer o reset neste dispositivo.';
     return;
@@ -7562,8 +7803,9 @@ function configurarBotaoReset(){
 }
 
 /* ======================= BACKUP (exportar/importar progresso e configurações) ======================= */
-// A chave da API Gemini fica de fora de propósito: exportar uma chave de API num ficheiro
-// que pode ser partilhado ou reenviado é um risco de segurança desnecessário.
+// A chave da API Gemini e os PINs de acesso ficam de fora de propósito: exportar isto
+// num ficheiro que pode ser partilhado ou reenviado seria um risco de segurança
+// desnecessário. Ao restaurar um backup, ambos os PINs têm de ser definidos de novo.
 const CHAVES_BACKUP = [
   CHAVE_ESTADO, CHAVE_ROTINA, CHAVE_HISTORICO, CHAVE_VIDEOS_REAIS,
   CHAVE_ESCALA_TEXTO, CHAVE_VISTA_ROTINA, CHAVE_QUESTIONARIO_EDUARDO, CHAVE_BANCO_PERGUNTAS,
@@ -7595,7 +7837,7 @@ function exportarBackup(){
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     if(msg){
-      msg.textContent = '✓ Backup exportado. Guarda o ficheiro num sítio seguro (ex: Google Drive).';
+      msg.textContent = '✓ Backup exportado. Guarda o ficheiro num sítio seguro (ex: Google Drive). Nota: os PINs e a chave da API não são incluídos por segurança — terás de os definir novamente ao restaurar noutro dispositivo.';
       msg.style.color = 'var(--texto-suave)';
     }
   }catch(e){
@@ -7616,7 +7858,7 @@ function importarBackup(ficheiro){
       if(!pacote || pacote.app !== 'mundoDoEduardo' || !pacote.dados || typeof pacote.dados !== 'object'){
         throw new Error('Ficheiro não reconhecido como um backup desta app.');
       }
-      const confirmado = window.confirm('Importar este backup vai substituir o progresso e configurações atuais neste dispositivo. Continuar?');
+      const confirmado = window.confirm('Importar este backup vai substituir o progresso e configurações atuais neste dispositivo. Os PINs de acesso não fazem parte do backup — se já tiveres PINs definidos neste dispositivo, mantêm-se; caso contrário, serão pedidos de novo. Continuar?');
       if(!confirmado) return;
       CHAVES_BACKUP.forEach(chave => {
         if(Object.prototype.hasOwnProperty.call(pacote.dados, chave)){
