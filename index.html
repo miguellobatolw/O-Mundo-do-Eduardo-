@@ -436,6 +436,7 @@
   .forma-caract svg{ width:100%; height:100%; display:block; }
   .forma-caract.certa{ border-color:#4C8C6B; background:#EAF6EF; }
   .forma-caract.errada{ border-color:var(--coral-suave); opacity:.55; pointer-events:none; }
+  .item-classificar.selecionado{ border-color:var(--petroleo); background:var(--salva-clara); transform:scale(1.08); }
   .carta{
     aspect-ratio:1/1;
     background:var(--petroleo);
@@ -2816,6 +2817,339 @@ let historiasSociais = [
 // aqui a resposta certa não é "igual à pista", é o seu contrário. Os distratores nunca
 // são aleatórios: são sempre outros opostos do mesmo banco, para exigir que o Eduardo
 // pense no conceito em jogo, não apenas reconheça a única opção "estranha".
+// Jogo de Classificar: mostra vários itens misturados e 2 caixas de destino — o Eduardo
+// toca num item (seleciona-o) e depois na caixa certa, em 2 toques separados, para não
+// exigir arrastar. Cada ronda usa um critério de classificação diferente (cor, tamanho,
+// categoria), com o nome do critério sempre visível nas caixas, para nunca obrigar a
+// adivinhar a regra.
+// Jogo das Sequências: mostra um padrão com uma peça em falta no fim e o Eduardo toca
+// na peça que continua a sequência corretamente, entre várias opções. Os distratores
+// incluem sempre pelo menos um elemento que já apareceu na sequência (para não ser óbvio
+// só por eliminação de "o que nunca vi") e, a partir do nível médio, a própria peça
+// certa mas fora de posição não conta — a resposta tem de respeitar o padrão, não só
+// conter símbolos já vistos.
+const NIVEIS_SEQUENCIAS = {
+  1: { nome:'Fácil', rondas:[
+    // Padrão alternado simples: A-B-A-B-?
+    { sequencia:['🔴','🔵','🔴','🔵'], resposta:'🔴', distratores:['🟢','🟡','🟣'] },
+    { sequencia:['🐶','🐱','🐶','🐱'], resposta:'🐶', distratores:['🐰','🐻','🦊'] },
+    { sequencia:['⭐','🌙','⭐','🌙'], resposta:'⭐', distratores:['☀️','☁️','⚡'] },
+    { sequencia:['🍎','🍌','🍎','🍌'], resposta:'🍎', distratores:['🍇','🍊','🍓'] },
+  ]},
+  2: { nome:'Médio', rondas:[
+    // Padrão de 3 elementos: A-B-C-A-B-C-?
+    { sequencia:['🔴','🟡','🔵','🔴','🟡','🔵'], resposta:'🔴', distratores:['🟢','🟣','🟠'] },
+    { sequencia:['🐘','🦁','🐒','🐘','🦁','🐒'], resposta:'🐘', distratores:['🦒','🐯','🐼'] },
+    // Padrão com repetição desigual: A-A-B-A-A-B-?
+    { sequencia:['🌟','🌟','🌙','🌟','🌟','🌙'], resposta:'🌟', distratores:['☀️','⚡','☁️'] },
+    { sequencia:['🚗','🚌','🚌','🚗','🚌','🚌'], resposta:'🚗', distratores:['🚲','🚂','🚁'] },
+  ]},
+  3: { nome:'Difícil', rondas:[
+    // Padrão progressivo: quantidade a aumentar
+    { sequencia:['⭐','⭐⭐','⭐⭐⭐'], resposta:'⭐⭐⭐⭐', distratores:['⭐','⭐⭐','⭐⭐⭐⭐⭐'] },
+    { sequencia:['🔵','🔵🔵','🔵🔵🔵'], resposta:'🔵🔵🔵🔵', distratores:['🔵','🔵🔵','🔵🔵🔵🔵🔵'] },
+    // Padrão de 4 elementos: A-B-C-D-A-B-C-D-?
+    { sequencia:['🔴','🟡','🟢','🔵','🔴','🟡','🟢','🔵'], resposta:'🔴', distratores:['🟣','🟠','⚫'] },
+    { sequencia:['🐸','🦆','🐟','🐢','🐸','🦆','🐟','🐢'], resposta:'🐸', distratores:['🦀','🐬','🦦'] },
+  ]},
+};
+
+let sequenciasNivelAtual = 1, sequenciasRondaAtual = 0, sequenciasTotalRondas = 4;
+let sequenciasErrouNestaRonda = false, sequenciasTeveErro = false;
+let sequenciasRondasDificeisSeguidas = 0;
+let sequenciasIndiceAlvoAtual = -1;
+
+function gerarHtmlSequencias(){
+  const nivel = obterNivelAtual('sequencias');
+  const nomeNivel = NIVEIS_SEQUENCIAS[nivel]?.nome || 'Fácil';
+  return `
+    <div class="painel">
+      <div class="nivel-jogo">Nível ${nomeNivel} — o que vem a seguir?</div>
+      <div class="pedido-caracteristicas" id="pista-sequencias" style="font-size:34px;letter-spacing:6px;"></div>
+      <button class="btn-pagina" id="btn-ouvir-sequencias" style="margin-bottom:12px;">🔊 Ouvir</button>
+      <div class="grelha-caracteristicas" id="grelha-sequencias"></div>
+      <div class="estado-jogo" id="estado-sequencias"></div>
+    </div>
+  `;
+}
+
+function iniciarJogoSequencias(){
+  sequenciasNivelAtual = obterNivelAtual('sequencias');
+  const config = NIVEIS_SEQUENCIAS[sequenciasNivelAtual] || NIVEIS_SEQUENCIAS[1];
+  sequenciasTotalRondas = config.rondas.length;
+  sequenciasRondaAtual = 0;
+  sequenciasTeveErro = false;
+  sequenciasRondasDificeisSeguidas = 0;
+  proximaRondaSequencias();
+}
+
+function proximaRondaSequencias(){
+  if(sequenciasRondaAtual >= sequenciasTotalRondas){
+    concluirJogoSequencias();
+    return;
+  }
+  sequenciasErrouNestaRonda = false;
+  const estadoAnterior = document.getElementById('estado-sequencias');
+  if(estadoAnterior) estadoAnterior.textContent = '';
+
+  const config = NIVEIS_SEQUENCIAS[sequenciasNivelAtual] || NIVEIS_SEQUENCIAS[1];
+  const ronda = config.rondas[sequenciasRondaAtual];
+  document.getElementById('pista-sequencias').textContent = ronda.sequencia.join(' ') + ' ❓';
+
+  const opcoes = embaralhar([ronda.resposta, ...ronda.distratores]);
+  sequenciasIndiceAlvoAtual = opcoes.indexOf(ronda.resposta);
+
+  const grelha = document.getElementById('grelha-sequencias');
+  grelha.innerHTML = opcoes.map((o,i) => `
+    <div class="forma-caract" id="opcao-sequencias-${i}" onclick="responderSequencias(${i})" role="button" tabindex="0" aria-label="${o}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();responderSequencias(${i});}" style="font-size:28px;">
+      ${o}
+    </div>
+  `).join('');
+
+  configurarBotaoOuvirSequencias();
+}
+
+function configurarBotaoOuvirSequencias(){
+  const btnOuvir = document.getElementById('btn-ouvir-sequencias');
+  if(!btnOuvir) return;
+  pararNarracao();
+  const texto = 'Olha para a sequência e toca no que vem a seguir.';
+  btnOuvir.textContent = '🔊 Ouvir';
+  btnOuvir.onclick = () => {
+    if(vozAtiva){
+      pararNarracao();
+      btnOuvir.textContent = '🔊 Ouvir';
+    } else {
+      btnOuvir.textContent = '⏸ A ouvir...';
+      narrar(texto, ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
+    }
+  };
+}
+
+function responderSequencias(i){
+  document.querySelectorAll('#grelha-sequencias .forma-caract').forEach(el => el.style.pointerEvents = 'none');
+  const el = document.getElementById('opcao-sequencias-'+i);
+  const correto = i === sequenciasIndiceAlvoAtual;
+  if(correto){
+    el.classList.add('certa');
+    tocarSomAcerto();
+    vibrar([15,40,60]);
+  } else {
+    el.classList.add('errada');
+    sequenciasErrouNestaRonda = true;
+    sequenciasTeveErro = true;
+    tocarSomErro();
+    vibrar([25,80,25]);
+    setTimeout(()=>{
+      document.querySelectorAll('#grelha-sequencias .forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
+    }, 400);
+    return;
+  }
+  sequenciasRondaAtual++;
+  sequenciasRondasDificeisSeguidas = sequenciasErrouNestaRonda ? sequenciasRondasDificeisSeguidas + 1 : 0;
+  const eraAUltimaRonda = sequenciasRondaAtual >= sequenciasTotalRondas;
+  if(sequenciasRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
+    setTimeout(()=>{
+      proximaRondaSequencias();
+      oferecerCaaAposDificuldadeGenerico();
+    }, 900);
+  } else {
+    setTimeout(proximaRondaSequencias, 900);
+  }
+}
+
+function concluirJogoSequencias(){
+  const proximoNivel = sequenciasNivelAtual + 1;
+  const existeProximoNivel = !!NIVEIS_SEQUENCIAS[proximoNivel];
+  if(!sequenciasTeveErro && existeProximoNivel && obterNivelAtual('sequencias') <= sequenciasNivelAtual){
+    nivelDesbloqueado['sequencias'] = proximoNivel;
+    guardarEstado();
+    renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
+  }
+  const nomeNivel = NIVEIS_SEQUENCIAS[sequenciasNivelAtual]?.nome || 'Fácil';
+  darEstrela(
+    sequenciasTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
+    'Completaste o Jogo das Sequências — nível ' + nomeNivel,
+    (!sequenciasTeveErro && sequenciasNivelAtual === 3) ? 2 : 1
+  );
+}
+
+const NIVEIS_CLASSIFICAR = {
+  1: { nome:'Fácil', rondas:[
+    { caixaA:{emoji:'🔴', nome:'Vermelho'}, caixaB:{emoji:'🔵', nome:'Azul'}, itens:[
+      {emoji:'🍎', grupo:'A'}, {emoji:'🫐', grupo:'B'}, {emoji:'🍓', grupo:'A'}, {emoji:'💧', grupo:'B'}, {emoji:'🌹', grupo:'A'}, {emoji:'🔵', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'🐘', nome:'Grande'}, caixaB:{emoji:'🐭', nome:'Pequeno'}, itens:[
+      {emoji:'🐋', grupo:'A'}, {emoji:'🐜', grupo:'B'}, {emoji:'🦒', grupo:'A'}, {emoji:'🐝', grupo:'B'}, {emoji:'🦣', grupo:'A'}, {emoji:'🐁', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'🐾', nome:'Animais'}, caixaB:{emoji:'🚗', nome:'Veículos'}, itens:[
+      {emoji:'🐶', grupo:'A'}, {emoji:'🚌', grupo:'B'}, {emoji:'🐱', grupo:'A'}, {emoji:'🚲', grupo:'B'}, {emoji:'🐰', grupo:'A'}, {emoji:'🚂', grupo:'B'},
+    ]},
+  ]},
+  2: { nome:'Médio', rondas:[
+    { caixaA:{emoji:'🟡', nome:'Amarelo'}, caixaB:{emoji:'🟢', nome:'Verde'}, itens:[
+      {emoji:'🍌', grupo:'A'}, {emoji:'🥦', grupo:'B'}, {emoji:'⭐', grupo:'A'}, {emoji:'🐸', grupo:'B'}, {emoji:'🌻', grupo:'A'}, {emoji:'🍀', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'⬆️', nome:'Em cima'}, caixaB:{emoji:'⬇️', nome:'Em baixo'}, itens:[
+      {emoji:'☁️', grupo:'A'}, {emoji:'🪨', grupo:'B'}, {emoji:'🦅', grupo:'A'}, {emoji:'🐛', grupo:'B'}, {emoji:'🎈', grupo:'A'}, {emoji:'🪱', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'🍽️', nome:'Comida'}, caixaB:{emoji:'🧸', nome:'Brinquedos'}, itens:[
+      {emoji:'🍕', grupo:'A'}, {emoji:'🎲', grupo:'B'}, {emoji:'🥕', grupo:'A'}, {emoji:'⚽', grupo:'B'}, {emoji:'🍞', grupo:'A'}, {emoji:'🪀', grupo:'B'},
+    ]},
+  ]},
+  3: { nome:'Difícil', rondas:[
+    { caixaA:{emoji:'🔷', nome:'Redondo'}, caixaB:{emoji:'🔶', nome:'Não redondo'}, itens:[
+      {emoji:'⚽', grupo:'A'}, {emoji:'📱', grupo:'B'}, {emoji:'🍊', grupo:'A'}, {emoji:'📚', grupo:'B'}, {emoji:'🎱', grupo:'A'}, {emoji:'🧊', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'🌳', nome:'Vive na natureza'}, caixaB:{emoji:'🏠', nome:'Feito por pessoas'}, itens:[
+      {emoji:'🌲', grupo:'A'}, {emoji:'🪑', grupo:'B'}, {emoji:'🦋', grupo:'A'}, {emoji:'📺', grupo:'B'}, {emoji:'🌺', grupo:'A'}, {emoji:'🔑', grupo:'B'},
+    ]},
+    { caixaA:{emoji:'☝️', nome:'Um só'}, caixaB:{emoji:'✌️', nome:'Vários'}, itens:[
+      {emoji:'🌞', grupo:'A'}, {emoji:'⭐', grupo:'B'}, {emoji:'🌍', grupo:'A'}, {emoji:'🐑', grupo:'B'}, {emoji:'🥇', grupo:'A'}, {emoji:'🎈', grupo:'B'},
+    ]},
+  ]},
+};
+
+let classificarNivelAtual = 1, classificarRondaAtual = 0, classificarTotalRondas = 3;
+let classificarErrouNestaRonda = false, classificarTeveErro = false;
+let classificarRondasDificeisSeguidas = 0;
+let classificarItensRestantes = [];
+let classificarItemSelecionado = -1;
+
+function gerarHtmlClassificar(){
+  const nivel = obterNivelAtual('classificar');
+  const nomeNivel = NIVEIS_CLASSIFICAR[nivel]?.nome || 'Fácil';
+  return `
+    <div class="painel">
+      <div class="nivel-jogo">Nível ${nomeNivel} — toca num item e depois na caixa certa</div>
+      <button class="btn-pagina" id="btn-ouvir-classificar" style="margin-bottom:12px;">🔊 Ouvir</button>
+      <div class="grelha-caracteristicas" id="grelha-classificar" style="margin-bottom:10px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="caixas-classificar"></div>
+      <div class="estado-jogo" id="estado-classificar"></div>
+    </div>
+  `;
+}
+
+function iniciarJogoClassificar(){
+  classificarNivelAtual = obterNivelAtual('classificar');
+  const config = NIVEIS_CLASSIFICAR[classificarNivelAtual] || NIVEIS_CLASSIFICAR[1];
+  classificarTotalRondas = config.rondas.length;
+  classificarRondaAtual = 0;
+  classificarTeveErro = false;
+  classificarRondasDificeisSeguidas = 0;
+  proximaRondaClassificar();
+}
+
+function proximaRondaClassificar(){
+  if(classificarRondaAtual >= classificarTotalRondas){
+    concluirJogoClassificar();
+    return;
+  }
+  classificarErrouNestaRonda = false;
+  classificarItemSelecionado = -1;
+  const estadoAnterior = document.getElementById('estado-classificar');
+  if(estadoAnterior) estadoAnterior.textContent = '';
+
+  const config = NIVEIS_CLASSIFICAR[classificarNivelAtual] || NIVEIS_CLASSIFICAR[1];
+  const ronda = config.rondas[classificarRondaAtual];
+  classificarItensRestantes = embaralhar(ronda.itens.map((it,idx) => ({...it, idOriginal:idx})));
+
+  document.getElementById('caixas-classificar').innerHTML = `
+    <div class="forma-caract" id="caixa-classificar-A" onclick="responderClassificar('A')" style="font-size:20px;flex-direction:column;gap:4px;">
+      <span style="font-size:32px;">${ronda.caixaA.emoji}</span>${ronda.caixaA.nome}
+    </div>
+    <div class="forma-caract" id="caixa-classificar-B" onclick="responderClassificar('B')" style="font-size:20px;flex-direction:column;gap:4px;">
+      <span style="font-size:32px;">${ronda.caixaB.emoji}</span>${ronda.caixaB.nome}
+    </div>
+  `;
+  renderItensClassificar();
+  configurarBotaoOuvirClassificar(ronda);
+}
+
+function renderItensClassificar(){
+  const grelha = document.getElementById('grelha-classificar');
+  grelha.innerHTML = classificarItensRestantes.map((it,i) => `
+    <div class="forma-caract item-classificar ${i===classificarItemSelecionado?'selecionado':''}" id="item-classificar-${i}" onclick="selecionarItemClassificar(${i})" style="font-size:36px;">
+      ${it.emoji}
+    </div>
+  `).join('');
+}
+
+function selecionarItemClassificar(i){
+  if(!classificarItensRestantes[i]) return;
+  classificarItemSelecionado = i;
+  renderItensClassificar();
+  vibrar(15);
+}
+
+function configurarBotaoOuvirClassificar(ronda){
+  const btnOuvir = document.getElementById('btn-ouvir-classificar');
+  if(!btnOuvir) return;
+  pararNarracao();
+  const texto = `Toca num item e depois na caixa: ${ronda.caixaA.nome} ou ${ronda.caixaB.nome}.`;
+  btnOuvir.textContent = '🔊 Ouvir';
+  btnOuvir.onclick = () => {
+    if(vozAtiva){
+      pararNarracao();
+      btnOuvir.textContent = '🔊 Ouvir';
+    } else {
+      btnOuvir.textContent = '⏸ A ouvir...';
+      narrar(texto, ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
+    }
+  };
+}
+
+function responderClassificar(grupo){
+  if(classificarItemSelecionado === -1) return; // precisa de escolher um item primeiro
+  const item = classificarItensRestantes[classificarItemSelecionado];
+  if(!item) return;
+  const correto = item.grupo === grupo;
+  if(correto){
+    tocarSomAcerto();
+    vibrar([15,40,60]);
+    classificarItensRestantes.splice(classificarItemSelecionado, 1);
+    classificarItemSelecionado = -1;
+    renderItensClassificar();
+    if(classificarItensRestantes.length === 0){
+      classificarRondaAtual++;
+      classificarRondasDificeisSeguidas = classificarErrouNestaRonda ? classificarRondasDificeisSeguidas + 1 : 0;
+      const eraAUltimaRonda = classificarRondaAtual >= classificarTotalRondas;
+      if(classificarRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
+        setTimeout(()=>{
+          proximaRondaClassificar();
+          oferecerCaaAposDificuldadeGenerico();
+        }, 700);
+      } else {
+        setTimeout(proximaRondaClassificar, 700);
+      }
+    }
+  } else {
+    classificarErrouNestaRonda = true;
+    classificarTeveErro = true;
+    tocarSomErro();
+    vibrar([25,80,25]);
+    // Não remove o item nem avança — apenas desmarca a seleção, para tentar de novo.
+    classificarItemSelecionado = -1;
+    renderItensClassificar();
+  }
+}
+
+function concluirJogoClassificar(){
+  const proximoNivel = classificarNivelAtual + 1;
+  const existeProximoNivel = !!NIVEIS_CLASSIFICAR[proximoNivel];
+  if(!classificarTeveErro && existeProximoNivel && obterNivelAtual('classificar') <= classificarNivelAtual){
+    nivelDesbloqueado['classificar'] = proximoNivel;
+    guardarEstado();
+    renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
+  }
+  const nomeNivel = NIVEIS_CLASSIFICAR[classificarNivelAtual]?.nome || 'Fácil';
+  darEstrela(
+    classificarTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
+    'Completaste o Jogo de Classificar — nível ' + nomeNivel,
+    (!classificarTeveErro && classificarNivelAtual === 3) ? 2 : 1
+  );
+}
+
 const NIVEIS_OPOSTOS = {
   1: { nome:'Fácil', pares:[
     { pista:{emoji:'🐘', texto:'grande'}, oposto:{emoji:'🐭', texto:'pequeno'} },
@@ -3130,6 +3464,8 @@ const jogosItens = [
   {icone:"🎧", cor:"#EAE5F1", t:"Ouvir e Perceber", d:"Ouve a história e responde", tipo:"ouvir-perguntas", dados:"aventura"},
   {icone:"🧩", cor:"#F0E4EE", t:"Jogo de Analogias", d:"Encontra a relação entre as palavras", tipo:"quiz", dados:"analogias"},
   {icone:"🔄", cor:"#EAF0FB", t:"Jogo dos Opostos", d:"Encontra o contrário da pista", tipo:"opostos", dados:"opostos"},
+  {icone:"📦", cor:"#FDEDE4", t:"Jogo de Classificar", d:"Separa os itens nas caixas certas", tipo:"classificar", dados:"classificar"},
+  {icone:"🔁", cor:"#E7F1E8", t:"Jogo das Sequências", d:"O que vem a seguir no padrão?", tipo:"sequencias", dados:"sequencias"},
 ];
 
 const videosItens = [
@@ -5363,6 +5699,14 @@ function abrirItemGenerico(it, origem){
     irParaDetalhe(gerarHtmlOpostos(), origem);
     return;
   }
+  if(it.tipo === 'classificar'){
+    irParaDetalhe(gerarHtmlClassificar(), origem);
+    return;
+  }
+  if(it.tipo === 'sequencias'){
+    irParaDetalhe(gerarHtmlSequencias(), origem);
+    return;
+  }
   if(it.tipo === 'calma'){
     abrirCalma();
     return;
@@ -6417,6 +6761,14 @@ const observador = new MutationObserver(()=>{
   if(document.getElementById('grelha-opostos') && !document.getElementById('grelha-opostos').dataset.iniciado){
     document.getElementById('grelha-opostos').dataset.iniciado = '1';
     iniciarJogoOpostos();
+  }
+  if(document.getElementById('grelha-classificar') && !document.getElementById('grelha-classificar').dataset.iniciado){
+    document.getElementById('grelha-classificar').dataset.iniciado = '1';
+    iniciarJogoClassificar();
+  }
+  if(document.getElementById('grelha-sequencias') && !document.getElementById('grelha-sequencias').dataset.iniciado){
+    document.getElementById('grelha-sequencias').dataset.iniciado = '1';
+    iniciarJogoSequencias();
   }
 });
 observador.observe(document.getElementById('conteudo-detalhe'), {childList:true, subtree:true});
