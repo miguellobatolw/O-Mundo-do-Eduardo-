@@ -307,6 +307,38 @@
     background:var(--salva); color:white; border-color:var(--salva);
   }
 
+  /* ===== Jogo "Pôr em Ordem" (arrastar cartões da rotina) ===== */
+  .cartao-ordenar-rotina{
+    background:var(--branco);
+    border-radius:var(--raio);
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:var(--sombra);
+    border:2px solid var(--salva-clara);
+    cursor:grab;
+    touch-action:none; /* impede o browser de tentar fazer scroll enquanto se arrasta */
+    user-select:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .cartao-ordenar-rotina:focus-visible{
+    outline:3px solid var(--petroleo);
+    outline-offset:2px;
+  }
+  .cartao-ordenar-rotina.a-arrastar{
+    opacity:.85;
+    box-shadow:0 8px 20px rgba(0,0,0,.18);
+    cursor:grabbing;
+    transform:scale(1.02);
+  }
+  .handle-arrastar{
+    font-size:18px;
+    color:var(--texto-suave);
+    flex-shrink:0;
+    line-height:1;
+  }
+
   /* ===== Listas de atividades / escola ===== */
   .lista-item{
     background:var(--branco);
@@ -389,6 +421,23 @@
   }
   .painel h2{ margin:0 0 8px; font-size:19px; color:var(--petroleo); }
   .painel p.desc{ color:var(--texto-suave); font-size:13.5px; margin:0 0 20px; line-height:1.5; }
+  /* Variante clara do círculo de respiração, para usar dentro de .painel (fundo
+     branco) — a versão original (.circulo-respirar) usa branco semi-transparente,
+     pensada para o fundo escuro do overlay do Modo Calma, e ficaria invisível aqui. */
+  .circulo-respirar-claro{
+    width:150px;height:150px;
+    margin:0 auto 26px;
+    border-radius:50%;
+    background:var(--salva-clara);
+    border:2px solid var(--salva);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px; color:var(--petroleo); font-weight:700;
+    animation:respirar 6s ease-in-out infinite;
+  }
+  .tempo-espera{
+    font-size:32px; font-weight:800; color:var(--petroleo);
+    margin-bottom:20px;
+  }
   .btn-primario{
     background:var(--petroleo);
     color:white; border:none;
@@ -490,6 +539,28 @@
     background:var(--areia-clara);
     color:var(--texto-suave);
     border:2px dashed var(--salva-clara);
+  }
+  /* Botões de seleção de ficha temática de vocabulário (ver FICHAS_TRACADO_TEMATICAS) —
+     grelha de 2 colunas para caber confortavelmente em ecrã de telemóvel. */
+  .grelha-temas-tracado{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .btn-tema-tracado{
+    padding:10px 8px;
+    border-radius:12px;
+    border:2px solid var(--salva-clara);
+    background:var(--branco);
+    color:var(--texto);
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-tema-tracado:active{
+    background:var(--salva-clara);
   }
 
   /* ===== Quiz ===== */
@@ -1048,6 +1119,11 @@
     overflow:hidden; margin-top:6px;
   }
   .recompensa .r-barra-preenchida{ height:100%; background:var(--petroleo); border-radius:100px; transition:width .4s ease; }
+  .medalha .m-barra-fundo{
+    height:8px; background:var(--salva-clara); border-radius:100px;
+    overflow:hidden; margin-top:6px;
+  }
+  .medalha .m-barra-preenchida{ height:100%; background:var(--petroleo); border-radius:100px; transition:width .4s ease; }
   .recompensa.resgatavel{ border:2px solid var(--petroleo); }
   .recompensa .btn-resgatar{
     flex-shrink:0; background:var(--petroleo); color:#fff; border:none;
@@ -1211,6 +1287,27 @@
   }
   .cartao-dica strong{ color:var(--petroleo); display:block; margin-bottom:4px; }
 
+  .fontes-dica-ia{
+    margin-top:10px;
+    padding-top:8px;
+    border-top:1px dashed var(--amarelo-suave);
+    white-space:normal;
+  }
+  .fontes-dica-ia summary{
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+    color:var(--texto-suave);
+  }
+  .fontes-dica-ia ul{
+    margin:8px 0 0;
+    padding-left:18px;
+    font-size:12px;
+    color:var(--texto-suave);
+    line-height:1.5;
+  }
+  .fontes-dica-ia li{ margin-bottom:4px; }
+
   .cartao-generalizacao{
     background:#EEF5F0;
     border:2px solid var(--salva);
@@ -1328,6 +1425,17 @@
     margin-bottom:10px;
   }
   .frase-caa-vazia{ color:var(--texto-suave); font-size:13.5px; }
+
+  /* Modo Prática do Quadro CAA: fundo âmbar suave em todo o ecrã, para ficar óbvio
+     que a frase construída aqui é só treino e não é "enviada" a sério. */
+  #ecra-caa.modo-pratica{ background:#FFF8EC; }
+  #ecra-caa.modo-pratica .frase-caa{ border:2px dashed var(--amarelo-suave); }
+  #btn-alternar-pratica-caa.ativo{
+    background:var(--amarelo-suave);
+    color:#fff;
+    border-color:var(--amarelo-suave);
+  }
+
   .palavra-caa{
     display:flex; flex-direction:column; align-items:center;
     background:var(--areia-clara);
@@ -1481,9 +1589,11 @@
       transition-duration:0.01ms !important;
     }
     .circulo-respirar{ animation:none !important; }
+    .circulo-respirar-claro{ animation:none !important; }
     .ecra{ animation:none !important; }
   }
   body.movimento-reduzido .circulo-respirar{ animation:none; }
+  body.movimento-reduzido .circulo-respirar-claro{ animation:none; }
   body.movimento-reduzido .ecra{ animation:none; }
   body.movimento-reduzido *{ transition-duration:0.01ms !important; }
 
@@ -1863,9 +1973,10 @@
          até uma secção específica. Toque em cada pictograma diz a palavra em voz alta e junta-a
          à frase no topo; "Falar" lê a frase completa. -->
     <section class="ecra" id="ecra-caa">
-      <button class="voltar" onclick="irPara(caaEcraAnterior || 'inicio')">← Voltar</button>
+      <button class="voltar" onclick="sairDoEcraCaa()">← Voltar</button>
       <div class="titulo-secao">💬 Quero Dizer</div>
-      <div class="subtitulo-secao">Toca nas imagens para formar uma frase</div>
+      <div class="subtitulo-secao" id="subtitulo-caa">Toca nas imagens para formar uma frase</div>
+      <button class="btn-secundario" id="btn-alternar-pratica-caa" onclick="alternarModoPraticaCaa()" style="width:100%;margin-bottom:12px;">🎯 Modo Treino (sem enviar de verdade)</button>
 
       <div class="frase-caa" id="frase-caa" role="status" aria-live="polite">
         <span class="frase-caa-vazia" id="frase-caa-vazia">Toca numa imagem para começar…</span>
@@ -1902,6 +2013,20 @@
       <div class="subtitulo-secao">O nome e a idade personalizam a app. As restantes respostas ajudam a IA a adaptar as perguntas do quiz.</div>
       <div id="resumo-perfil-crianca"></div>
       <button class="btn-primario" id="btn-abrir-editar-perfil" style="margin-top:10px;">✏️ Editar perfil</button>
+
+      <!-- ===== Acesso partilhado: dá a outro adulto (o outro progenitor, um terapeuta) acesso
+           ao MESMO perfil, com a mesma rotina e histórico — sem duplicar dados. ===== -->
+      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">👥 Acesso partilhado</div>
+      <div class="subtitulo-secao">Convida outro adulto (o outro pai/mãe, um terapeuta) a aceder a este mesmo perfil, com a mesma rotina e histórico.</div>
+      <button class="btn-secundario" id="btn-gerar-codigo-convite">Gerar código de convite</button>
+      <div id="resultado-codigo-convite" style="display:none;"></div>
+
+      <div class="subtitulo-secao" style="margin-top:16px;">Recebeste um código de outra pessoa? Insere-o aqui para acederes ao perfil dela em vez de criares um novo.</div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="campo-codigo-convite" placeholder="Código de 6 letras" maxlength="6" style="flex:1; text-transform:uppercase; padding:12px; border-radius:12px; border:2px solid var(--salva-clara); font-size:15px; text-align:center; letter-spacing:2px;">
+        <button class="btn-secundario" id="btn-usar-codigo-convite" style="width:auto; padding:0 16px;">Ligar</button>
+      </div>
+      <p id="msg-codigo-convite" style="font-size:12.5px;margin-top:6px;"></p>
       </div>
 
       <div class="painel-aba" data-aba="rotina">
@@ -1916,6 +2041,16 @@
           <div class="d">Reduz confetis e som de ovação ao ganhar estrelas. Fica mais discreto.</div>
         </div>
         <button class="interruptor" id="interruptor-efeitos-calmos" onclick="alternarEfeitosCalmos()" aria-label="Ativar ou desativar efeitos calmos">
+          <div class="bola"></div>
+        </button>
+      </div>
+
+      <div class="linha-definicao">
+        <div class="txt-def">
+          <div class="t">⏱️ Mostrar tempo no jogo "Esperar"</div>
+          <div class="d">Desliga se a contagem de segundos aumentar a ansiedade em vez de ajudar a esperar com calma.</div>
+        </div>
+        <button class="interruptor" id="interruptor-mostrar-tempo-esperar" onclick="alternarMostrarTempoEsperar()" aria-label="Mostrar ou esconder o tempo no jogo Esperar">
           <div class="bola"></div>
         </button>
       </div>
@@ -2047,6 +2182,7 @@
         <div class="t-grafico">Quadro CAA — palavras mais usadas</div>
         <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Um uso frequente de palavras como "dói-me" ou "preciso de calma" pode ser um sinal a que vale a pena prestar atenção — não é um diagnóstico.</p>
         <div id="lista-uso-caa"></div>
+        <p id="linha-sessoes-pratica-caa" style="font-size:12.5px;color:var(--texto-suave);margin-top:10px;display:none;"></p>
       </div>
 
       <div class="cartao-grafico" id="cartao-add-caa">
@@ -2277,6 +2413,16 @@
       <button class="btn-primario" id="btn-gerar-plano" style="margin-top:10px;">✨ Gerar sugestões do Plano</button>
       <p id="msg-plano" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
       <div id="revisao-plano"></div>
+
+      <!-- ===================== PARTILHAR COM OUTRO CUIDADOR ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">👨‍👩‍👧 Partilhar com outro cuidador</div>
+      <div class="subtitulo-secao">Dá acesso ao pai, avó, avô ou professora de apoio ao mesmo histórico e configurações do Eduardo — para todos reforçarem os mesmos padrões, no telemóvel de cada um.</div>
+      <p style="font-size:12.5px;color:var(--texto-suave);margin:6px 0 10px;">1. Exporta o ficheiro abaixo e envia-o (WhatsApp, email) à pessoa.<br>2. Essa pessoa abre a app no telemóvel dela e usa "Importar" com o mesmo ficheiro.<br>3. A partir daí, ambos veem o mesmo progresso — mas cada telemóvel guarda a sua própria cópia; alterações feitas num não aparecem automaticamente no outro, é preciso repetir a partilha de vez em quando.</p>
+      <button class="btn-secundario" id="btn-exportar-partilha" style="margin-top:6px;">📤 Exportar para partilhar</button>
+      <label class="btn-secundario" for="input-importar-partilha" style="margin-top:10px;display:block;text-align:center;cursor:pointer;">📥 Já recebi um ficheiro — importar</label>
+      <input type="file" id="input-importar-partilha" accept="application/json" style="display:none;">
+      <p id="msg-partilha" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
 
       <!-- ===================== BACKUP (exportar/importar progresso) ===================== -->
       <div class="separador-secao"></div>
@@ -2723,6 +2869,32 @@
           const snap = await getDoc(doc(db, "perfis", uid));
           return snap.exists() ? snap.data() : null;
         },
+        // ===== Acesso multi-cuidador =====
+        // Gera um código curto (6 caracteres) que outro adulto (o outro progenitor, um
+        // terapeuta) pode usar para se ligar ao MESMO perfil, em vez de criar um duplicado.
+        // O código fica guardado num documento à parte ("vinculos"), que aponta para o uid
+        // do perfil original — nunca contém a password nem dados sensíveis da criança.
+        gerarCodigoConvite: async (uidDono) => {
+          const codigo = Math.random().toString(36).slice(2, 8).toUpperCase();
+          await setDoc(doc(db, "vinculos", codigo), {
+            uidPerfil: uidDono,
+            criadoEm: Date.now(),
+          });
+          return codigo;
+        },
+        // Liga a conta atual (uidConvidado) ao perfil apontado pelo código. A partir daqui,
+        // ambos os uids leem/escrevem o mesmo documento em "perfis" — ver regras do Firestore
+        // nas instruções para autorizar isto.
+        usarCodigoConvite: async (codigo, uidConvidado) => {
+          const snapVinculo = await getDoc(doc(db, "vinculos", codigo.trim().toUpperCase()));
+          if(!snapVinculo.exists()){
+            throw new Error('Código não encontrado. Confirma se o escreveste corretamente.');
+          }
+          const uidPerfil = snapVinculo.data().uidPerfil;
+          // Guarda a ligação: esta conta passa a apontar para o perfil partilhado.
+          await setDoc(doc(db, "perfis", uidConvidado), { uidPerfilPartilhado: uidPerfil }, { merge: true });
+          return uidPerfil;
+        },
       };
 
       // Ponto central: reage sempre que o estado de login muda (arranque da app, login, logout).
@@ -2767,7 +2939,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.24.0';
+window.APP_VERSION = '1.29.0';
 
 /* ======================= DADOS ======================= */
 
@@ -2972,6 +3144,224 @@ function concluirJogoSequencias(){
     'Completaste o Jogo das Sequências — nível ' + nomeNivel,
     (!sequenciasTeveErro && sequenciasNivelAtual === 3) ? 2 : 1
   );
+}
+
+/* ======================= JOGO "PÔR EM ORDEM" (sequenciação de rotina, arrastar) =======================
+   Usa os próprios blocos da rotina do Eduardo (já lhe são familiares) em vez de conteúdo
+   abstrato — treina sequência temporal de eventos do dia-a-dia, mais próximo de planeamento
+   e memória de sequência do que o Jogo das Sequências (que é sobre padrões visuais abstratos).
+   Drag-and-drop real (arrastar com o dedo), com suporte a toque e a rato, sem depender de
+   nenhuma biblioteca externa. */
+// Níveis por número de cartões a ordenar — a rotina do Eduardo tem 8 blocos no total,
+// por isso o nível Difícil (6 cartões) ainda cabe confortavelmente sem esgotar o banco
+// nem tornar a ronda longa de mais para o formato do jogo.
+const NIVEIS_ORDENAR_ROTINA = {
+  1: { nome:'Fácil', qtdCartoes:4 },
+  2: { nome:'Médio', qtdCartoes:5 },
+  3: { nome:'Difícil', qtdCartoes:6 },
+};
+let ordenarRotinaBlocosRonda = []; // os blocos escolhidos para esta ronda, na ordem CORRETA
+let ordenarRotinaOrdemAtual = []; // a ordem atual dos cartões no ecrã (o que o Eduardo já moveu)
+let ordenarRotinaTeveErro = false;
+let ordenarRotinaNivelAtual = 1;
+let ordenarRotinaArrastandoIndice = null; // índice do cartão a ser arrastado neste momento
+
+function gerarHtmlOrdenarRotina(){
+  const nivel = obterNivelAtual('ordenar-rotina');
+  const nomeNivel = NIVEIS_ORDENAR_ROTINA[nivel]?.nome || 'Fácil';
+  return `
+    <div class="painel">
+      <div class="nivel-jogo">Nível ${nomeNivel} — põe as tarefas na ordem certa</div>
+      <p class="desc">Arrasta os cartões até ficarem na ordem em que acontecem no dia, do primeiro para o último.</p>
+      <div id="lista-ordenar-rotina" style="display:flex;flex-direction:column;gap:10px;margin-top:14px;"></div>
+      <button class="btn-primario" id="btn-verificar-ordenar-rotina" style="margin-top:16px;">Verificar</button>
+      <div class="estado-jogo" id="estado-ordenar-rotina"></div>
+    </div>
+  `;
+}
+
+function iniciarJogoOrdenarRotina(){
+  ordenarRotinaNivelAtual = obterNivelAtual('ordenar-rotina');
+  const config = NIVEIS_ORDENAR_ROTINA[ordenarRotinaNivelAtual] || NIVEIS_ORDENAR_ROTINA[1];
+  // Escolhe config.qtdCartoes blocos ao acaso da rotina do dia, mantendo a ordem
+  // cronológica original como "resposta certa", depois embaralha para mostrar.
+  const indicesEscolhidos = embaralhar(rotinaHoje.map((_, i) => i)).slice(0, config.qtdCartoes);
+  indicesEscolhidos.sort((a, b) => a - b); // repõe a ordem cronológica = a sequência correta
+  ordenarRotinaBlocosRonda = indicesEscolhidos.map(i => rotinaHoje[i]);
+  ordenarRotinaOrdemAtual = embaralhar(ordenarRotinaBlocosRonda.map((_, i) => i)); // ordem embaralhada para mostrar
+  ordenarRotinaTeveErro = false;
+  renderOrdenarRotina();
+}
+
+function renderOrdenarRotina(){
+  const cont = document.getElementById('lista-ordenar-rotina');
+  if(!cont) return;
+  cont.innerHTML = ordenarRotinaOrdemAtual.map((indiceOriginal, posicao) => {
+    const bloco = ordenarRotinaBlocosRonda[indiceOriginal];
+    return `
+      <div class="cartao-ordenar-rotina" draggable="true" data-posicao="${posicao}" tabindex="0" role="button" aria-label="${bloco.t}, posição ${posicao + 1} de ${ordenarRotinaOrdemAtual.length}">
+        <span class="handle-arrastar">⠿</span>
+        <span class="icone-rotina" style="width:36px;height:36px;font-size:20px;">${bloco.icone}</span>
+        <span class="t" style="flex:1;">${bloco.t}</span>
+      </div>
+    `;
+  }).join('');
+  ativarArrastarOrdenarRotina();
+}
+
+// Suporta tanto rato/trackpad (dragstart/dragover/drop, API nativa HTML5) como toque em
+// telemóvel (touchstart/touchmove/touchend) — a API de drag nativa tem suporte inconsistente
+// em toque em alguns browsers Android, por isso o toque é implementado à parte.
+// IMPORTANTE: durante o arrasto por toque, os cartões são reordenados no DOM diretamente
+// (insertBefore), nunca via renderOrdenarRotina() — recriar os elementos a meio do gesto
+// destruiria o nó que está a receber os eventos touchmove e interromperia o arrasto.
+function ativarArrastarOrdenarRotina(){
+  const cartoes = document.querySelectorAll('.cartao-ordenar-rotina');
+  const container = document.getElementById('lista-ordenar-rotina');
+
+  cartoes.forEach(cartao => {
+    // --- Rato / trackpad (drag nativo) ---
+    cartao.addEventListener('dragstart', (e) => {
+      ordenarRotinaArrastandoIndice = Number(cartao.dataset.posicao);
+      cartao.classList.add('a-arrastar');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    cartao.addEventListener('dragend', () => {
+      cartao.classList.remove('a-arrastar');
+      ordenarRotinaArrastandoIndice = null;
+    });
+    cartao.addEventListener('dragover', (e) => {
+      e.preventDefault(); // necessário para permitir o 'drop'
+    });
+    cartao.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const posicaoDestino = Number(cartao.dataset.posicao);
+      if(ordenarRotinaArrastandoIndice === null || ordenarRotinaArrastandoIndice === posicaoDestino) return;
+      trocarPosicoesOrdenarRotina(ordenarRotinaArrastandoIndice, posicaoDestino);
+    });
+
+    // --- Toque (telemóvel) ---
+    // Guarda a posição inicial do toque uma única vez no início do gesto; o deslocamento
+    // (delta) a cada frame é sempre calculado a partir desse ponto fixo, nunca a partir de
+    // getBoundingClientRect() a meio do arrasto (essa medida já reflete o deslocamento do
+    // frame anterior e ia acumulando erro — era a causa do cartão "fugir" do dedo).
+    let toqueYInicial = 0;
+
+    cartao.addEventListener('touchstart', (e) => {
+      ordenarRotinaArrastandoIndice = Number(cartao.dataset.posicao);
+      cartao.classList.add('a-arrastar');
+      toqueYInicial = e.touches[0].clientY;
+      cartao.style.position = 'relative';
+      cartao.style.zIndex = '10';
+    }, { passive: true });
+
+    cartao.addEventListener('touchmove', (e) => {
+      if(ordenarRotinaArrastandoIndice === null) return;
+      e.preventDefault(); // impede o scroll da página enquanto se arrasta
+      const toqueY = e.touches[0].clientY;
+      cartao.style.top = (toqueY - toqueYInicial) + 'px';
+
+      // Deteta sobre que outro cartão está o dedo, para reordenar em tempo real.
+      // Esconde temporariamente o próprio cartão da deteção (pointer-events:none),
+      // senão elementFromPoint devolve sempre o próprio cartão (que está por cima do dedo).
+      cartao.style.pointerEvents = 'none';
+      const elementoPorBaixo = document.elementFromPoint(e.touches[0].clientX, toqueY);
+      cartao.style.pointerEvents = '';
+      const cartaoPorBaixo = elementoPorBaixo ? elementoPorBaixo.closest('.cartao-ordenar-rotina') : null;
+      if(cartaoPorBaixo && cartaoPorBaixo !== cartao && container.contains(cartaoPorBaixo)){
+        // Troca os dois valores no array de dados (pelas posições atuais, guardadas no
+        // dataset de cada nó — são atualizadas a cada troca, por isso refletem sempre a
+        // correspondência atual entre elemento DOM e posição lógica).
+        const posicaoAtualCartao = Number(cartao.dataset.posicao);
+        const posicaoAtualDestino = Number(cartaoPorBaixo.dataset.posicao);
+        [ordenarRotinaOrdemAtual[posicaoAtualCartao], ordenarRotinaOrdemAtual[posicaoAtualDestino]] =
+          [ordenarRotinaOrdemAtual[posicaoAtualDestino], ordenarRotinaOrdemAtual[posicaoAtualCartao]];
+        // ...e troca os dois nós DOM diretamente (sem recriar nada), preservando o cartão
+        // arrastado — apenas troca as etiquetas de posição e a ordem física dos irmãos.
+        cartao.dataset.posicao = String(posicaoAtualDestino);
+        cartaoPorBaixo.dataset.posicao = String(posicaoAtualCartao);
+        if(cartao.nextSibling === cartaoPorBaixo){
+          container.insertBefore(cartaoPorBaixo, cartao);
+        } else if(cartaoPorBaixo.nextSibling === cartao){
+          container.insertBefore(cartao, cartaoPorBaixo);
+        } else {
+          // Não são vizinhos diretos (arrasto rápido saltou uma posição) — troca pela
+          // referência do irmão seguinte de cada um, cobrindo o caso geral.
+          const refCartao = cartao.nextSibling;
+          const refDestino = cartaoPorBaixo.nextSibling;
+          container.insertBefore(cartao, refDestino);
+          container.insertBefore(cartaoPorBaixo, refCartao);
+        }
+        // Ao trocar de posição no DOM, o cartão arrastado ganhou um novo "top" de
+        // referência (a sua posição de layout mudou) — reiniciamos o ponto de partida
+        // do delta para o toque continuar a sentir-se natural a partir daqui.
+        cartao.style.top = '0px';
+        toqueYInicial = toqueY;
+      }
+    }, { passive: false });
+
+    cartao.addEventListener('touchend', () => {
+      ordenarRotinaArrastandoIndice = null;
+      cartao.classList.remove('a-arrastar');
+      cartao.style.position = '';
+      cartao.style.top = '';
+      cartao.style.zIndex = '';
+    });
+
+    cartao.addEventListener('touchcancel', () => {
+      ordenarRotinaArrastandoIndice = null;
+      renderOrdenarRotina(); // caso de interrupção do gesto: repõe tudo do zero, por segurança
+    });
+
+    // --- Teclado (acessibilidade): setas para cima/baixo movem o cartão focado ---
+    cartao.addEventListener('keydown', (e) => {
+      const posicaoAtual = Number(cartao.dataset.posicao);
+      if(e.key === 'ArrowUp' && posicaoAtual > 0){
+        e.preventDefault();
+        trocarPosicoesOrdenarRotina(posicaoAtual, posicaoAtual - 1);
+        setTimeout(() => document.querySelector(`[data-posicao="${posicaoAtual - 1}"]`)?.focus(), 0);
+      } else if(e.key === 'ArrowDown' && posicaoAtual < ordenarRotinaOrdemAtual.length - 1){
+        e.preventDefault();
+        trocarPosicoesOrdenarRotina(posicaoAtual, posicaoAtual + 1);
+        setTimeout(() => document.querySelector(`[data-posicao="${posicaoAtual + 1}"]`)?.focus(), 0);
+      }
+    });
+  });
+}
+
+function trocarPosicoesOrdenarRotina(posicaoA, posicaoB){
+  [ordenarRotinaOrdemAtual[posicaoA], ordenarRotinaOrdemAtual[posicaoB]] =
+    [ordenarRotinaOrdemAtual[posicaoB], ordenarRotinaOrdemAtual[posicaoA]];
+  renderOrdenarRotina();
+  vibrar(10);
+}
+
+function verificarOrdenarRotina(){
+  // A ordem correta é sempre 0,1,2,3... (índices originais em ordem crescente = ordem
+  // cronológica), já que ordenarRotinaBlocosRonda foi construído nessa ordem.
+  const estaCorreta = ordenarRotinaOrdemAtual.every((indiceOriginal, posicao) => indiceOriginal === posicao);
+  const estado = document.getElementById('estado-ordenar-rotina');
+  if(estaCorreta){
+    if(estado) estado.textContent = '';
+    const proximoNivel = ordenarRotinaNivelAtual + 1;
+    const existeProximoNivel = !!NIVEIS_ORDENAR_ROTINA[proximoNivel];
+    if(!ordenarRotinaTeveErro && existeProximoNivel && obterNivelAtual('ordenar-rotina') <= ordenarRotinaNivelAtual){
+      nivelDesbloqueado['ordenar-rotina'] = proximoNivel;
+      guardarEstado();
+      renderLista('lista-jogos', jogosItens, abrirJogo);
+    }
+    const nomeNivel = NIVEIS_ORDENAR_ROTINA[ordenarRotinaNivelAtual]?.nome || 'Fácil';
+    darEstrela(
+      ordenarRotinaTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
+      'Puseste as tarefas do dia na ordem certa — nível ' + nomeNivel,
+      (!ordenarRotinaTeveErro && ordenarRotinaNivelAtual === 3) ? 2 : 1
+    );
+  } else {
+    ordenarRotinaTeveErro = true;
+    tocarSomErro();
+    vibrar(30);
+    if(estado) estado.textContent = 'Ainda não está — repara bem nas horas de cada tarefa e tenta outra vez.';
+  }
 }
 
 const NIVEIS_CLASSIFICAR = {
@@ -3451,6 +3841,7 @@ const atividadesItens = [
   {icone:"🎵", cor:"#EAE5F1", t:"Sons Relaxantes", d:"Chuva, ondas do mar, floresta", tipo:"sons"},
   {icone:"📋", cor:"#E7F1E8", t:"Quadro de Emoções", d:"Como te sentes agora?", tipo:"emocoes"},
   {icone:"🧘", cor:"#F3E3E0", t:"Respirar com Calma", d:"3 minutos de respiração guiada", tipo:"calma"},
+  {icone:"⏳", cor:"#EAF0FB", t:"Aprender a Esperar", d:"Respira enquanto o tempo passa, com calma", tipo:"esperar", dados:"esperar"},
 ];
 
 const jogosItens = [
@@ -3466,6 +3857,7 @@ const jogosItens = [
   {icone:"🔄", cor:"#EAF0FB", t:"Jogo dos Opostos", d:"Encontra o contrário da pista", tipo:"opostos", dados:"opostos"},
   {icone:"📦", cor:"#FDEDE4", t:"Jogo de Classificar", d:"Separa os itens nas caixas certas", tipo:"classificar", dados:"classificar"},
   {icone:"🔁", cor:"#E7F1E8", t:"Jogo das Sequências", d:"O que vem a seguir no padrão?", tipo:"sequencias", dados:"sequencias"},
+  {icone:"📋", cor:"#FBEFDD", t:"Pôr em Ordem", d:"Arrasta as tarefas do dia para a ordem certa", tipo:"ordenar-rotina", dados:"ordenar-rotina"},
 ];
 
 const videosItens = [
@@ -3542,6 +3934,7 @@ const medalhasLista = [
   {icone:"🌿", t:"Calma Total", d:"Usa o modo Calma 5 vezes", desbloqueada:false},
   {icone:"🔥", t:"Semana Completa", d:"Termina a rotina do dia 7 dias seguidos", desbloqueada:false},
   {icone:"💪", t:"Nunca Desistes", d:"Termina 10 fichas até ao fim, mesmo com respostas erradas", desbloqueada:false},
+  {icone:"⏳", t:"Primeira Espera", d:"Esperaste com calma pela primeira vez", desbloqueada:false},
 ];
 
 // Cada pergunta tem um nível de dificuldade: 1 = fácil, 2 = médio, 3 = difícil.
@@ -3726,8 +4119,41 @@ const quizzes = {
 };
 
 // Nível de dificuldade atualmente desbloqueado por matéria (chave do banco de perguntas).
-// Começa sempre em 1 (fácil); só sobe depois de acertar TODAS as perguntas desse nível de uma vez.
 let nivelDesbloqueado = {};
+
+// Histórico curto de sessões recentes por jogo, usado para decidir a subida de nível
+// (ver avaliarProgressaoNivel). Guarda só as últimas 2 sessões: {chave: [true, false, ...]},
+// onde cada valor é "sessão limpa o suficiente" (0 ou 1 erro) nesse nível. Um jogo que
+// sobe de nível reinicia o seu histórico, para o critério se aplicar sempre ao nível
+// em que a criança está agora, não a um nível já ultrapassado.
+let historicoSessoesJogo = {};
+
+// Critério de progressão: exige domínio *repetido*, não um golpe de sorte numa única
+// sessão. Em vez de "zero erros agora" decidir logo a subida (que deixa subir por sorte
+// pontual num único bom dia), olha às últimas 2 sessões neste nível — só sobe se AMBAS
+// foram sem erros. Um único erro isolado não trava a subida por si só: só a impede se
+// se repetir na sessão seguinte também. Devolve true se subiu de nível.
+function avaliarProgressaoNivel(chave, teveErro, niveisDoJogo){
+  const nivelAtual = obterNivelAtual(chave);
+  const proximoNivel = nivelAtual + 1;
+  const existeProximoNivel = !!niveisDoJogo[proximoNivel];
+  if(!existeProximoNivel) return false;
+
+  if(!historicoSessoesJogo[chave]) historicoSessoesJogo[chave] = [];
+  const sessaoLimpa = !teveErro; // esta função só recebe TeveErro booleano (0 vs 1+ erros)
+  historicoSessoesJogo[chave].push(sessaoLimpa);
+  if(historicoSessoesJogo[chave].length > 2){
+    historicoSessoesJogo[chave] = historicoSessoesJogo[chave].slice(-2);
+  }
+
+  const ultimasDuas = historicoSessoesJogo[chave];
+  const subiu = ultimasDuas.length === 2 && ultimasDuas.every(s => s === true);
+  if(subiu){
+    nivelDesbloqueado[chave] = proximoNivel;
+    historicoSessoesJogo[chave] = []; // reinicia para o novo nível
+  }
+  return subiu;
+}
 
 function obterNivelAtual(chave){
   return nivelDesbloqueado[chave] || 1;
@@ -3787,6 +4213,11 @@ let somAtivo = null; // { chave, pararFn } — som ambiente (chuva, etc.) atualm
 // "Efeitos calmos": interruptor manual em Definições que reduz confetis e som de ovação,
 // independente da preferência do sistema (prefers-reduced-motion) e do volume do dispositivo.
 let efeitosCalmosAtivo = false;
+// Preferência do jogo "Esperar": mostrar ou não a contagem decrescente em números.
+// Para algumas crianças, ver os segundos a contar aumenta a ansiedade em vez de a
+// reduzir — o objetivo do exercício é tolerar a incerteza, não vigiar o relógio.
+// Por omissão fica visível (true), para não mudar o comportamento de quem já usa a app.
+let mostrarTempoEsperar = true;
 
 // ===================== QUADRO CAA (Comunicação Aumentativa e Alternativa) =====================
 // Pictogramas organizados por categoria, inspirados no vocabulário nuclear típico de CAA
@@ -3887,6 +4318,12 @@ const categoriasCaa = [
 
 let categoriaCaaAtiva = 'nucleo';
 let fraseCaaAtual = []; // array de {icone, texto}
+// Modo Prática do Quadro CAA: quando ativo, o Eduardo pode ensaiar frases sem que isso
+// conte como comunicação funcional real — não regista em registoUsoCaa nem nas
+// estatísticas parentais de uso do quadro. Só conta sessões de prática, um número
+// separado, para os pais verem que houve treino mesmo que não seja "uso a sério".
+let modoPraticaCaaAtivo = false;
+let contadorSessoesPraticaCaa = 0;
 let caaEcraAnterior = 'inicio'; // para o botão "Voltar" regressar ao ecrã de onde veio
 
 // Frases guardadas para reutilizar com 1 toque — reduz o esforço motor/cognitivo de
@@ -3934,6 +4371,12 @@ function carregarFrasesGuardadasCaa(){
 // isto quando já há pelo menos 1 palavra na frase.
 function guardarFraseAtualComoRapida(){
   if(fraseCaaAtual.length === 0) return;
+  // Frases criadas em Modo Prática não são guardadas como frases rápidas — são só
+  // treino, e guardá-las misturaria ensaios com frases reais que o Eduardo já domina.
+  if(modoPraticaCaaAtivo){
+    vibrar(15);
+    return;
+  }
   const texto = fraseCaaAtual.map(p => p.texto).join(' ');
   // Evita duplicar exatamente a mesma frase (mesma sequência de palavras)
   const jaExiste = frasesGuardadasCaa.some(f => f.texto === texto);
@@ -4058,6 +4501,9 @@ let contadorUsosCalma = 0;
 // Conta quizzes terminados até ao fim, mesmo com erros pelo caminho — reforça
 // a persistência em tentar, não só o resultado final (ver responderQuiz/renderQuiz)
 let contadorQuizzesConcluidos = 0;
+// Conta esperas completadas até ao fim na atividade "Aprender a Esperar" — sair
+// a meio (ver sairDeEsperar) nunca incrementa este contador, por desenho.
+let contadorEsperasCompletas = 0;
 
 // Sequência de dias seguidos com a rotina do dia 100% completa
 let streakDias = 0;
@@ -4077,6 +4523,11 @@ let registoPosCalma = {};
 // (não a hora exata, para não sugerir um registo demasiado granular/clínico).
 // Ajuda a notar padrões como "quase sempre ao fim da tarde", úteis para ajustar a rotina.
 let registoCalmaPorHora = {}; // { manha:1, almoco:0, tarde:4, fimDoDia:1 }
+// Histórico da atividade "Aprender a Esperar": cada entrada regista se a espera foi
+// completada até ao fim ou se saiu a meio (sem que isso conte como falha — ver
+// sairDeEsperar). Dá ao responsável visibilidade sobre a evolução da tolerância à
+// espera ao longo do tempo, sem ser um registo intrusivo de "sucesso/fracasso".
+let registoTentativasEsperar = [];
 const PERIODOS_CALMA = {
   manha:    { lbl: 'Manhã',        de: 6,  ate: 12 },
   almoco:   { lbl: 'Hora de almoço', de: 12, ate: 14 },
@@ -4212,19 +4663,24 @@ function guardarEstado(){
       contadorVitoriasMemoria: contadorVitoriasMemoria,
       contadorUsosCalma: contadorUsosCalma,
       contadorQuizzesConcluidos: contadorQuizzesConcluidos,
+      contadorEsperasCompletas: contadorEsperasCompletas,
       nivelDesbloqueado: nivelDesbloqueado,
       streakDias: streakDias,
       recordeStreakDias: recordeStreakDias,
       ultimaDataStreak: ultimaDataStreak,
       efeitosCalmosAtivo: efeitosCalmosAtivo,
+      mostrarTempoEsperar: mostrarTempoEsperar,
       volumeSomApp: volumeSomApp,
       registoCalmaPorBloco: registoCalmaPorBloco,
       registoPosCalma: registoPosCalma,
       registoCalmaPorHora: registoCalmaPorHora,
+      registoTentativasEsperar: registoTentativasEsperar,
+      historicoSessoesJogo: historicoSessoesJogo,
       registoLatenciaPorMateria: registoLatenciaPorMateria,
       registoPistaPorMateria: registoPistaPorMateria,
       registoEmocoes: registoEmocoes,
       registoUsoCaa: registoUsoCaa,
+      contadorSessoesPraticaCaa: contadorSessoesPraticaCaa,
       recompensasLista: recompensasLista,
       estrelasGastas: estrelasGastas,
       sessoesTerapeuta: sessoesTerapeuta,
@@ -4269,6 +4725,7 @@ function carregarEstado(){
     if(typeof estado.contadorVitoriasMemoria === 'number') contadorVitoriasMemoria = estado.contadorVitoriasMemoria;
     if(typeof estado.contadorUsosCalma === 'number') contadorUsosCalma = estado.contadorUsosCalma;
     if(typeof estado.contadorQuizzesConcluidos === 'number') contadorQuizzesConcluidos = estado.contadorQuizzesConcluidos;
+    if(typeof estado.contadorEsperasCompletas === 'number') contadorEsperasCompletas = estado.contadorEsperasCompletas;
     if(estado.nivelDesbloqueado && typeof estado.nivelDesbloqueado === 'object'){
       nivelDesbloqueado = estado.nivelDesbloqueado;
     }
@@ -4277,6 +4734,7 @@ function carregarEstado(){
     if(recordeStreakDias < streakDias) recordeStreakDias = streakDias; // compatibilidade com estados antigos sem este campo
     if(typeof estado.ultimaDataStreak === 'string') ultimaDataStreak = estado.ultimaDataStreak;
     if(typeof estado.efeitosCalmosAtivo === 'boolean') efeitosCalmosAtivo = estado.efeitosCalmosAtivo;
+    if(typeof estado.mostrarTempoEsperar === 'boolean') mostrarTempoEsperar = estado.mostrarTempoEsperar;
     // Compatibilidade com o antigo interruptor on/off (versões anteriores da app)
     if(typeof estado.somAppLigado === 'boolean') volumeSomApp = estado.somAppLigado ? 1 : 0;
     if(typeof estado.volumeSomApp === 'number') volumeSomApp = Math.min(1, Math.max(0, estado.volumeSomApp));
@@ -4288,6 +4746,12 @@ function carregarEstado(){
     }
     if(estado.registoCalmaPorHora && typeof estado.registoCalmaPorHora === 'object'){
       registoCalmaPorHora = estado.registoCalmaPorHora;
+    }
+    if(Array.isArray(estado.registoTentativasEsperar)){
+      registoTentativasEsperar = estado.registoTentativasEsperar;
+    }
+    if(estado.historicoSessoesJogo && typeof estado.historicoSessoesJogo === 'object'){
+      historicoSessoesJogo = estado.historicoSessoesJogo;
     }
     if(estado.registoLatenciaPorMateria && typeof estado.registoLatenciaPorMateria === 'object'){
       registoLatenciaPorMateria = estado.registoLatenciaPorMateria;
@@ -4301,6 +4765,7 @@ function carregarEstado(){
     if(estado.registoUsoCaa && typeof estado.registoUsoCaa === 'object'){
       registoUsoCaa = estado.registoUsoCaa;
     }
+    if(typeof estado.contadorSessoesPraticaCaa === 'number') contadorSessoesPraticaCaa = estado.contadorSessoesPraticaCaa;
     if(Array.isArray(estado.recompensasLista)) recompensasLista = estado.recompensasLista;
     if(typeof estado.estrelasGastas === 'number') estrelasGastas = estado.estrelasGastas;
     if(Array.isArray(estado.sessoesTerapeuta)) sessoesTerapeuta = estado.sessoesTerapeuta;
@@ -4320,6 +4785,14 @@ function alternarEfeitosCalmos(){
   vibrar(20);
   const btn = document.getElementById('interruptor-efeitos-calmos');
   if(btn) btn.classList.toggle('ligado', efeitosCalmosAtivo);
+}
+
+function alternarMostrarTempoEsperar(){
+  mostrarTempoEsperar = !mostrarTempoEsperar;
+  guardarEstado();
+  vibrar(20);
+  const btn = document.getElementById('interruptor-mostrar-tempo-esperar');
+  if(btn) btn.classList.toggle('ligado', mostrarTempoEsperar);
 }
 
 // Ativa os Efeitos Calmos diretamente (não inverte, ao contrário de alternarEfeitosCalmos) —
@@ -5225,7 +5698,9 @@ function renderLista(id, itens, funcaoClicar){
     const nivelReal = (it.tipo === 'quiz' && it.dados) ? obterNivelAtual(it.dados)
       : (it.tipo === 'memoria' && it.dados) ? obterNivelAtual(it.dados)
       : (it.tipo === 'caracteristicas' && it.dados) ? obterNivelAtual(it.dados)
-      : (it.tipo === 'diferente' && it.dados) ? obterNivelAtual(it.dados) : null;
+      : (it.tipo === 'diferente' && it.dados) ? obterNivelAtual(it.dados)
+      : (it.tipo === 'sequencias' && it.dados) ? obterNivelAtual(it.dados)
+      : (it.tipo === 'ordenar-rotina' && it.dados) ? obterNivelAtual(it.dados) : null;
     const chaveNivel = nivelReal === 1 ? 'facil' : nivelReal === 2 ? 'medio' : nivelReal === 3 ? 'dificil' : it.nivel;
     const nomeNivel = chaveNivel === 'facil' ? 'Fácil' : chaveNivel === 'medio' ? 'Médio' : chaveNivel === 'dificil' ? 'Desafio' : '';
     const etiquetaHtml = chaveNivel ? `<span class="etiqueta et-${chaveNivel}">${nomeNivel}</span>` : '';
@@ -5368,6 +5843,41 @@ function icconeDaPalavraCaa(palavraTexto){
   return '⭐';
 }
 
+// Alterna entre o uso real do quadro CAA e o Modo Prática (ensaiar frases sem que
+// contem como comunicação funcional real). Muda o visual do ecrã para ficar sempre
+// claro em que modo se está, e limpa a frase em curso ao trocar — misturar uma frase
+// "a sério" com uma de treino seria confuso para quem lê o registo depois.
+// Sair do Quadro CAA sempre repõe o modo normal (não Prática), para nunca voltar a
+// entrar já em Modo Treino sem o Eduardo ou o adulto o terem escolhido desta vez.
+function sairDoEcraCaa(){
+  if(modoPraticaCaaAtivo){
+    modoPraticaCaaAtivo = false;
+    document.getElementById('ecra-caa').classList.remove('modo-pratica');
+  }
+  irPara(caaEcraAnterior || 'inicio');
+}
+
+function alternarModoPraticaCaa(){
+  modoPraticaCaaAtivo = !modoPraticaCaaAtivo;
+  if(fraseCaaAtual.length > 0) limparFraseCaa();
+  const ecra = document.getElementById('ecra-caa');
+  const btn = document.getElementById('btn-alternar-pratica-caa');
+  const subtitulo = document.getElementById('subtitulo-caa');
+  if(modoPraticaCaaAtivo){
+    ecra.classList.add('modo-pratica');
+    btn.classList.add('ativo');
+    btn.textContent = '✅ Em Modo Treino — toca para voltar ao normal';
+    subtitulo.textContent = 'Treino livre: as frases aqui não ficam registadas como comunicação real';
+    contadorSessoesPraticaCaa++;
+    guardarEstado();
+  } else {
+    ecra.classList.remove('modo-pratica');
+    btn.classList.remove('ativo');
+    btn.textContent = '🎯 Modo Treino (sem enviar de verdade)';
+    subtitulo.textContent = 'Toca nas imagens para formar uma frase';
+  }
+}
+
 function renderGrelhaCaa(){
   const cont = document.getElementById('grelha-caa');
   if(categoriaCaaAtiva === 'mais-usadas'){
@@ -5395,14 +5905,18 @@ function renderGrelhaCaa(){
 }
 
 // Adiciona uma palavra à frase em construção, diz a palavra sozinha de imediato
-// (feedback rápido de que o toque funcionou) e vibra ligeiramente.
+// (feedback rápido de que o toque funcionou) e vibra ligeiramente. Em Modo Prática,
+// não regista o uso — o objetivo é ensaiar sem que isso conte como comunicação real
+// nas estatísticas que os pais veem.
 function adicionarPalavraCaa(palavra){
   fraseCaaAtual.push(palavra);
   renderFraseCaa();
   vibrar(20);
   narrar(palavra.texto);
-  registoUsoCaa[palavra.texto] = (registoUsoCaa[palavra.texto] || 0) + 1;
-  guardarEstado();
+  if(!modoPraticaCaaAtivo){
+    registoUsoCaa[palavra.texto] = (registoUsoCaa[palavra.texto] || 0) + 1;
+    guardarEstado();
+  }
 }
 
 function apagarUltimoCaa(){
@@ -5707,8 +6221,16 @@ function abrirItemGenerico(it, origem){
     irParaDetalhe(gerarHtmlSequencias(), origem);
     return;
   }
+  if(it.tipo === 'ordenar-rotina'){
+    irParaDetalhe(gerarHtmlOrdenarRotina(), origem);
+    return;
+  }
   if(it.tipo === 'calma'){
     abrirCalma();
+    return;
+  }
+  if(it.tipo === 'esperar'){
+    irParaDetalhe(gerarHtmlEsperar(), origem);
     return;
   }
   if(it.tipo === 'sons'){
@@ -6770,6 +7292,11 @@ const observador = new MutationObserver(()=>{
     document.getElementById('grelha-sequencias').dataset.iniciado = '1';
     iniciarJogoSequencias();
   }
+  if(document.getElementById('lista-ordenar-rotina') && !document.getElementById('lista-ordenar-rotina').dataset.iniciado){
+    document.getElementById('lista-ordenar-rotina').dataset.iniciado = '1';
+    iniciarJogoOrdenarRotina();
+    document.getElementById('btn-verificar-ordenar-rotina').addEventListener('click', verificarOrdenarRotina);
+  }
 });
 observador.observe(document.getElementById('conteudo-detalhe'), {childList:true, subtree:true});
 
@@ -7198,35 +7725,15 @@ function avancarRondaDiferenteAposElogio(textoFalado){
     diferenteRondasDificeisSeguidas = diferenteErrouNestaRonda ? diferenteRondasDificeisSeguidas + 1 : 0;
     const eraAUltimaRonda = diferenteRondaAtual >= diferenteTotalRondas;
     if(diferenteRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
+      diferenteRondasDificeisSeguidas = 0; // não pergunta de novo já na ronda seguinte
       setTimeout(()=>{
         proximaRondaDiferente();
-        oferecerCaaAposDificuldadeDiferente();
+        oferecerCaaAposDificuldadeGenerico();
       }, 500);
     } else {
       setTimeout(proximaRondaDiferente, 500);
     }
   }, true);
-}
-
-// Mesmo padrão de oferecerCaaAposDificuldadeCaracteristicas: guarda o HTML do jogo em
-// curso para poder repô-lo exatamente como estava, sem reiniciar as rondas já feitas.
-function oferecerCaaAposDificuldadeDiferente(){
-  diferenteRondasDificeisSeguidas = 0;
-  const cont = document.getElementById('conteudo-detalhe');
-  const htmlJogoEmCurso = cont.innerHTML;
-  cont.innerHTML = `
-    <div class="painel">
-      <div class="icone-grande" style="background:var(--salva-clara)">💬</div>
-      <h2>Tudo bem se isto está difícil</h2>
-      <p class="desc">Se quiseres dizer como te sentes ou pedir alguma coisa, o quadro está ali.</p>
-      <button class="btn-primario" id="btn-caa-apos-dificuldade">💬 Abrir o quadro</button>
-      <button class="btn-secundario" id="btn-continuar-apos-dificuldade" style="margin-top:10px;">Continuar o jogo</button>
-    </div>
-  `;
-  document.getElementById('btn-caa-apos-dificuldade').addEventListener('click', abrirCaa);
-  document.getElementById('btn-continuar-apos-dificuldade').addEventListener('click', ()=>{
-    cont.innerHTML = htmlJogoEmCurso;
-  });
 }
 
 function concluirJogoDiferente(){
@@ -7285,6 +7792,42 @@ const LETRAS_TRACADO = {
 };
 const ORDEM_LETRAS_TRACADO = ['L','T','I','O','C','V','X'];
 
+// Fichas temáticas de vocabulário para o traçado — em vez de só desenhar letras soltas
+// do alfabeto, agrupa palavras curtas por tema com um emoji de apoio, para dar
+// significado ao gesto motor (a criança associa o traço a uma palavra e imagem
+// concretas, não só a uma letra isolada). Palavras mantidas curtas (4-6 letras) para
+// não tornar a ficha cansativa, e todas usam só letras já suportadas em LETRAS_TRACADO.
+const FICHAS_TRACADO_TEMATICAS = {
+  casa: {
+    nome: 'A minha casa', icone: '🏠',
+    palavras: [
+      {palavra:'CASA', emoji:'🏠'}, {palavra:'CAMA', emoji:'🛏️'}, {palavra:'MESA', emoji:'🪑'},
+      {palavra:'PORTA', emoji:'🚪'}, {palavra:'LUZ', emoji:'💡'}, {palavra:'BANHO', emoji:'🛁'},
+    ],
+  },
+  comida: {
+    nome: 'Comida', icone: '🍎',
+    palavras: [
+      {palavra:'MACA', emoji:'🍎'}, {palavra:'PAO', emoji:'🍞'}, {palavra:'LEITE', emoji:'🥛'},
+      {palavra:'SOPA', emoji:'🍲'}, {palavra:'BOLO', emoji:'🎂'}, {palavra:'AGUA', emoji:'💧'},
+    ],
+  },
+  animais: {
+    nome: 'Animais', icone: '🐶',
+    palavras: [
+      {palavra:'CAO', emoji:'🐶'}, {palavra:'GATO', emoji:'🐱'}, {palavra:'PATO', emoji:'🦆'},
+      {palavra:'PEIXE', emoji:'🐟'}, {palavra:'VACA', emoji:'🐄'}, {palavra:'URSO', emoji:'🐻'},
+    ],
+  },
+  roupa: {
+    nome: 'A minha roupa', icone: '👕',
+    palavras: [
+      {palavra:'CAMISA', emoji:'👕'}, {palavra:'CALCA', emoji:'👖'}, {palavra:'MEIA', emoji:'🧦'},
+      {palavra:'SAPATO', emoji:'👟'}, {palavra:'CASACO', emoji:'🧥'}, {palavra:'BONE', emoji:'🧢'},
+    ],
+  },
+};
+
 // Remove acentos e outros caracteres para obter só as letras que o traçado sabe desenhar
 // (A-Z). Nomes com letras fora deste alfabeto (ex: Ñ) simplesmente ficam sem essa letra.
 function letrasTraçaveisDoNome(nome){
@@ -7298,6 +7841,43 @@ function letrasTraçaveisDoNome(nome){
   return letras;
 }
 
+// Normaliza uma palavra do quadro CAA para o formato do traçado (maiúsculas, sem
+// acentos), tal como já se faz ao nome da criança em letrasTraçaveisDoNome.
+function normalizarPalavraParaTracado(palavra){
+  return (palavra || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z]/g, ''); // remove espaços e qualquer símbolo que não seja letra
+}
+
+// Gera dinamicamente uma ficha de traçado "As Minhas Palavras" a partir das palavras
+// mais usadas no Quadro CAA (ver registoUsoCaa) — ponte de generalização entre a
+// comunicação funcional (o que ele já pede/diz) e o treino motor da escrita (o gesto
+// de escrever essas mesmas palavras). Só entra em jogo com uso suficiente do CAA
+// (mesmo limiar de 5 já usado no cartão parental "Palavras mais usadas"), e só
+// inclui palavras cujas letras sejam todas traçáveis — palavras muito curtas (1-2
+// letras, ex: "eu", "eu") não entram, por não darem uma ficha útil de motricidade.
+const LIMIAR_MINIMO_USO_CAA_PARA_FICHA = 5;
+function obterFichaPalavrasCaa(){
+  const entradas = Object.entries(registoUsoCaa).filter(([,n]) => n > 0);
+  const totalUsos = entradas.reduce((soma,[,n]) => soma + n, 0);
+  if(totalUsos < LIMIAR_MINIMO_USO_CAA_PARA_FICHA) return null;
+
+  const candidatas = entradas
+    .sort((a,b) => b[1] - a[1])
+    .map(([texto]) => normalizarPalavraParaTracado(texto))
+    .filter(p => p.length >= 3 && [...p].every(ch => LETRAS_TRACADO[ch]));
+
+  // Remove duplicados (palavras diferentes no CAA podem normalizar para o mesmo texto)
+  const unicas = [...new Set(candidatas)].slice(0, 6);
+  if(unicas.length === 0) return null;
+
+  return {
+    nome: 'As Minhas Palavras', icone: '💬',
+    palavras: unicas.map(p => ({palavra: p, emoji: '💬'})),
+  };
+}
+
 let tracadoModoNome = false; // true quando a sessão atual é "Traça o Meu Nome"
 let tracadoOrdemAtual = ORDEM_LETRAS_TRACADO; // sequência de letras da sessão em curso
 
@@ -7308,17 +7888,27 @@ let tracadoDesenhando = false;
 let tracadoCtx = null;
 let tracadoUltimoPonto = null;
 let tracadoPontosAcertados = 0; // quantos pontos-guia já foram "tocados" nesta letra
+// Verdadeiro enquanto o dedo está fora da tolerância à linha guia (ver TOLERANCIA_TRACADO_PX).
+// Usado só para dar um sinal visual discreto ("volta para aqui"), nunca para penalizar.
+let tracadoForaDaTolerancia = false;
 
 function gerarHtmlTracado(){
   tracadoIndiceAtual = 0;
   tracadoLetrasFeitas = [];
   tracadoModoNome = false;
+  tracadoTemaAtual = null;
   tracadoOrdemAtual = ORDEM_LETRAS_TRACADO;
   const nomeCrianca = obterNomeCriancaParaTracado();
+  const fichaCaa = obterFichaPalavrasCaa();
+  const botoesTemas = Object.entries(FICHAS_TRACADO_TEMATICAS).map(([chave, tema]) =>
+    `<button class="btn-tema-tracado" data-tema-tracado="${chave}">${tema.icone} ${tema.nome}</button>`
+  ).join('');
   return `
     <div class="painel">
       <div class="nivel-jogo" id="nivel-jogo-tracado">Desenha por cima da linha com o dedo</div>
       ${nomeCrianca ? `<button class="btn-secundario" id="btn-tracar-nome" style="margin-bottom:10px;">✏️ Traçar o meu nome: ${nomeCrianca}</button>` : ''}
+      ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras (do quadro de comunicação)</button>` : ''}
+      <div class="grelha-temas-tracado">${botoesTemas}</div>
       <div class="letras-feitas" id="letras-feitas-tracado"></div>
       <div class="canvas-tracado-wrap">
         <canvas id="canvas-tracado"></canvas>
@@ -7353,11 +7943,66 @@ function iniciarTracado(){
   document.getElementById('btn-recomecar-tracado').addEventListener('click', desenharLetraAtualTracado);
   const btnNome = document.getElementById('btn-tracar-nome');
   if(btnNome) btnNome.addEventListener('click', iniciarTracadoDoNome);
+  const btnPalavrasCaa = document.getElementById('btn-tracar-palavras-caa');
+  if(btnPalavrasCaa) btnPalavrasCaa.addEventListener('click', () => iniciarTracadoDoTema(CHAVE_TEMA_TRACADO_CAA));
+  document.querySelectorAll('[data-tema-tracado]').forEach(btn => {
+    btn.addEventListener('click', () => iniciarTracadoDoTema(btn.dataset.temaTracado));
+  });
 }
 
-// Troca a sequência do alfabeto fixo pelas letras do primeiro nome da criança, incluindo
-// repetições (ex: "ANA" traça A, N, A — reforça a mesma letra mais do que uma vez, o que
-// é normal e positivo em prática motora).
+// Troca a sequência do alfabeto fixo pelas letras de uma palavra de vocabulário de um
+// tema (ver FICHAS_TRACADO_TEMATICAS) — a criança traça uma palavra inteira, letra a
+// letra, associada a um emoji de apoio, dando significado ao gesto motor em vez de só
+// treinar letras soltas do alfabeto.
+let tracadoTemaAtual = null; // chave do tema em curso, ou null se for o modo alfabeto/nome
+let tracadoPalavraIndiceAtual = 0; // índice da palavra atual dentro do tema
+const CHAVE_TEMA_TRACADO_CAA = '__palavras_caa__'; // chave especial para a ficha dinâmica do CAA
+
+// Resolve o tema em curso, incluindo a ficha dinâmica "As Minhas Palavras" (que não
+// vive em FICHAS_TRACADO_TEMATICAS por ser gerada em cada acesso a partir do CAA).
+function obterTemaTracadoAtual(){
+  if(tracadoTemaAtual === CHAVE_TEMA_TRACADO_CAA) return obterFichaPalavrasCaa();
+  return FICHAS_TRACADO_TEMATICAS[tracadoTemaAtual];
+}
+
+function iniciarTracadoDoTema(chaveTema){
+  const tema = chaveTema === CHAVE_TEMA_TRACADO_CAA ? obterFichaPalavrasCaa() : FICHAS_TRACADO_TEMATICAS[chaveTema];
+  if(!tema) return;
+  tracadoTemaAtual = chaveTema;
+  tracadoPalavraIndiceAtual = 0;
+  tracadoModoNome = false;
+  iniciarPalavraDoTemaTracado();
+}
+
+// Prepara o traçado da palavra atual dentro do tema em curso — chamada ao começar o
+// tema e sempre que se avança para a palavra seguinte (ver avancarPalavraTemaTracado).
+function iniciarPalavraDoTemaTracado(){
+  const tema = obterTemaTracadoAtual();
+  const item = tema.palavras[tracadoPalavraIndiceAtual];
+  tracadoOrdemAtual = [...item.palavra].filter(ch => LETRAS_TRACADO[ch]);
+  tracadoIndiceAtual = 0;
+  tracadoLetrasFeitas = [];
+  const nivelEl = document.getElementById('nivel-jogo-tracado');
+  if(nivelEl) nivelEl.textContent = `${tema.icone} ${tema.nome} — ${item.emoji} ${item.palavra}`;
+  renderLetrasFeitasTracado();
+  if(tracadoCtx) desenharLetraAtualTracado();
+  configurarBotaoOuvirTracado();
+}
+
+// Chamada quando a última letra da palavra atual é concluída (ver marcarLetraConcluidaTracado
+// mais abaixo) — avança para a palavra seguinte do tema, ou termina a ficha se já foi a última.
+function avancarPalavraTemaTracado(){
+  const tema = obterTemaTracadoAtual();
+  tracadoPalavraIndiceAtual++;
+  if(tracadoPalavraIndiceAtual >= tema.palavras.length){
+    // Ficha temática concluída: mesma celebração usada no fim do modo alfabeto/nome.
+    tracadoTemaAtual = null;
+    darEstrela('Ficha completa!', `Traçaste todas as palavras de "${tema.nome}"!`);
+    return;
+  }
+  iniciarPalavraDoTemaTracado();
+}
+
 function iniciarTracadoDoNome(){
   const nomeCrianca = obterNomeCriancaParaTracado();
   if(!nomeCrianca) return;
@@ -7432,6 +8077,7 @@ function pontoParaPixel(p){
 function desenharLetraAtualTracado(){
   tracadoSegmentoAtual = 0;
   tracadoPontosAcertados = 0;
+  tracadoForaDaTolerancia = false;
   redesenharGuiaTracado();
 }
 
@@ -7447,8 +8093,17 @@ function redesenharGuiaTracado(){
     ctx.beginPath();
     ctx.setLineDash([2, 10]);
     ctx.lineCap = 'round';
-    ctx.lineWidth = 14;
-    ctx.strokeStyle = iSeg < tracadoSegmentoAtual ? '#C9DBCD' : '#DCE3E4';
+    // Enquanto o dedo estiver desviado demais do segmento atual, a linha guia desse
+    // segmento fica mais grossa e muda para um tom quente — um sinal discreto de
+    // "volta para aqui", sem qualquer som ou mensagem de erro. Volta ao normal assim
+    // que o dedo reencontrar a tolerância.
+    const estaForaDaTolerancia = (iSeg === tracadoSegmentoAtual) && tracadoDesenhando && tracadoForaDaTolerancia;
+    ctx.lineWidth = estaForaDaTolerancia ? 18 : 14;
+    if(estaForaDaTolerancia){
+      ctx.strokeStyle = '#E0A96D'; // tom quente e discreto, não vermelho de "erro"
+    } else {
+      ctx.strokeStyle = iSeg < tracadoSegmentoAtual ? '#C9DBCD' : '#DCE3E4';
+    }
     seg.forEach((p,i)=>{
       const [x,y] = pontoParaPixel(p);
       if(i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
@@ -7526,6 +8181,12 @@ function aoMoverTracoTracado(evento){
   const dist = distanciaAoTracoAtual(p);
 
   if(dist <= TOLERANCIA_TRACADO_PX){
+    // Voltou para dentro da tolerância: se estava a mostrar o sinal de desvio,
+    // redesenha a guia para a repor ao normal.
+    if(tracadoForaDaTolerancia){
+      tracadoForaDaTolerancia = false;
+      redesenharGuiaTracado();
+    }
     const ctx = tracadoCtx;
     ctx.beginPath();
     ctx.lineCap = 'round';
@@ -7546,12 +8207,23 @@ function aoMoverTracoTracado(evento){
       }
       tracadoPontosAcertados++;
     }
+  } else if(!tracadoForaDaTolerancia){
+    // Acabou de sair da tolerância: acende o sinal visual discreto na linha guia.
+    // Não desenha nada do traço em si (mantém-se assim, sem penalizar o desvio).
+    tracadoForaDaTolerancia = true;
+    redesenharGuiaTracado();
   }
   tracadoUltimoPonto = p;
 }
 
 function aoTerminarTracoTracado(){
   tracadoDesenhando = false;
+  // Repõe o sinal visual de desvio, caso estivesse ativo — a próxima vez que pousar
+  // o dedo começa sempre com a guia no estado normal.
+  if(tracadoForaDaTolerancia){
+    tracadoForaDaTolerancia = false;
+    redesenharGuiaTracado();
+  }
 }
 
 function avancarSegmentoTracado(){
@@ -7586,6 +8258,13 @@ function concluirLetraTracado(){
 }
 
 function concluirJogoTracado(){
+  // Modo temático (ver iniciarTracadoDoTema): terminar as letras da PALAVRA atual não
+  // é o fim da ficha — avança para a palavra seguinte do tema, ou celebra a ficha
+  // completa se já não houver mais palavras (ver avancarPalavraTemaTracado).
+  if(tracadoTemaAtual){
+    avancarPalavraTemaTracado();
+    return;
+  }
   const texto = tracadoModoNome
     ? 'Conseguiste escrever o teu nome!'
     : 'Traçaste todas as letras — ' + tracadoOrdemAtual.join(', ');
@@ -7596,15 +8275,33 @@ function concluirJogoTracado(){
 function renderConquistas(){
   document.getElementById('total-estrelas').textContent = estrelas;
   document.getElementById('total-estrelas-2').textContent = estrelas;
-  document.getElementById('lista-medalhas').innerHTML = medalhasLista.map(m=>`
+  document.getElementById('lista-medalhas').innerHTML = medalhasLista.map((m,i)=>{
+    // Para medalhas ainda bloqueadas com progresso numérico, mostra "faltam X para a medalha"
+    // com barra visual — dá uma meta concreta e visível, tal como na Loja de Recompensas,
+    // em vez de um bloqueio opaco sem indicação de quanto falta.
+    let progressoHtml = '';
+    if(!m.desbloqueada){
+      const prog = progressoMedalha(i);
+      if(prog){
+        const atual = Math.min(prog.atual, prog.meta);
+        const pct = Math.min(100, Math.round((atual / prog.meta) * 100));
+        const faltam = Math.max(0, prog.meta - atual);
+        progressoHtml = `
+          <div class="m-barra-fundo"><div class="m-barra-preenchida" style="width:${pct}%"></div></div>
+          <div style="font-size:11.5px;color:var(--texto-suave);margin-top:3px;">${faltam > 0 ? `Faltam ${faltam}` : 'Quase lá!'}</div>
+        `;
+      }
+    }
+    return `
     <div class="medalha ${m.desbloqueada?'':'bloqueada'}">
       <div class="m-icone">${m.icone}</div>
       <div class="txt">
         <div class="t" style="font-weight:700;">${m.t}</div>
         <div class="d" style="font-size:12.5px;color:var(--texto-suave);">${m.d}</div>
+        ${progressoHtml}
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 /* ======================= LOJA DE RECOMPENSAS ======================= */
@@ -7722,6 +8419,23 @@ const MEDALHA_MEMORIA = 2;
 const MEDALHA_CALMA = 3;
 const MEDALHA_STREAK = 4;
 const MEDALHA_PERSISTENCIA = 5;
+const MEDALHA_ESPERA = 6;
+
+// Devolve {atual, meta} para a medalha no índice dado, ou null se não tiver progresso
+// numérico associado (ex: "Primeira Estrela", que é tudo-ou-nada). Usado para mostrar
+// uma barra "faltam X para Y" nas medalhas ainda bloqueadas, tal como já existe na
+// Loja de Recompensas — dá uma meta visível e concreta, em vez de um bloqueio opaco.
+function progressoMedalha(indice){
+  switch(indice){
+    case MEDALHA_ESTUDIOSO: return {atual: contadorFichasEscola, meta: 5};
+    case MEDALHA_MEMORIA: return {atual: contadorVitoriasMemoria, meta: 3};
+    case MEDALHA_CALMA: return {atual: contadorUsosCalma, meta: 5};
+    case MEDALHA_STREAK: return {atual: streakDias, meta: 7};
+    case MEDALHA_PERSISTENCIA: return {atual: contadorQuizzesConcluidos, meta: 10};
+    case MEDALHA_ESPERA: return {atual: contadorEsperasCompletas, meta: 1};
+    default: return null;
+  }
+}
 
 // Verifica os contadores atuais contra os limiares de cada medalha e desbloqueia
 // as que ainda não estavam. Mostra o ecrã de reforço positivo para cada uma desbloqueada agora.
@@ -7747,6 +8461,12 @@ function verificarMedalhas(){
   if(!medalhasLista[MEDALHA_PERSISTENCIA].desbloqueada && contadorQuizzesConcluidos >= 10){
     medalhasLista[MEDALHA_PERSISTENCIA].desbloqueada = true;
     desbloqueiosNovos.push(medalhasLista[MEDALHA_PERSISTENCIA]);
+  }
+  // Basta 1 espera completada até ao fim — como na Caju, o objetivo é celebrar a
+  // primeira vez que a criança tolera esperar, não exigir repetição para reconhecer o esforço.
+  if(!medalhasLista[MEDALHA_ESPERA].desbloqueada && contadorEsperasCompletas >= 1){
+    medalhasLista[MEDALHA_ESPERA].desbloqueada = true;
+    desbloqueiosNovos.push(medalhasLista[MEDALHA_ESPERA]);
   }
 
   if(desbloqueiosNovos.length > 0){
@@ -8012,6 +8732,95 @@ function fecharYay(){
   irPara('inicio');
 }
 
+/* ======================= APRENDER A ESPERAR =======================
+   Atividade dedicada a treinar tolerância à espera/frustração — não existia nenhuma
+   atividade da EduKids com este objetivo específico. Segue o princípio ABA de "shaping"
+   (moldagem gradual): começa com um tempo de espera muito curto, quase garantidamente
+   fácil de conseguir, e só sobe para o tempo seguinte depois de completar o atual —
+   nunca expõe a criança a uma espera longa antes de ter praticado as mais curtas.
+   Os tempos são múltiplos de 6s (duração de 1 ciclo completo de inspirar/expirar da
+   animação .circulo-respirar já usada no Modo Calma), para a espera terminar sempre
+   no fim de um ciclo de respiração completo, nunca a meio de uma inspiração. */
+const NIVEIS_ESPERAR = {
+  1: { nome:'Muito curta', segundos:6 },   // 1 ciclo de respiração
+  2: { nome:'Curta', segundos:12 },        // 2 ciclos
+  3: { nome:'Média', segundos:24 },        // 4 ciclos
+  4: { nome:'Longa', segundos:42 },        // 7 ciclos
+};
+
+let esperarSegundosRestantes = 0;
+let esperarIntervaloId = null;
+let esperarSaiuAMeio = false;
+
+function gerarHtmlEsperar(){
+  const nivel = obterNivelAtual('esperar');
+  const config = NIVEIS_ESPERAR[nivel] || NIVEIS_ESPERAR[1];
+  return `
+    <div class="painel">
+      <div class="nivel-jogo">Nível ${config.nome} — respira enquanto esperas</div>
+      <p class="desc">Vamos treinar esperar com calma. Respira devagar enquanto o tempo passa — não há problema nenhum em esperar.</p>
+      <div class="circulo-respirar-claro" id="circulo-respirar-esperar">Respira</div>
+      ${mostrarTempoEsperar
+        ? `<div class="tempo-espera" id="tempo-espera-mostrador" aria-live="polite">${config.segundos}</div>`
+        : `<div class="tempo-espera" id="tempo-espera-mostrador" aria-live="off" style="display:none;">${config.segundos}</div>`
+      }
+      <button class="btn-primario" id="btn-comecar-esperar" onclick="comecarEsperar()">Começar</button>
+      <button class="btn-secundario" id="btn-sair-esperar" onclick="sairDeEsperar()" style="display:none;">Já chega por hoje</button>
+    </div>
+  `;
+}
+
+function comecarEsperar(){
+  const nivel = obterNivelAtual('esperar');
+  const config = NIVEIS_ESPERAR[nivel] || NIVEIS_ESPERAR[1];
+  esperarSegundosRestantes = config.segundos;
+  esperarSaiuAMeio = false;
+  document.getElementById('btn-comecar-esperar').style.display = 'none';
+  document.getElementById('btn-sair-esperar').style.display = '';
+  atualizarMostradorEsperar();
+  if(esperarIntervaloId) clearInterval(esperarIntervaloId);
+  esperarIntervaloId = setInterval(()=>{
+    esperarSegundosRestantes--;
+    atualizarMostradorEsperar();
+    if(esperarSegundosRestantes <= 0){
+      clearInterval(esperarIntervaloId);
+      esperarIntervaloId = null;
+      concluirEsperar();
+    }
+  }, 1000);
+}
+
+function atualizarMostradorEsperar(){
+  const el = document.getElementById('tempo-espera-mostrador');
+  if(el) el.textContent = esperarSegundosRestantes;
+}
+
+// Sair a meio NUNCA é tratado como erro ou falha — o objetivo desta atividade é
+// experiência positiva com a espera, não perfeição. Sair a meio ainda regista a
+// tentativa (para o responsável ver o padrão), mas sem penalização nem impedir
+// tentar de novo mais tarde, e sem travar a progressão de nível já alcançada.
+function sairDeEsperar(){
+  if(esperarIntervaloId){ clearInterval(esperarIntervaloId); esperarIntervaloId = null; }
+  esperarSaiuAMeio = true;
+  registoTentativasEsperar.push({completo:false, data:new Date().toISOString()});
+  guardarEstado();
+  irPara('atividades');
+}
+
+function concluirEsperar(){
+  registoTentativasEsperar.push({completo:true, data:new Date().toISOString()});
+  contadorEsperasCompletas++;
+  // Progressão por domínio repetido, mesmo critério já usado nos outros jogos:
+  // só sobe de nível depois de 2 sessões seguidas completas neste nível.
+  avaliarProgressaoNivel('esperar', false, NIVEIS_ESPERAR);
+  guardarEstado();
+  narrar('Muito bem! Esperaste com calma.', ()=>{
+    // darEstrela() já chama verificarMedalhas() internamente e mostra a medalha nova
+    // no mesmo overlay de recompensa, caso seja a primeira vez (ver MEDALHA_ESPERA).
+    darEstrela('Esperaste com calma!', 'Treinar a espera é uma competência importante — e tu conseguiste.');
+  }, true);
+}
+
 /* ======================= MODO CALMA ======================= */
 function abrirCalma(){
   contadorUsosCalma++;
@@ -8176,6 +8985,70 @@ function fecharModalPerfil(){
   renderResumoPerfilCrianca();
 }
 
+// ===== Acesso multi-cuidador (UI) =====
+// Liga a conta atual ao perfil de outra pessoa através de um código de convite —
+// permite ao outro progenitor ou a um terapeuta aceder ao MESMO perfil da criança,
+// com a mesma rotina e histórico, em vez de duplicar dados numa conta nova.
+// Requer sessão Firebase ativa; a app local sem conta não tem partilha (por definição,
+// os dados ficam só neste dispositivo nesse caso).
+async function usarCodigoConviteERecarregar(){
+  const campo = document.getElementById('campo-codigo-convite');
+  const msg = document.getElementById('msg-codigo-convite');
+  const codigo = campo.value.trim();
+  if(!codigo){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Escreve o código que recebeste.'; return; }
+  if(!window.firebaseAuthApi || !window.utilizadorAtual || window.utilizadorAtual.semConta){
+    msg.style.color = 'var(--coral-suave)';
+    msg.textContent = 'É preciso ter uma conta (com email) para usar um código de convite.';
+    return;
+  }
+  const btn = document.getElementById('btn-usar-codigo-convite');
+  btn.disabled = true;
+  msg.style.color = 'var(--texto-suave)';
+  msg.textContent = 'A ligar...';
+  try{
+    const uidPerfilReal = await window.firebaseAuthApi.usarCodigoConvite(codigo, window.utilizadorAtual.uid);
+    window.uidPerfilAtivo = uidPerfilReal;
+    msg.style.color = 'var(--salva)';
+    msg.textContent = '✓ Ligado com sucesso! A recarregar os dados...';
+    await window.aoEntrarNaApp(window.utilizadorAtual);
+    renderConfig();
+  }catch(e){
+    msg.style.color = 'var(--coral-suave)';
+    msg.textContent = e && e.message ? e.message : 'Não foi possível usar este código. Confirma se está correto.';
+  }
+  btn.disabled = false;
+}
+
+// Gera um código de 6 letras para PARTILHAR este perfil com outra pessoa, que o usa em
+// usarCodigoConviteERecarregar() acima para se ligar ao mesmo perfil desta criança.
+async function gerarEMostrarCodigoConvite(){
+  const btn = document.getElementById('btn-gerar-codigo-convite');
+  const resultado = document.getElementById('resultado-codigo-convite');
+  if(!window.firebaseAuthApi || !window.utilizadorAtual || window.utilizadorAtual.semConta){
+    resultado.style.display = 'block';
+    resultado.innerHTML = `<p style="font-size:13px;color:var(--coral-suave);margin-top:10px;">É preciso ter uma conta (com email) para partilhar o acesso. Isto não está disponível no modo "sem conta".</p>`;
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'A gerar...';
+  try{
+    const uidPerfilReal = window.uidPerfilAtivo || window.utilizadorAtual.uid;
+    const codigo = await window.firebaseAuthApi.gerarCodigoConvite(uidPerfilReal);
+    resultado.style.display = 'block';
+    resultado.innerHTML = `
+      <div style="background:var(--areia-clara);border:2px solid var(--salva-clara);border-radius:14px;padding:14px;margin-top:10px;text-align:center;">
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 8px;">Partilha este código com a outra pessoa. Ela deve escolher "Já tenho um código de convite" ao criar a sua conta.</p>
+        <p style="font-size:26px;font-weight:800;letter-spacing:3px;color:var(--petroleo);margin:0;">${codigo}</p>
+      </div>
+    `;
+  }catch(e){
+    resultado.style.display = 'block';
+    resultado.innerHTML = `<p style="font-size:13px;color:var(--coral-suave);margin-top:10px;">Não foi possível gerar o código agora. Verifica a ligação à internet e tenta de novo.</p>`;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Gerar código de convite';
+}
+
 // Mostra, na aba Perfil, um resumo rápido do que já foi preenchido — para o responsável
 // perceber de relance se falta completar algo, sem ter de abrir o modal para o descobrir.
 function renderResumoPerfilCrianca(){
@@ -8293,6 +9166,8 @@ function abrirConfigSemPin(){
   renderResumoPerfilCrianca();
   const interruptor = document.getElementById('interruptor-efeitos-calmos');
   if(interruptor) interruptor.classList.toggle('ligado', efeitosCalmosAtivo);
+  const interruptorTempoEsperar = document.getElementById('interruptor-mostrar-tempo-esperar');
+  if(interruptorTempoEsperar) interruptorTempoEsperar.classList.toggle('ligado', mostrarTempoEsperar);
   const sliderSom = document.getElementById('slider-volume-som');
   if(sliderSom) sliderSom.value = Math.round(volumeSomApp * 100);
   const sliderVelVoz = document.getElementById('slider-velocidade-voz');
@@ -8635,23 +9510,37 @@ function renderPosCalma(){
 function renderUsoCaa(){
   const cartao = document.getElementById('cartao-uso-caa');
   const cont = document.getElementById('lista-uso-caa');
+  const linhaPratica = document.getElementById('linha-sessoes-pratica-caa');
   if(!cartao || !cont) return;
   const entradas = Object.entries(registoUsoCaa);
   const total = entradas.reduce((soma,[,n]) => soma + n, 0);
-  if(total < MIN_TOQUES_PARA_MAIS_USADAS){
+  // O cartão aparece se houver uso real suficiente OU pelo menos uma sessão de
+  // treino registada — os pais devem ver o esforço de prática mesmo antes de haver
+  // uso "a sério" que baste para a lista de palavras mais usadas.
+  if(total < MIN_TOQUES_PARA_MAIS_USADAS && contadorSessoesPraticaCaa === 0){
     cartao.style.display = 'none';
     return;
   }
   cartao.style.display = '';
-  entradas.sort((a,b) => b[1] - a[1]);
-  // Mostra só as 8 palavras mais usadas, para o cartão não crescer sem fim à medida
-  // que o vocabulário do Eduardo se alarga
-  cont.innerHTML = entradas.slice(0, 8).map(([palavra, n]) => `
-    <div class="linha-nivel-materia">
-      <span class="nome-materia">${palavra}</span>
-      <span class="etiqueta et-medio">${n}×</span>
-    </div>
-  `).join('');
+  if(total >= MIN_TOQUES_PARA_MAIS_USADAS){
+    entradas.sort((a,b) => b[1] - a[1]);
+    // Mostra só as 8 palavras mais usadas, para o cartão não crescer sem fim à medida
+    // que o vocabulário do Eduardo se alarga
+    cont.innerHTML = entradas.slice(0, 8).map(([palavra, n]) => `
+      <div class="linha-nivel-materia">
+        <span class="nome-materia">${palavra}</span>
+        <span class="etiqueta et-medio">${n}×</span>
+      </div>
+    `).join('');
+  } else {
+    cont.innerHTML = '';
+  }
+  if(contadorSessoesPraticaCaa > 0){
+    linhaPratica.style.display = '';
+    linhaPratica.textContent = `🎯 Modo Treino usado ${contadorSessoesPraticaCaa}× (frases de ensaio, não contam como uso real acima).`;
+  } else {
+    linhaPratica.style.display = 'none';
+  }
 }
 
 function renderResumoParental(){
@@ -8971,7 +9860,7 @@ async function gerarDicaParaPaisIA(forcarNova){
   if(!forcarNova){
     const cache = obterCacheDicaIA();
     if(cache && cache.data === dataHojeChave()){
-      mostrarDicaIA(cache.texto, true);
+      mostrarDicaIA(cache.texto, true, cache.resumo);
       return;
     }
   }
@@ -8992,8 +9881,8 @@ async function gerarDicaParaPaisIA(forcarNova){
     } else {
       texto = await gerarDicaComClaude(prompt);
     }
-    guardarCacheDicaIA(texto);
-    mostrarDicaIA(texto, false);
+    guardarCacheDicaIA(texto, resumo);
+    mostrarDicaIA(texto, false, resumo);
   }catch(e){
     msg.textContent = mensagemErroDeRede(e, fornecedor);
   }finally{
@@ -9002,11 +9891,12 @@ async function gerarDicaParaPaisIA(forcarNova){
   }
 }
 
-// Guarda a última dica gerada, junto com a data, dentro do mesmo objeto de estado
-// (não precisa de chave própria no backup — viaja com o resto do estado).
-function guardarCacheDicaIA(texto){
+// Guarda a última dica gerada, junto com a data e o resumo de dados que a originou —
+// para "Baseado em:" continuar visível mesmo ao reabrir a app no mesmo dia (dica vinda
+// da cache), não só logo a seguir a gerá-la.
+function guardarCacheDicaIA(texto, resumo){
   try{
-    localStorage.setItem(CHAVE_CACHE_DICA_IA, JSON.stringify({ texto, data: dataHojeChave() }));
+    localStorage.setItem(CHAVE_CACHE_DICA_IA, JSON.stringify({ texto, resumo, data: dataHojeChave() }));
   }catch(e){ /* sem acesso ao localStorage: a dica só fica visível nesta sessão */ }
 }
 function obterCacheDicaIA(){
@@ -9015,14 +9905,30 @@ function obterCacheDicaIA(){
     return bruto ? JSON.parse(bruto) : null;
   }catch(e){ return null; }
 }
-function mostrarDicaIA(texto, veioDaCache){
+// Traduz o resumo técnico (a mesma string enviada à IA) numa lista de pontos legível,
+// para os pais verem exatamente que dados sustentam a dica — não é uma explicação nova,
+// é o próprio "Dados:" do prompt, apresentado como lista em vez de texto corrido.
+function formatarResumoParaExibicao(resumo){
+  if(!resumo) return '';
+  return resumo
+    .split(/(?<=\.)\s+(?=[A-ZÀ-Ú\[])/)
+    .map(frase => frase.trim())
+    .filter(Boolean)
+    .map(frase => `<li>${escaparHtml(frase)}</li>`)
+    .join('');
+}
+function mostrarDicaIA(texto, veioDaCache, resumo){
   const msg = document.getElementById('msg-dica-ia');
   const resultado = document.getElementById('resultado-dica-ia');
   resultado.style.display = 'block';
   // Escapa o texto gerado pela IA antes de o inserir — evita que qualquer HTML/tags
   // no texto sejam interpretados como marcação. Quebras de linha reais são preservadas
   // via CSS (white-space: pre-line no .cartao-dica), não por não escapar.
-  resultado.innerHTML = `<div class="cartao-dica"><strong>✨ Dica com base na evolução do Eduardo</strong>${escaparHtml(texto)}</div>`;
+  const listaResumo = formatarResumoParaExibicao(resumo);
+  const blocoFontes = listaResumo
+    ? `<details class="fontes-dica-ia"><summary>Baseado em quê?</summary><ul>${listaResumo}</ul></details>`
+    : '';
+  resultado.innerHTML = `<div class="cartao-dica"><strong>✨ Dica com base na evolução do Eduardo</strong>${escaparHtml(texto)}${blocoFontes}</div>`;
   msg.innerHTML = veioDaCache
     ? `Esta é a dica de hoje. <a href="#" id="link-gerar-dica-nova" style="color:var(--petroleo);">Gerar uma nova mesmo assim</a>`
     : '';
@@ -10556,8 +11462,10 @@ const CHAVES_BACKUP = [
   CHAVE_HISTORIAS_SOCIAIS, CHAVE_CAA_PERSONALIZADO, CHAVE_FRASES_GUARDADAS_CAA,
 ];
 
-function exportarBackup(){
-  const msg = document.getElementById('msg-backup');
+function exportarBackup(idElementoMsg, prefixoFicheiro, textoSucesso){
+  idElementoMsg = idElementoMsg || 'msg-backup';
+  prefixoFicheiro = prefixoFicheiro || 'mundo-do-eduardo-backup';
+  const msg = document.getElementById(idElementoMsg);
   try{
     const dados = {};
     CHAVES_BACKUP.forEach(chave => {
@@ -10575,25 +11483,26 @@ function exportarBackup(){
     const a = document.createElement('a');
     const dataFicheiro = dataHojeChave();
     a.href = url;
-    a.download = `mundo-do-eduardo-backup-${dataFicheiro}.json`;
+    a.download = `${prefixoFicheiro}-${dataFicheiro}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     if(msg){
-      msg.textContent = '✓ Backup exportado. Guarda o ficheiro num sítio seguro (ex: Google Drive). Nota: os PINs e a chave da API não são incluídos por segurança — terás de os definir novamente ao restaurar noutro dispositivo.';
+      msg.textContent = textoSucesso || '✓ Backup exportado. Guarda o ficheiro num sítio seguro (ex: Google Drive). Nota: os PINs e a chave da API não são incluídos por segurança — terás de os definir novamente ao restaurar noutro dispositivo.';
       msg.style.color = 'var(--texto-suave)';
     }
   }catch(e){
     if(msg){
-      msg.textContent = 'Não foi possível criar o backup neste dispositivo.';
+      msg.textContent = 'Não foi possível criar o ficheiro neste dispositivo.';
       msg.style.color = 'var(--coral-suave)';
     }
   }
 }
 
-function importarBackup(ficheiro){
-  const msg = document.getElementById('msg-backup');
+function importarBackup(ficheiro, idElementoMsg, textoConfirmacao, textoSucesso){
+  idElementoMsg = idElementoMsg || 'msg-backup';
+  const msg = document.getElementById(idElementoMsg);
   if(!ficheiro) return;
   const leitor = new FileReader();
   leitor.onload = () => {
@@ -10602,7 +11511,7 @@ function importarBackup(ficheiro){
       if(!pacote || pacote.app !== 'mundoDoEduardo' || !pacote.dados || typeof pacote.dados !== 'object'){
         throw new Error('Ficheiro não reconhecido como um backup desta app.');
       }
-      const confirmado = window.confirm('Importar este backup vai substituir o progresso e configurações atuais neste dispositivo. Os PINs de acesso não fazem parte do backup — se já tiveres PINs definidos neste dispositivo, mantêm-se; caso contrário, serão pedidos de novo. Continuar?');
+      const confirmado = window.confirm(textoConfirmacao || 'Importar este ficheiro vai substituir o progresso e configurações atuais neste dispositivo. Os PINs de acesso não fazem parte do ficheiro — se já tiveres PINs definidos neste dispositivo, mantêm-se; caso contrário, serão pedidos de novo. Continuar?');
       if(!confirmado) return;
       CHAVES_BACKUP.forEach(chave => {
         if(Object.prototype.hasOwnProperty.call(pacote.dados, chave)){
@@ -10610,13 +11519,13 @@ function importarBackup(ficheiro){
         }
       });
       if(msg){
-        msg.textContent = '✓ Backup importado. A reiniciar a app...';
+        msg.textContent = textoSucesso || '✓ Importado. A reiniciar a app...';
         msg.style.color = 'var(--texto-suave)';
       }
       setTimeout(()=> location.reload(), 700);
     }catch(e){
       if(msg){
-        msg.textContent = 'Não foi possível importar: o ficheiro não é um backup válido desta app.';
+        msg.textContent = 'Não foi possível importar: o ficheiro não é reconhecido por esta app.';
         msg.style.color = 'var(--coral-suave)';
       }
     }
@@ -10629,13 +11538,35 @@ function importarBackup(ficheiro){
 
 function configurarBotoesBackup(){
   const btnExportar = document.getElementById('btn-exportar-backup');
-  if(btnExportar) btnExportar.addEventListener('click', exportarBackup);
+  if(btnExportar) btnExportar.addEventListener('click', ()=> exportarBackup('msg-backup', 'mundo-do-eduardo-backup'));
   const inputImportar = document.getElementById('input-importar-backup');
   if(inputImportar){
     inputImportar.addEventListener('change', (e) => {
       const ficheiro = e.target.files && e.target.files[0];
-      importarBackup(ficheiro);
+      importarBackup(ficheiro, 'msg-backup');
       inputImportar.value = ''; // permite selecionar o mesmo ficheiro outra vez, se preciso
+    });
+  }
+
+  const btnExportarPartilha = document.getElementById('btn-exportar-partilha');
+  if(btnExportarPartilha){
+    btnExportarPartilha.addEventListener('click', ()=> exportarBackup(
+      'msg-partilha',
+      'eduardo-partilha',
+      '✓ Ficheiro pronto. Envia-o por WhatsApp ou email à pessoa com quem queres partilhar o acesso.'
+    ));
+  }
+  const inputImportarPartilha = document.getElementById('input-importar-partilha');
+  if(inputImportarPartilha){
+    inputImportarPartilha.addEventListener('change', (e) => {
+      const ficheiro = e.target.files && e.target.files[0];
+      importarBackup(
+        ficheiro,
+        'msg-partilha',
+        'Isto vai substituir o progresso e configurações atuais neste dispositivo pelo histórico partilhado. Continuar?',
+        '✓ Ficheiro importado. A partir de agora este dispositivo mostra o mesmo histórico. A reiniciar a app...'
+      );
+      inputImportarPartilha.value = '';
     });
   }
 }
@@ -10712,6 +11643,8 @@ carregarQuestionarioEduardo();
 aplicarSaudacaoPersonalizada();
 document.getElementById('btn-guardar-questionario').addEventListener('click', guardarQuestionarioEduardo);
 document.getElementById('btn-abrir-editar-perfil').addEventListener('click', abrirModalPerfil);
+document.getElementById('btn-gerar-codigo-convite').addEventListener('click', gerarEMostrarCodigoConvite);
+document.getElementById('btn-usar-codigo-convite').addEventListener('click', usarCodigoConviteERecarregar);
 document.getElementById('btn-fechar-perfil').addEventListener('click', fecharModalPerfil);
 document.getElementById('btn-aceitar-sugestao-calmos').addEventListener('click', ()=>{
   ativarEfeitosCalmos();
