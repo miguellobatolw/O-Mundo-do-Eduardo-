@@ -2027,6 +2027,13 @@
         <button class="btn-secundario" id="btn-usar-codigo-convite" style="width:auto; padding:0 16px;">Ligar</button>
       </div>
       <p id="msg-codigo-convite" style="font-size:12.5px;margin-top:6px;"></p>
+
+      <!-- ===== Encontrar apoio perto: atalho para pesquisar profissionais e clínicas
+           especializadas em autismo perto do utilizador, por categoria. Não é um diretório
+           próprio — abre uma pesquisa já filtrada num serviço de mapas externo. ===== -->
+      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">📍 Encontrar apoio perto</div>
+      <div class="subtitulo-secao">Pesquisa profissionais e clínicas especializadas perto de ti. Abre uma pesquisa num mapa, fora da app.</div>
+      <div id="lista-categorias-apoio" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;"></div>
       </div>
 
       <div class="painel-aba" data-aba="rotina">
@@ -2939,7 +2946,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.29.0';
+window.APP_VERSION = '1.32.0';
 
 /* ======================= DADOS ======================= */
 
@@ -3027,6 +3034,11 @@ const NIVEIS_SEQUENCIAS = {
 };
 
 let sequenciasNivelAtual = 1, sequenciasRondaAtual = 0, sequenciasTotalRondas = 4;
+// Nível usado para GERAR o conteúdo desta sessão — normalmente igual a sequenciasNivelAtual,
+// mas pode ser um nível anterior numa ronda de revisão espaçada (ver obterNivelParaRonda).
+// Mantido separado para a progressão de nível continuar a basear-se sempre no nível real
+// desbloqueado, nunca no nível (mais baixo) de uma sessão de revisão.
+let sequenciasNivelConteudo = 1;
 let sequenciasErrouNestaRonda = false, sequenciasTeveErro = false;
 let sequenciasRondasDificeisSeguidas = 0;
 let sequenciasIndiceAlvoAtual = -1;
@@ -3047,7 +3059,8 @@ function gerarHtmlSequencias(){
 
 function iniciarJogoSequencias(){
   sequenciasNivelAtual = obterNivelAtual('sequencias');
-  const config = NIVEIS_SEQUENCIAS[sequenciasNivelAtual] || NIVEIS_SEQUENCIAS[1];
+  sequenciasNivelConteudo = obterNivelParaRonda('sequencias');
+  const config = NIVEIS_SEQUENCIAS[sequenciasNivelConteudo] || NIVEIS_SEQUENCIAS[1];
   sequenciasTotalRondas = config.rondas.length;
   sequenciasRondaAtual = 0;
   sequenciasTeveErro = false;
@@ -3064,7 +3077,7 @@ function proximaRondaSequencias(){
   const estadoAnterior = document.getElementById('estado-sequencias');
   if(estadoAnterior) estadoAnterior.textContent = '';
 
-  const config = NIVEIS_SEQUENCIAS[sequenciasNivelAtual] || NIVEIS_SEQUENCIAS[1];
+  const config = NIVEIS_SEQUENCIAS[sequenciasNivelConteudo] || NIVEIS_SEQUENCIAS[1];
   const ronda = config.rondas[sequenciasRondaAtual];
   document.getElementById('pista-sequencias').textContent = ronda.sequencia.join(' ') + ' ❓';
 
@@ -3164,6 +3177,7 @@ let ordenarRotinaBlocosRonda = []; // os blocos escolhidos para esta ronda, na o
 let ordenarRotinaOrdemAtual = []; // a ordem atual dos cartões no ecrã (o que o Eduardo já moveu)
 let ordenarRotinaTeveErro = false;
 let ordenarRotinaNivelAtual = 1;
+let ordenarRotinaNivelConteudo = 1;
 let ordenarRotinaArrastandoIndice = null; // índice do cartão a ser arrastado neste momento
 
 function gerarHtmlOrdenarRotina(){
@@ -3182,7 +3196,8 @@ function gerarHtmlOrdenarRotina(){
 
 function iniciarJogoOrdenarRotina(){
   ordenarRotinaNivelAtual = obterNivelAtual('ordenar-rotina');
-  const config = NIVEIS_ORDENAR_ROTINA[ordenarRotinaNivelAtual] || NIVEIS_ORDENAR_ROTINA[1];
+  ordenarRotinaNivelConteudo = obterNivelParaRonda('ordenar-rotina');
+  const config = NIVEIS_ORDENAR_ROTINA[ordenarRotinaNivelConteudo] || NIVEIS_ORDENAR_ROTINA[1];
   // Escolhe config.qtdCartoes blocos ao acaso da rotina do dia, mantendo a ordem
   // cronológica original como "resposta certa", depois embaralha para mostrar.
   const indicesEscolhidos = embaralhar(rotinaHoje.map((_, i) => i)).slice(0, config.qtdCartoes);
@@ -3401,6 +3416,7 @@ const NIVEIS_CLASSIFICAR = {
 };
 
 let classificarNivelAtual = 1, classificarRondaAtual = 0, classificarTotalRondas = 3;
+let classificarNivelConteudo = 1;
 let classificarErrouNestaRonda = false, classificarTeveErro = false;
 let classificarRondasDificeisSeguidas = 0;
 let classificarItensRestantes = [];
@@ -3422,7 +3438,8 @@ function gerarHtmlClassificar(){
 
 function iniciarJogoClassificar(){
   classificarNivelAtual = obterNivelAtual('classificar');
-  const config = NIVEIS_CLASSIFICAR[classificarNivelAtual] || NIVEIS_CLASSIFICAR[1];
+  classificarNivelConteudo = obterNivelParaRonda('classificar');
+  const config = NIVEIS_CLASSIFICAR[classificarNivelConteudo] || NIVEIS_CLASSIFICAR[1];
   classificarTotalRondas = config.rondas.length;
   classificarRondaAtual = 0;
   classificarTeveErro = false;
@@ -3440,7 +3457,7 @@ function proximaRondaClassificar(){
   const estadoAnterior = document.getElementById('estado-classificar');
   if(estadoAnterior) estadoAnterior.textContent = '';
 
-  const config = NIVEIS_CLASSIFICAR[classificarNivelAtual] || NIVEIS_CLASSIFICAR[1];
+  const config = NIVEIS_CLASSIFICAR[classificarNivelConteudo] || NIVEIS_CLASSIFICAR[1];
   const ronda = config.rondas[classificarRondaAtual];
   classificarItensRestantes = embaralhar(ronda.itens.map((it,idx) => ({...it, idOriginal:idx})));
 
@@ -3565,6 +3582,7 @@ const NIVEIS_OPOSTOS = {
 };
 
 let opostosNivelAtual = 1, opostosRondaAtual = 0, opostosTotalRondas = 5;
+let opostosNivelConteudo = 1;
 let opostosErrouNestaRonda = false, opostosTeveErro = false;
 let opostosRondasDificeisSeguidas = 0;
 let opostosIndiceAlvoAtual = -1;
@@ -3585,7 +3603,8 @@ function gerarHtmlOpostos(){
 
 function iniciarJogoOpostos(){
   opostosNivelAtual = obterNivelAtual('opostos');
-  const config = NIVEIS_OPOSTOS[opostosNivelAtual] || NIVEIS_OPOSTOS[1];
+  opostosNivelConteudo = obterNivelParaRonda('opostos');
+  const config = NIVEIS_OPOSTOS[opostosNivelConteudo] || NIVEIS_OPOSTOS[1];
   opostosTotalRondas = config.pares.length;
   opostosRondaAtual = 0;
   opostosTeveErro = false;
@@ -3602,7 +3621,7 @@ function proximaRondaOpostos(){
   const estadoAnterior = document.getElementById('estado-opostos');
   if(estadoAnterior) estadoAnterior.textContent = '';
 
-  const config = NIVEIS_OPOSTOS[opostosNivelAtual] || NIVEIS_OPOSTOS[1];
+  const config = NIVEIS_OPOSTOS[opostosNivelConteudo] || NIVEIS_OPOSTOS[1];
   const par = config.pares[opostosRondaAtual];
   document.getElementById('pista-opostos').innerHTML = `${par.pista.emoji}<div style="font-size:20px;margin-top:4px;">${par.pista.texto}</div>`;
 
@@ -3714,6 +3733,7 @@ const NIVEIS_PUZZLE_SENSORIAL = {
 };
 
 let puzzleNivelAtual = 1, puzzleRondaAtual = 0, puzzleTotalRondas = 5;
+let puzzleNivelConteudo = 1;
 let puzzleErrouNestaRonda = false, puzzleTeveErro = false;
 let puzzleRondasDificeisSeguidas = 0;
 let puzzleIndiceAlvoAtual = -1;
@@ -3734,7 +3754,8 @@ function gerarHtmlPuzzleSensorial(){
 
 function iniciarJogoPuzzleSensorial(){
   puzzleNivelAtual = obterNivelAtual('puzzle');
-  const config = NIVEIS_PUZZLE_SENSORIAL[puzzleNivelAtual] || NIVEIS_PUZZLE_SENSORIAL[1];
+  puzzleNivelConteudo = obterNivelParaRonda('puzzle');
+  const config = NIVEIS_PUZZLE_SENSORIAL[puzzleNivelConteudo] || NIVEIS_PUZZLE_SENSORIAL[1];
   puzzleTotalRondas = config.conjuntos.length;
   puzzleRondaAtual = 0;
   puzzleTeveErro = false;
@@ -3751,7 +3772,7 @@ function proximaRondaPuzzleSensorial(){
   const estadoAnterior = document.getElementById('estado-puzzle');
   if(estadoAnterior) estadoAnterior.textContent = '';
 
-  const config = NIVEIS_PUZZLE_SENSORIAL[puzzleNivelAtual] || NIVEIS_PUZZLE_SENSORIAL[1];
+  const config = NIVEIS_PUZZLE_SENSORIAL[puzzleNivelConteudo] || NIVEIS_PUZZLE_SENSORIAL[1];
   const conjunto = config.conjuntos[puzzleRondaAtual];
   document.getElementById('pista-puzzle').textContent = conjunto.pista;
 
@@ -4157,6 +4178,31 @@ function avaliarProgressaoNivel(chave, teveErro, niveisDoJogo){
 
 function obterNivelAtual(chave){
   return nivelDesbloqueado[chave] || 1;
+}
+
+// Contador de quantas vezes cada jogo foi jogado desde a última subida de nível — usado
+// só para decidir a cadência da revisão espaçada abaixo, não interfere com o critério
+// de progressão em si (ver avaliarProgressaoNivel).
+let contadorRondasDesdeSubida = {};
+
+// Devolve o nível a usar NESTA ronda — normalmente o nível atual desbloqueado, mas de
+// vez em quando (1 em cada 4 rondas, e só se já existe um nível anterior) devolve um
+// nível anterior em vez do atual. Isto é revisão espaçada: confirma que uma competência
+// já dominada se mantém ao longo do tempo, em vez de nunca mais ser revisitada assim
+// que se sobe de nível — sem isto, o critério de progressão (2 sessões limpas) garante
+// que a criança sabia a matéria naquele momento, mas nada garante que continua a saber
+// passadas semanas. A regra de 1 em 4 é deliberadamente pouco frequente: a maioria das
+// rondas continua a treinar o nível atual (é isso que faz a criança progredir); a
+// revisão é só um lembrete ocasional, não deve atrasar a progressão visivelmente.
+function obterNivelParaRonda(chave){
+  const nivelAtual = obterNivelAtual(chave);
+  if(nivelAtual <= 1) return nivelAtual; // nada para rever ainda
+  contadorRondasDesdeSubida[chave] = (contadorRondasDesdeSubida[chave] || 0) + 1;
+  const ehRondaDeRevisao = contadorRondasDesdeSubida[chave] % 4 === 0;
+  if(!ehRondaDeRevisao) return nivelAtual;
+  // Revê sempre o nível imediatamente anterior (não um aleatório mais antigo), que é
+  // o mais recentemente aprendido e por isso o mais útil confirmar que se mantém.
+  return nivelAtual - 1;
 }
 
 // Devolve uma cópia embaralhada de um array (Fisher-Yates), sem alterar o original
@@ -7117,6 +7163,7 @@ function gerarHtmlMemoria(){
   `;
 }
 let memCartas = [], memViradas = [], memPares = 0, memBloqueado = false, memNivelAtual = 1, memTotalPares = 4;
+let memNivelConteudo = 1;
 // Nº de tentativas seguidas SEM encontrar nenhum par (2 cartas viradas, sem combinar) —
 // no Jogo da Memória, "não encontrar" é o próprio mecanismo do jogo, não um erro no
 // sentido do quiz; por isso o limiar para oferecer o CAA aqui é bem mais alto (ver
@@ -7125,7 +7172,8 @@ let memCartas = [], memViradas = [], memPares = 0, memBloqueado = false, memNive
 let memTentativasFalhadasSeguidas = 0;
 function iniciarMemoria(){
   memNivelAtual = obterNivelAtual('memoria');
-  const emojis = NIVEIS_MEMORIA[memNivelAtual]?.pares || NIVEIS_MEMORIA[1].pares;
+  memNivelConteudo = obterNivelParaRonda('memoria');
+  const emojis = NIVEIS_MEMORIA[memNivelConteudo]?.pares || NIVEIS_MEMORIA[1].pares;
   memTotalPares = emojis.length;
   const conjunto = [...emojis, ...emojis];
   memCartas = conjunto.sort(()=>Math.random()-0.5);
@@ -7325,6 +7373,7 @@ const TAMANHOS_CARACT = [
 ];
 
 let caractNivelAtual = 1, caractRondaAtual = 0, caractTotalRondas = 5, caractErrouNestaRonda = false, caractTeveErro = false;
+let caractNivelConteudo = 1;
 // Mesmo conceito usado no quiz (quizPerguntasDificeisSeguidas): conta rondas seguidas
 // com pelo menos 1 erro, sem nenhuma ronda limpa pelo meio.
 let caractRondasDificeisSeguidas = 0;
@@ -7362,7 +7411,8 @@ function svgFormaCaract(forma, corValor, escala){
 
 function iniciarJogoCaracteristicas(){
   caractNivelAtual = obterNivelAtual('caracteristicas');
-  const config = NIVEIS_CARACTERISTICAS[caractNivelAtual] || NIVEIS_CARACTERISTICAS[1];
+  caractNivelConteudo = obterNivelParaRonda('caracteristicas');
+  const config = NIVEIS_CARACTERISTICAS[caractNivelConteudo] || NIVEIS_CARACTERISTICAS[1];
   caractTotalRondas = config.rondas;
   caractRondaAtual = 0;
   caractTeveErro = false;
@@ -7384,7 +7434,7 @@ function proximaRondaCaracteristicas(){
   // das opções, em vez de desaparecer como acontece no quiz.
   const estadoAnterior = document.getElementById('estado-caracteristicas');
   if(estadoAnterior) estadoAnterior.textContent = '';
-  const config = NIVEIS_CARACTERISTICAS[caractNivelAtual] || NIVEIS_CARACTERISTICAS[1];
+  const config = NIVEIS_CARACTERISTICAS[caractNivelConteudo] || NIVEIS_CARACTERISTICAS[1];
   const usaCor = config.atributos.includes('cor');
   const usaForma = config.atributos.includes('forma');
   const usaTamanho = config.atributos.includes('tamanho');
@@ -7581,6 +7631,7 @@ const NIVEIS_DIFERENTE = {
 };
 
 let diferenteNivelAtual = 1, diferenteRondaAtual = 0, diferenteTotalRondas = 5;
+let diferenteNivelConteudo = 1;
 let diferenteErrouNestaRonda = false, diferenteTeveErro = false;
 let diferenteRondasDificeisSeguidas = 0;
 let diferenteIndiceAlvoAtual = -1;
@@ -7600,7 +7651,8 @@ function gerarHtmlDiferente(){
 
 function iniciarJogoDiferente(){
   diferenteNivelAtual = obterNivelAtual('diferente');
-  const config = NIVEIS_DIFERENTE[diferenteNivelAtual] || NIVEIS_DIFERENTE[1];
+  diferenteNivelConteudo = obterNivelParaRonda('diferente');
+  const config = NIVEIS_DIFERENTE[diferenteNivelConteudo] || NIVEIS_DIFERENTE[1];
   diferenteTotalRondas = config.rondas;
   diferenteRondaAtual = 0;
   diferenteTeveErro = false;
@@ -7620,12 +7672,12 @@ function proximaRondaDiferente(){
   const estadoAnterior = document.getElementById('estado-diferente');
   if(estadoAnterior) estadoAnterior.textContent = '';
 
-  const config = NIVEIS_DIFERENTE[diferenteNivelAtual] || NIVEIS_DIFERENTE[1];
+  const config = NIVEIS_DIFERENTE[diferenteNivelConteudo] || NIVEIS_DIFERENTE[1];
   // Escolhe aleatoriamente QUAL atributo vai diferir nesta ronda, entre os disponíveis
   // no nível atual — no nível 1 só há "cor" para escolher, mas nos níveis seguintes
   // varia entre rondas, para não ficar sempre previsível.
-  const atributosDisponiveis = diferenteNivelAtual === 1 ? ['cor']
-    : diferenteNivelAtual === 2 ? ['cor','forma']
+  const atributosDisponiveis = diferenteNivelConteudo === 1 ? ['cor']
+    : diferenteNivelConteudo === 2 ? ['cor','forma']
     : ['cor','forma','tamanho'];
   const atributoQueDifere = atributosDisponiveis[Math.floor(Math.random()*atributosDisponiveis.length)];
 
@@ -8974,6 +9026,58 @@ function fecharModalPin(){
 // aoEntrarNaApp) e, depois disso, sempre que o responsável tocar em "✏️ Editar perfil"
 // na aba Perfil da área dos pais. Usa o mesmo formulário e os mesmos IDs de sempre —
 // só mudou de sítio (para um modal), não a forma como é guardado.
+// ===== Encontrar apoio perto (UI) =====
+// Categorias de apoio profissional mais comuns para uma criança autista. Cada uma abre
+// uma pesquisa filtrada num mapa externo (não é um diretório próprio da app) — usa a
+// localização do dispositivo quando disponível, ou pede ao utilizador para escrever a
+// zona à mão se a localização não estiver acessível ou for recusada.
+const categoriasApoioPerto = [
+  {icone:"🗣️", t:"Terapia da Fala"},
+  {icone:"🧩", t:"Terapia ABA"},
+  {icone:"🖐️", t:"Terapia Ocupacional"},
+  {icone:"🧠", t:"Neuropediatria"},
+  {icone:"💬", t:"Psicologia Infantil"},
+  {icone:"🏫", t:"Escolas com apoio especializado"},
+];
+
+function renderCategoriasApoioPerto(){
+  const cont = document.getElementById('lista-categorias-apoio');
+  if(!cont) return;
+  cont.innerHTML = categoriasApoioPerto.map((c,i)=>`
+    <button class="btn-secundario" data-indice-apoio="${i}" style="text-align:left; display:flex; align-items:center; gap:8px; padding:12px;">
+      <span style="font-size:18px;">${c.icone}</span><span style="font-size:13px;">${c.t}</span>
+    </button>
+  `).join('');
+  cont.querySelectorAll('[data-indice-apoio]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const categoria = categoriasApoioPerto[parseInt(btn.getAttribute('data-indice-apoio'), 10)];
+      pesquisarApoioPerto(categoria.t);
+    });
+  });
+}
+
+function pesquisarApoioPerto(termoCategoria){
+  const termo = encodeURIComponent(termoCategoria + ' para crianças com autismo');
+  // Tenta obter a localização do dispositivo para centrar a pesquisa; se não houver
+  // permissão ou o navegador não suportar, faz a pesquisa só pelo termo (o serviço de
+  // mapas usa então a localização aproximada do próprio browser, quando disponível).
+  const abrirPesquisa = (lat, lon) => {
+    const url = (lat != null && lon != null)
+      ? `https://www.google.com/maps/search/${termo}/@${lat},${lon},13z`
+      : `https://www.google.com/maps/search/${termo}`;
+    window.open(url, '_blank', 'noopener');
+  };
+  if('geolocation' in navigator){
+    navigator.geolocation.getCurrentPosition(
+      (pos)=> abrirPesquisa(pos.coords.latitude, pos.coords.longitude),
+      ()=> abrirPesquisa(null, null), // permissão recusada ou indisponível: pesquisa sem coordenadas
+      { timeout: 5000 }
+    );
+  } else {
+    abrirPesquisa(null, null);
+  }
+}
+
 function abrirModalPerfil(){
   carregarQuestionarioEduardo();
   document.getElementById('msg-questionario').textContent = '';
@@ -11645,6 +11749,7 @@ document.getElementById('btn-guardar-questionario').addEventListener('click', gu
 document.getElementById('btn-abrir-editar-perfil').addEventListener('click', abrirModalPerfil);
 document.getElementById('btn-gerar-codigo-convite').addEventListener('click', gerarEMostrarCodigoConvite);
 document.getElementById('btn-usar-codigo-convite').addEventListener('click', usarCodigoConviteERecarregar);
+renderCategoriasApoioPerto();
 document.getElementById('btn-fechar-perfil').addEventListener('click', fecharModalPerfil);
 document.getElementById('btn-aceitar-sugestao-calmos').addEventListener('click', ()=>{
   ativarEfeitosCalmos();
@@ -12040,6 +12145,22 @@ window.aoEntrarNaApp = async function(user){
     }, 300);
   }
 };
+
+// ===== Suporte offline (Service Worker) =====
+// Regista o service worker (sw.js, no mesmo repositório, mesmo diretório) para a app
+// continuar a abrir e a funcionar mesmo sem rede depois da primeira visita — importante
+// porque é usada em contexto doméstico onde a rede pode faltar. Service Workers só
+// funcionam em contexto seguro (HTTPS) — não têm efeito ao abrir o ficheiro localmente
+// (file:// ou content://), o que é esperado e não deve gerar nenhum erro visível: a app
+// funciona à mesma nesses casos, só sem o benefício do cache offline.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Falha silenciosa: contexto inseguro, sw.js ausente, ou navegador sem suporte.
+      // Nunca deve impedir a app de continuar a funcionar normalmente.
+    });
+  });
+}
 </script>
 </body>
 </html>
