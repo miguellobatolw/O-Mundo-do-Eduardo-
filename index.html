@@ -505,6 +505,17 @@
      jogo de características — o .estado-jogo desse jogo passou a ser reservado só
      para o feedback de acerto/erro, colocado junto às opções, não no topo. */
   .nivel-jogo{ font-size:14px; color:var(--texto-suave); margin-bottom:10px; }
+  .aviso-novo-tracado{
+    background:#EAF0FB;
+    border:2px solid #A9C2E8;
+    border-radius:var(--raio);
+    padding:8px 12px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--petroleo);
+    text-align:center;
+    margin:0 0 10px;
+  }
 
   /* ===== Traça a Letra ===== */
   .canvas-tracado-wrap{
@@ -515,10 +526,25 @@
     margin-bottom:16px;
     touch-action:none;
   }
-  #canvas-tracado{
+  /* Dois canvas sobrepostos no mesmo espaço: #canvas-tracado-desenho guarda só o traço
+     que o dedo do Eduardo já fez (nunca é limpo durante o gesto — só ao mudar de letra
+     ou "Recomeçar"); #canvas-tracado (por cima) é só a guia pontilhada e o marcador
+     verde, que são redesenhados com frequência (ex: ao sair da tolerância). Antes de
+     existir esta separação, redesenhar a guia limpava o canvas todo e apagava também
+     o traço já feito pelo dedo. */
+  #canvas-tracado-desenho, #canvas-tracado{
     display:block;
     width:100%;
     border-radius:var(--raio);
+  }
+  #canvas-tracado-desenho{
+    position:relative;
+  }
+  #canvas-tracado{
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none; /* os eventos de toque continuam a ser capturados pelo wrap/canvas de baixo */
   }
   .letras-feitas{
     display:flex;
@@ -2034,6 +2060,7 @@
       <div class="titulo-secao" style="font-size:18px; margin-top:26px;">📍 Encontrar apoio perto</div>
       <div class="subtitulo-secao">Pesquisa profissionais e clínicas especializadas perto de ti. Abre uma pesquisa num mapa, fora da app.</div>
       <div id="lista-categorias-apoio" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;"></div>
+      <p id="msg-apoio-perto" style="font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
       </div>
 
       <div class="painel-aba" data-aba="rotina">
@@ -2946,7 +2973,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.32.0';
+window.APP_VERSION = '1.33.0';
 
 /* ======================= DADOS ======================= */
 
@@ -3214,10 +3241,10 @@ function renderOrdenarRotina(){
   cont.innerHTML = ordenarRotinaOrdemAtual.map((indiceOriginal, posicao) => {
     const bloco = ordenarRotinaBlocosRonda[indiceOriginal];
     return `
-      <div class="cartao-ordenar-rotina" draggable="true" data-posicao="${posicao}" tabindex="0" role="button" aria-label="${bloco.t}, posição ${posicao + 1} de ${ordenarRotinaOrdemAtual.length}">
+      <div class="cartao-ordenar-rotina" draggable="true" data-posicao="${posicao}" tabindex="0" role="button" aria-label="${escaparHtml(bloco.t)}, posição ${posicao + 1} de ${ordenarRotinaOrdemAtual.length}">
         <span class="handle-arrastar">⠿</span>
         <span class="icone-rotina" style="width:36px;height:36px;font-size:20px;">${bloco.icone}</span>
-        <span class="t" style="flex:1;">${bloco.t}</span>
+        <span class="t" style="flex:1;">${escaparHtml(bloco.t)}</span>
       </div>
     `;
   }).join('');
@@ -4479,8 +4506,8 @@ function renderFrasesRapidasCaa(){
   cont.innerHTML = frasesGuardadasCaa.map((f,i) => `
     <div class="frase-rapida-caa" data-indice="${i}">
       <button class="fr-usar" data-usar="${i}">
-        <span class="pc-icone">${f.icone}</span>
-        <span class="pc-texto">${f.texto}</span>
+        <span class="pc-icone">${escaparHtml(f.icone)}</span>
+        <span class="pc-texto">${escaparHtml(f.texto)}</span>
       </button>
       <button class="fr-remover" data-remover="${i}" aria-label="Remover esta frase guardada">✕</button>
     </div>
@@ -5397,8 +5424,8 @@ function renderRotina(){
       <div class="hora">${b.hora}</div>
       <div class="icone-rotina">${b.icone}</div>
       <div class="info">
-        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${b.t}${b.escolhaHoje ? ': ' + b.escolhaHoje : ''}</div>
-        ${b.opcoes && b.opcoes.length > 0 && !b.escolhaHoje ? `<div class="d">✋ Toca para escolher</div>` : (b.d && !b.feito ? `<div class="d">${b.d}</div>` : '')}
+        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${escaparHtml(b.t)}${b.escolhaHoje ? ': ' + escaparHtml(b.escolhaHoje) : ''}</div>
+        ${b.opcoes && b.opcoes.length > 0 && !b.escolhaHoje ? `<div class="d">✋ Toca para escolher</div>` : (b.d && !b.feito ? `<div class="d">${escaparHtml(b.d)}</div>` : '')}
       </div>
       <button class="btn-ouvir-rotina" data-indice="${i}" aria-label="Ouvir esta tarefa">🔊</button>
       <button class="check-rotina" onclick="toggleRotina(${i})">${b.feito?'✓':''}</button>
@@ -5507,10 +5534,10 @@ function abrirEscolhaBloco(i){
   const opcoes = bloco.opcoes || [];
   irParaDetalhe(`
     <div class="painel">
-      <h2 style="margin-bottom:6px;">${bloco.icone} ${bloco.t}</h2>
+      <h2 style="margin-bottom:6px;">${bloco.icone} ${escaparHtml(bloco.t)}</h2>
       <p class="desc" style="margin-bottom:18px;">O que queres fazer agora?</p>
       <div class="lista-opcoes-escolha">
-        ${opcoes.map((op,idx)=>`<button class="btn-secundario btn-opcao-escolha" data-opcao="${idx}" style="display:block;width:100%;margin-bottom:10px;">${op}</button>`).join('')}
+        ${opcoes.map((op,idx)=>`<button class="btn-secundario btn-opcao-escolha" data-opcao="${idx}" style="display:block;width:100%;margin-bottom:10px;">${escaparHtml(op)}</button>`).join('')}
       </div>
     </div>
   `, 'rotina');
@@ -5535,13 +5562,13 @@ function abrirPrimeiroDepois(i){
         <div class="pd-bloco">
           <div class="pd-etiqueta">Primeiro</div>
           <div class="pd-icone">${atual.icone}</div>
-          <div class="pd-texto">${atual.t}${atual.escolhaHoje ? ': ' + atual.escolhaHoje : ''}</div>
+          <div class="pd-texto">${escaparHtml(atual.t)}${atual.escolhaHoje ? ': ' + escaparHtml(atual.escolhaHoje) : ''}</div>
         </div>
         <div class="pd-seta">→</div>
         <div class="pd-bloco ${seguinte ? '' : 'pd-vazio'}">
           <div class="pd-etiqueta">Depois</div>
           <div class="pd-icone">${seguinte ? seguinte.icone : '🌙'}</div>
-          <div class="pd-texto">${seguinte ? seguinte.t : 'Fim do dia'}</div>
+          <div class="pd-texto">${seguinte ? escaparHtml(seguinte.t) : 'Fim do dia'}</div>
         </div>
       </div>
       <button class="btn-primario" id="btn-ouvir-pd">🔊 Ouvir</button>
@@ -5557,6 +5584,7 @@ function abrirPrimeiroDepois(i){
       btn.textContent = '🔊 Ouvir';
     } else {
       btn.textContent = '⏸ A ouvir...';
+      // Texto falado por voz — não precisa de escape de HTML, só o inserido no DOM.
       const texto = seguinte
         ? `Primeiro: ${atual.t}. Depois: ${seguinte.t}.`
         : `Primeiro: ${atual.t}. Depois disso, é o fim do dia.`;
@@ -5593,7 +5621,7 @@ function abrirTemporizador(bloco, indiceRotina){
 
   const html = `
     <div class="painel">
-      <h2 style="margin-bottom:6px;">${bloco.icone} ${bloco.t}</h2>
+      <h2 style="margin-bottom:6px;">${bloco.icone} ${escaparHtml(bloco.t)}</h2>
       <p class="desc" style="margin-bottom:20px;">Enquanto o círculo estiver cheio, ainda há tempo. Quando esvaziar, a tarefa termina.</p>
       <div class="temporizador-visual">
         <svg viewBox="0 0 120 120" class="temporizador-svg">
@@ -5662,7 +5690,7 @@ function concluirTemporizador(bloco, indiceRotina){
     <div class="painel">
       <div class="icone-grande" style="background:var(--salva-clara)">⏳</div>
       <h2>Tempo terminado</h2>
-      <p class="desc">Já passou o tempo para "${bloco.t}". Podes marcar como feito ou continuar mais um pouco, sem problema.</p>
+      <p class="desc">Já passou o tempo para "${escaparHtml(bloco.t)}". Podes marcar como feito ou continuar mais um pouco, sem problema.</p>
       <button class="btn-primario" id="btn-marcar-feito-temp">✓ Marcar como feito</button>
       <button class="btn-secundario" id="btn-voltar-temp" style="margin-top:10px;">Voltar ao Meu Dia</button>
     </div>
@@ -5751,11 +5779,11 @@ function renderLista(id, itens, funcaoClicar){
     const nomeNivel = chaveNivel === 'facil' ? 'Fácil' : chaveNivel === 'medio' ? 'Médio' : chaveNivel === 'dificil' ? 'Desafio' : '';
     const etiquetaHtml = chaveNivel ? `<span class="etiqueta et-${chaveNivel}">${nomeNivel}</span>` : '';
     return `
-    <div class="lista-item" data-lista="${id}" data-indice="${i}" role="button" tabindex="0" aria-label="${it.t} — ${it.d}${nomeNivel ? ', nível ' + nomeNivel : ''}">
+    <div class="lista-item" data-lista="${id}" data-indice="${i}" role="button" tabindex="0" aria-label="${escaparHtml(it.t)} — ${escaparHtml(it.d)}${nomeNivel ? ', nível ' + nomeNivel : ''}">
       <div class="icone-item" style="background:${it.cor}">${it.icone}</div>
       <div class="txt">
-        <div class="t">${it.t}</div>
-        <div class="d">${it.d}</div>
+        <div class="t">${escaparHtml(it.t)}</div>
+        <div class="d">${escaparHtml(it.d)}</div>
         ${etiquetaHtml}
       </div>
       <div class="seta">›</div>
@@ -5867,7 +5895,7 @@ function renderAbasCaa(){
     ? `<button class="aba-caa ${categoriaCaaAtiva==='mais-usadas'?'ativa':''}" data-cat="mais-usadas">⭐ Mais usadas</button>`
     : '';
   cont.innerHTML = abaMaisUsadas + categoriasCaa.map(cat => `
-    <button class="aba-caa ${cat.id===categoriaCaaAtiva?'ativa':''}" data-cat="${cat.id}">${cat.nome}</button>
+    <button class="aba-caa ${cat.id===categoriaCaaAtiva?'ativa':''}" data-cat="${cat.id}">${escaparHtml(cat.nome)}</button>
   `).join('');
   cont.querySelectorAll('.aba-caa').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -5929,17 +5957,17 @@ function renderGrelhaCaa(){
   if(categoriaCaaAtiva === 'mais-usadas'){
     const entradas = Object.entries(registoUsoCaa).sort((a,b) => b[1] - a[1]).slice(0, 12);
     cont.innerHTML = entradas.map(([texto]) => `
-      <button class="peca-caa" data-icone="${icconeDaPalavraCaa(texto)}" data-texto="${texto}">
+      <button class="peca-caa" data-icone="${escaparHtml(icconeDaPalavraCaa(texto))}" data-texto="${escaparHtml(texto)}">
         <span class="pc-icone">${icconeDaPalavraCaa(texto)}</span>
-        <span class="pc-texto">${texto}</span>
+        <span class="pc-texto">${escaparHtml(texto)}</span>
       </button>
     `).join('');
   } else {
     const cat = categoriasCaa.find(c => c.id === categoriaCaaAtiva) || categoriasCaa[0];
     cont.innerHTML = cat.pecas.map((p,i) => `
-      <button class="peca-caa" data-icone="${p.icone}" data-texto="${p.texto}">
+      <button class="peca-caa" data-icone="${escaparHtml(p.icone)}" data-texto="${escaparHtml(p.texto)}">
         <span class="pc-icone">${p.icone}</span>
-        <span class="pc-texto">${p.texto}</span>
+        <span class="pc-texto">${escaparHtml(p.texto)}</span>
       </button>
     `).join('');
   }
@@ -5995,7 +6023,7 @@ function renderFraseCaa(){
   cont.innerHTML = fraseCaaAtual.map(p => `
     <div class="palavra-caa">
       <span class="pc-icone">${p.icone}</span>
-      <span class="pc-texto">${p.texto}</span>
+      <span class="pc-texto">${escaparHtml(p.texto)}</span>
     </div>
   `).join('');
 }
@@ -6052,7 +6080,7 @@ function renderListaVideosReais(){
     <div class="lista-item" data-indice="${i}">
       <div class="icone-item" style="background:#F3E3E0">${v.tipo==='youtube' || v.tipo==='vimeo' ? '▶️' : '🎬'}</div>
       <div class="txt">
-        <div class="t">${v.titulo}</div>
+        <div class="t">${escaparHtml(v.titulo)}</div>
         <div class="d">${v.tipo==='youtube' ? 'Vídeo do YouTube' : v.tipo==='vimeo' ? 'Vídeo do Vimeo' : 'Ficheiro de vídeo'}</div>
       </div>
       <div class="seta">›</div>
@@ -6083,7 +6111,7 @@ function abrirVideoReal(i){
   }
   irParaDetalhe(`
     <div class="painel" style="text-align:left;">
-      <h2 style="text-align:center;">${v.titulo}</h2>
+      <h2 style="text-align:center;">${escaparHtml(v.titulo)}</h2>
       ${player}
       <button class="btn-primario" id="btn-video-real-terminei" style="margin-top:18px;">Já vi ✓</button>
     </div>
@@ -6108,11 +6136,11 @@ function renderPaginaTema(){
   irParaDetalhe(`
     <div class="painel">
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
-      <h2 style="margin-bottom:14px;">${temaAtual.t}</h2>
+      <h2 style="margin-bottom:14px;">${escaparHtml(temaAtual.t)}</h2>
       ${storyboard}
       <div class="pagina-tema">
         <div class="pagina-emoji">${pag.emoji}</div>
-        <p class="pagina-texto">${pag.texto}</p>
+        <p class="pagina-texto">${escaparHtml(pag.texto)}</p>
       </div>
       <button class="btn-primario" id="btn-ouvir">🔊 Ouvir esta página</button>
       <div class="nav-paginas">
@@ -6211,9 +6239,9 @@ function abrirEscolhaQuiz(it, origem){
       <h2>O que queres treinar?</h2>
       <p class="desc">Escolhe uma das duas.</p>
       ${opcoes.map((op, i) => `
-        <div class="opcao" id="escolha-quiz-${i}" style="text-align:center;justify-content:center;" role="button" tabindex="0" aria-label="${op.t}">
+        <div class="opcao" id="escolha-quiz-${i}" style="text-align:center;justify-content:center;" role="button" tabindex="0" aria-label="${escaparHtml(op.t)}">
           <span style="font-size:20px;">${op.icone}</span>
-          <span>${op.t}</span>
+          <span>${escaparHtml(op.t)}</span>
         </div>
       `).join('')}
     </div>
@@ -6303,7 +6331,7 @@ function abrirItemGenerico(it, origem){
   irParaDetalhe(`
     <div class="painel">
       <div class="icone-grande" style="background:${it.cor}">${it.icone}</div>
-      <h2>${it.t}</h2>
+      <h2>${escaparHtml(it.t)}</h2>
       ${extra}
     </div>
   `, origem);
@@ -6704,6 +6732,13 @@ let quizPerguntasDificeisSeguidas = 0;
 // Controla a hierarquia de dicas (prompt fading) dentro da pergunta atual:
 // 0 = ainda sem tentativa; 1 = já errou uma vez nesta pergunta (opção eliminada, dá 2ª hipótese)
 let quizTentativasNaPergunta = 0;
+
+// Modo Dupla: a mãe/cuidador e o Eduardo alternam a vez a cada pergunta (não por acerto,
+// ao contrário do jogo da memória — assim garante-se que ambos respondem a perguntas
+// diferentes, mesmo que um dos dois acerte sempre). Jogam como equipa, um só resultado final.
+// A vez só alterna ao AVANÇAR de pergunta, nunca a meio do prompt fading da mesma pergunta.
+let quizModoDupla = false;
+let quizVezDaMae = false;
 // Latência de resposta: marca quando a pergunta apareceu no ecrã, para medir quanto tempo
 // até à 1ª tentativa (não conta o tempo de "pensar de novo" depois de uma pista, que mede
 // outra coisa). É um indicador de hesitação/processamento, não de desempenho — por isso
@@ -6789,14 +6824,16 @@ function renderSessoesTerapeuta(){
   cont.innerHTML = sessoesTerapeuta.map(s => {
     const data = new Date(s.quando);
     const dataTexto = data.toLocaleDateString('pt-PT', {day:'2-digit', month:'short'});
+    // Escapa texto escrito livremente pelo terapeuta/cuidador antes de inserir —
+    // mesmo cuidado já aplicado a outros campos de texto livre na app.
     return `
       <div class="linha-nivel-materia" style="flex-direction:column;align-items:flex-start;gap:4px;">
         <div style="display:flex;justify-content:space-between;width:100%;">
-          <span style="font-weight:700;">${s.objetivo}</span>
+          <span style="font-weight:700;">${escaparHtml(s.objetivo)}</span>
           <span style="font-size:12px;color:var(--texto-suave);">${dataTexto}</span>
         </div>
         <span style="font-size:12.5px;color:var(--texto-suave);">${descreverReacaoSessao(s.reacao)}</span>
-        ${s.proximoPasso ? `<span style="font-size:12.5px;color:var(--petroleo);">Próximo passo: ${s.proximoPasso}</span>` : ''}
+        ${s.proximoPasso ? `<span style="font-size:12.5px;color:var(--petroleo);">Próximo passo: ${escaparHtml(s.proximoPasso)}</span>` : ''}
       </div>
     `;
   }).join('');
@@ -6835,6 +6872,7 @@ function iniciarQuiz(chave, titulo, origem){
   quizTeveErro = false;
   quizPerguntasDificeisSeguidas = 0;
   quizEmCurso = true;
+  quizVezDaMae = false;
   renderQuiz();
 }
 // Sugestões de generalização: uma ação concreta para o Eduardo (ou os pais, lida com ele)
@@ -6927,18 +6965,21 @@ function renderQuiz(){
     // depender de reforço contínuo, evitando também que se torne previsível de mais.
     const ganhouBonusSurpresa = jaEstavaConsolidado && Math.random() < 0.25;
     const quantidadeBase = nivelDaSessao === 3 ? 2 : 1;
+    const textoTerminaste = quizModoDupla
+      ? `Acertaram tudo em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}) como equipa. Muito bem!`
+      : `Acertaste tudo em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). Muito bem, Eduardo!`;
     irParaDetalhe(`
       <div class="painel">
         <div class="icone-grande" style="background:var(--salva-clara)">🎉</div>
         <h2>Terminaste!</h2>
-        <p class="desc">Acertaste tudo em "${quizTitulo}" (nível ${nomesNivel[nivelDaSessao] || ''}). Muito bem, Eduardo!</p>
+        <p class="desc">${textoTerminaste}</p>
         ${renderCartaoGeneralizacao(quizChave)}
       </div>
     `, quizOrigem);
     if(ganhouBonusSurpresa){
       darEstrela('Bónus surpresa!', 'Completaste: ' + quizTitulo + ' — já dominas isto tão bem que ganhaste uma estrela extra!', quantidadeBase + 1);
     } else {
-      darEstrela('Excelente trabalho!', 'Completaste: ' + quizTitulo, quantidadeBase);
+      darEstrela(quizModoDupla ? 'Boa equipa!' : 'Excelente trabalho!', 'Completaste: ' + quizTitulo, quantidadeBase);
     }
     return;
   }
@@ -6949,17 +6990,42 @@ function renderQuiz(){
   const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
   const classesNivel = {1:'et-facil', 2:'et-medio', 3:'et-dificil'};
   const etiquetaNivel = q.nivel ? `<span class="etiqueta ${classesNivel[q.nivel]}">${nomesNivel[q.nivel]}</span>` : '';
+  const alternadorInicial = quizIndex === 0 ? `
+    <div class="alternador-modo-dupla">
+      <button class="btn-modo-dupla ${quizModoDupla ? '' : 'ativo'}" id="btn-quiz-sozinho">👦 Sozinho</button>
+      <button class="btn-modo-dupla ${quizModoDupla ? 'ativo' : ''}" id="btn-quiz-dupla">👩‍👦 Jogar com a mãe</button>
+    </div>
+  ` : '';
+  const indicadorVez = quizModoDupla
+    ? `<div class="vez-modo-dupla ${quizVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${quizVezDaMae ? '👩 Vez da mãe responder' : '👦 Vez do Eduardo responder'}</div>`
+    : '';
   irParaDetalhe(`
     <div class="painel" style="text-align:left;">
+      ${alternadorInicial}
       <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--texto-suave);">Pergunta ${quizIndex + 1} de ${quizAtual.length}</p>
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
       ${etiquetaNivel ? `<div style="margin-bottom:10px;">${etiquetaNivel}</div>` : ''}
+      ${indicadorVez}
       <div class="pergunta">${q.p}</div>
       <button class="btn-pagina" id="btn-ouvir-quiz" style="margin-bottom:12px;">🔊 Ouvir</button>
       ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})" role="button" tabindex="0" aria-label="Opção ${String.fromCharCode(65+i)}: ${op}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();responderQuiz(${i});}"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${op}</div>`).join('')}
       <p id="feedback-quiz" role="status" aria-live="polite" style="min-height:20px;font-size:13.5px;font-weight:700;margin-top:12px;text-align:center;"></p>
     </div>
   `, quizOrigem);
+
+  const btnQuizSozinho = document.getElementById('btn-quiz-sozinho');
+  const btnQuizDupla = document.getElementById('btn-quiz-dupla');
+  if(btnQuizSozinho && btnQuizDupla){
+    btnQuizSozinho.addEventListener('click', ()=>{
+      quizModoDupla = false;
+      renderQuiz();
+    });
+    btnQuizDupla.addEventListener('click', ()=>{
+      quizModoDupla = true;
+      quizVezDaMae = false;
+      renderQuiz();
+    });
+  }
 
   const btnOuvir = document.getElementById('btn-ouvir-quiz');
   if(btnOuvir){
@@ -7027,6 +7093,7 @@ function oferecerCaaAposDificuldade(){
   });
   document.getElementById('btn-continuar-apos-dificuldade').addEventListener('click', ()=>{
     quizIndex++;
+    if(quizModoDupla) quizVezDaMae = !quizVezDaMae;
     renderQuiz();
   });
 }
@@ -7035,6 +7102,7 @@ function responderQuiz(i){
   pararNarracao();
   const q = quizAtual[quizIndex];
   const feedback = document.getElementById('feedback-quiz');
+  const quemRespondeu = quizModoDupla ? (quizVezDaMae ? 'A mãe' : 'O Eduardo') : '';
   // Só regista latência na 1ª tentativa da pergunta — depois de uma pista, o tempo
   // seguinte mede outra coisa (releitura/correção), não hesitação inicial.
   if(quizTentativasNaPergunta === 0){
@@ -7089,7 +7157,7 @@ function responderQuiz(i){
     document.getElementById('op-'+q.c).classList.add('certa');
     document.getElementById('op-'+i).classList.add('errada');
     if(feedback){
-      feedback.textContent = 'Não foi desta vez. A resposta certa é: ' + q.o[q.c];
+      feedback.textContent = (quizModoDupla ? quemRespondeu + ': n' : 'N') + 'ão foi desta vez. A resposta certa é: ' + q.o[q.c];
       feedback.style.color = 'var(--coral-suave)';
     }
     vibrar([25,80,25]);
@@ -7106,8 +7174,10 @@ function responderQuiz(i){
       // Para acerto limpo, o elogio tem texto (ecrã) e fala (voz, com ênfase marcada)
       // separados. Para acerto com pista, a mesma frase serve para os dois.
       const elogio = acertoLimpo ? elogioRespostaCertaAoAcaso() : null;
-      const textoEcra = elogio ? elogio.texto : 'Foi! Acertaste com a ajuda da pista.';
-      const textoFalado = elogio ? elogio.fala : 'Foi! Acertaste com a ajuda da pista.';
+      const textoEcraBase = elogio ? elogio.texto : 'Foi! Acertaste com a ajuda da pista.';
+      const textoFaladoBase = elogio ? elogio.fala : 'Foi! Acertaste com a ajuda da pista.';
+      const textoEcra = quizModoDupla ? quemRespondeu + ': ' + textoEcraBase : textoEcraBase;
+      const textoFalado = quizModoDupla ? quemRespondeu + ': ' + textoFaladoBase : textoFaladoBase;
       feedback.textContent = textoEcra;
       feedback.style.color = 'var(--petroleo)';
       tocarSomAcerto();
@@ -7117,7 +7187,11 @@ function responderQuiz(i){
       // dita (+ uma pequena pausa de respiro) — antes disso o setTimeout fixo de 1.4s
       // cortava a fala a meio sempre que a frase era mais longa do que isso.
       narrar(textoFalado, ()=>{
-        setTimeout(()=>{ quizIndex++; renderQuiz(); }, 500);
+        setTimeout(()=>{
+          quizIndex++;
+          if(quizModoDupla) quizVezDaMae = !quizVezDaMae;
+          renderQuiz();
+        }, 500);
       }, acertoLimpo);
       return;
     }
@@ -7128,7 +7202,11 @@ function responderQuiz(i){
   if(quizPerguntasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS){
     setTimeout(oferecerCaaAposDificuldade, 1400);
   } else {
-    setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1400);
+    setTimeout(()=>{
+      quizIndex++;
+      if(quizModoDupla) quizVezDaMae = !quizVezDaMae;
+      renderQuiz();
+    }, 1400);
   }
 }
 
@@ -7937,7 +8015,8 @@ let tracadoIndiceAtual = 0;
 let tracadoLetrasFeitas = [];
 let tracadoSegmentoAtual = 0;
 let tracadoDesenhando = false;
-let tracadoCtx = null;
+let tracadoCtx = null; // contexto da GUIA (pontilhado + marcador verde) — limpo com frequência
+let tracadoCtxDesenho = null; // contexto do TRAÇO do dedo — só limpo ao mudar de letra ou "Recomeçar"
 let tracadoUltimoPonto = null;
 let tracadoPontosAcertados = 0; // quantos pontos-guia já foram "tocados" nesta letra
 // Verdadeiro enquanto o dedo está fora da tolerância à linha guia (ver TOLERANCIA_TRACADO_PX).
@@ -7958,11 +8037,13 @@ function gerarHtmlTracado(){
   return `
     <div class="painel">
       <div class="nivel-jogo" id="nivel-jogo-tracado">Desenha por cima da linha com o dedo</div>
+      <p class="aviso-novo-tracado" id="aviso-novo-tracado" style="display:none;"></p>
       ${nomeCrianca ? `<button class="btn-secundario" id="btn-tracar-nome" style="margin-bottom:10px;">✏️ Traçar o meu nome: ${nomeCrianca}</button>` : ''}
       ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras (do quadro de comunicação)</button>` : ''}
       <div class="grelha-temas-tracado">${botoesTemas}</div>
       <div class="letras-feitas" id="letras-feitas-tracado"></div>
       <div class="canvas-tracado-wrap">
+        <canvas id="canvas-tracado-desenho"></canvas>
         <canvas id="canvas-tracado"></canvas>
       </div>
       <button class="btn-pagina" id="btn-ouvir-tracado" style="margin-bottom:10px;">🔊 Ouvir</button>
@@ -8100,10 +8181,12 @@ function configurarBotaoOuvirTracado(){
 
 function configurarCanvasTracado(){
   const canvas = document.getElementById('canvas-tracado');
-  if(!canvas) return;
+  const canvasDesenho = document.getElementById('canvas-tracado-desenho');
+  if(!canvas || !canvasDesenho) return;
   const dpr = window.devicePixelRatio || 1;
-  const larg = canvas.clientWidth || 320;
+  const larg = canvasDesenho.clientWidth || 320;
   const alt = Math.round(larg * 0.8);
+
   canvas.style.height = alt + 'px';
   canvas.width = larg * dpr;
   canvas.height = alt * dpr;
@@ -8112,10 +8195,19 @@ function configurarCanvasTracado(){
   tracadoCtx._larg = larg;
   tracadoCtx._alt = alt;
 
-  canvas.addEventListener('pointerdown', aoIniciarTracoTracado);
-  canvas.addEventListener('pointermove', aoMoverTracoTracado);
+  canvasDesenho.style.height = alt + 'px';
+  canvasDesenho.width = larg * dpr;
+  canvasDesenho.height = alt * dpr;
+  tracadoCtxDesenho = canvasDesenho.getContext('2d');
+  tracadoCtxDesenho.scale(dpr, dpr);
+
+  // Os eventos de toque/rato são capturados no canvas de baixo (o de guia tem
+  // pointer-events:none), mas as coordenadas do evento continuam corretas porque
+  // ambos os canvas ocupam exatamente o mesmo espaço.
+  canvasDesenho.addEventListener('pointerdown', aoIniciarTracoTracado);
+  canvasDesenho.addEventListener('pointermove', aoMoverTracoTracado);
   window.addEventListener('pointerup', aoTerminarTracoTracado);
-  canvas.addEventListener('pointercancel', aoTerminarTracoTracado);
+  canvasDesenho.addEventListener('pointercancel', aoTerminarTracoTracado);
 
   desenharLetraAtualTracado();
 }
@@ -8130,6 +8222,10 @@ function desenharLetraAtualTracado(){
   tracadoSegmentoAtual = 0;
   tracadoPontosAcertados = 0;
   tracadoForaDaTolerancia = false;
+  esconderAvisoNovoTracado();
+  // Limpa o traço já feito pelo dedo (canvas de baixo) — aqui sim é intencional: mudar
+  // de letra ou "Recomeçar esta letra" deve mesmo apagar o que estava desenhado.
+  if(tracadoCtxDesenho) tracadoCtxDesenho.clearRect(0, 0, tracadoCtx._larg, tracadoCtx._alt);
   redesenharGuiaTracado();
 }
 
@@ -8164,10 +8260,37 @@ function redesenharGuiaTracado(){
   });
   ctx.setLineDash([]);
 
-  // Marcador do ponto de partida do segmento atual (verde), para orientar onde pousar o dedo
+  // Marcador do ponto de partida do segmento atual (verde), com uma seta a apontar
+  // o sentido inicial do traço — ajuda a saber não só ONDE pousar o dedo, mas também
+  // PARA ONDE mover a seguir, sem precisar de tentar e ver.
   if(tracadoSegmentoAtual < letra.segmentos.length){
-    const inicio = letra.segmentos[tracadoSegmentoAtual][0];
-    const [x,y] = pontoParaPixel(inicio);
+    const segAtual = letra.segmentos[tracadoSegmentoAtual];
+    const inicio = segAtual[0];
+    const [x, y] = pontoParaPixel(inicio);
+
+    // Direção inicial do traço: do 1º para o 2º ponto do segmento (ou, no caso raro
+    // de um segmento com um único ponto, sem seta — não há direção que calcular).
+    if(segAtual.length > 1){
+      const [x2, y2] = pontoParaPixel(segAtual[1]);
+      const angulo = Math.atan2(y2 - y, x2 - x);
+      const distanciaSeta = 26; // afastada do ponto verde, para não se sobrepor a ele
+      const cx = x + Math.cos(angulo) * distanciaSeta;
+      const cy = y + Math.sin(angulo) * distanciaSeta;
+      const tamanhoSeta = 11;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angulo);
+      ctx.beginPath();
+      ctx.moveTo(tamanhoSeta, 0);
+      ctx.lineTo(-tamanhoSeta * 0.6, -tamanhoSeta * 0.7);
+      ctx.lineTo(-tamanhoSeta * 0.6, tamanhoSeta * 0.7);
+      ctx.closePath();
+      ctx.fillStyle = '#4C8C6B';
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.beginPath();
     ctx.arc(x, y, 9, 0, Math.PI*2);
     ctx.fillStyle = '#4C8C6B';
@@ -8216,9 +8339,10 @@ function coordenadasEvento(canvas, evento){
 }
 
 function aoIniciarTracoTracado(evento){
-  const canvas = document.getElementById('canvas-tracado');
+  const canvas = document.getElementById('canvas-tracado-desenho');
   tracadoDesenhando = true;
   tracadoUltimoPonto = coordenadasEvento(canvas, evento);
+  esconderAvisoNovoTracado();
 }
 
 // TOLERÂNCIA: até 40px de desvio ao próximo ponto-guia ainda conta como "em cima da
@@ -8227,19 +8351,23 @@ function aoIniciarTracoTracado(evento){
 const TOLERANCIA_TRACADO_PX = 40;
 
 function aoMoverTracoTracado(evento){
-  if(!tracadoDesenhando || !tracadoCtx) return;
-  const canvas = document.getElementById('canvas-tracado');
+  if(!tracadoDesenhando || !tracadoCtxDesenho) return;
+  const canvas = document.getElementById('canvas-tracado-desenho');
   const p = coordenadasEvento(canvas, evento);
   const dist = distanciaAoTracoAtual(p);
 
   if(dist <= TOLERANCIA_TRACADO_PX){
     // Voltou para dentro da tolerância: se estava a mostrar o sinal de desvio,
-    // redesenha a guia para a repor ao normal.
+    // redesenha a guia para a repor ao normal (só a guia — o traço já feito, no
+    // canvas de baixo, não é tocado por isto).
     if(tracadoForaDaTolerancia){
       tracadoForaDaTolerancia = false;
       redesenharGuiaTracado();
     }
-    const ctx = tracadoCtx;
+    // O traço do dedo vai para o canvas de DESENHO, separado da guia — por isso
+    // nunca é apagado quando a guia é redesenhada (era essa mistura que causava o
+    // traço já feito a desaparecer sempre que se saía da tolerância ou se recomeçava).
+    const ctx = tracadoCtxDesenho;
     ctx.beginPath();
     ctx.lineCap = 'round';
     ctx.lineWidth = 12;
@@ -8283,12 +8411,35 @@ function avancarSegmentoTracado(){
   tracadoSegmentoAtual++;
   tracadoPontosAcertados = 0;
   if(tracadoSegmentoAtual >= letra.segmentos.length){
+    esconderAvisoNovoTracado();
     concluirLetraTracado();
   } else {
-    // Ainda há outro traço a fazer nesta letra (ex: a barra horizontal do T) —
-    // redesenha para mostrar o novo ponto de partida verde, sem apagar o já feito
+    // Ainda há outro traço a fazer nesta letra (ex: a barra vertical do T, que começa
+    // num ponto diferente de onde a horizontal terminou) — o Eduardo precisa de
+    // levantar o dedo e pousar de novo no novo ponto verde. Se o dedo ainda estiver
+    // no ecrã neste preciso momento (arrastou sem levantar), força esse levantamento
+    // agora: sem isto, o próximo movimento calcula a distância ao NOVO segmento a
+    // partir de uma posição que ainda está perto do segmento ANTERIOR, fica sempre
+    // fora da tolerância, e o traçado parece simplesmente ter parado de responder.
+    tracadoDesenhando = false;
     redesenharGuiaTracado();
+    mostrarAvisoNovoTracado();
   }
+}
+
+// Aviso discreto (sem som nem vibração — não é um erro) a pedir para levantar o dedo
+// e recomeçar no novo ponto verde, sempre que uma letra tem mais do que um traço
+// separado (ex: T, I não tem, mas A, E, F, H, K, R, Y, Z, Q sim).
+function mostrarAvisoNovoTracado(){
+  const aviso = document.getElementById('aviso-novo-tracado');
+  if(!aviso) return;
+  aviso.textContent = '👆 Levanta o dedo e toca no novo ponto verde';
+  aviso.style.display = 'block';
+}
+
+function esconderAvisoNovoTracado(){
+  const aviso = document.getElementById('aviso-novo-tracado');
+  if(aviso) aviso.style.display = 'none';
 }
 
 function concluirLetraTracado(){
@@ -8380,7 +8531,7 @@ function renderLojaRecompensas(){
       <div class="recompensa ${podeResgatar?'resgatavel':''}">
         <div class="r-icone">${r.icone || '🎁'}</div>
         <div class="r-info">
-          <div class="t">${r.t}</div>
+          <div class="t">${escaparHtml(r.t)}</div>
           <div class="custo">${podeResgatar ? 'Já podes trocar!' : `${disponiveis} de ${r.custo} estrelas`}</div>
           <div class="r-barra-fundo"><div class="r-barra-preenchida" style="width:${pct}%"></div></div>
         </div>
@@ -9058,13 +9209,19 @@ function renderCategoriasApoioPerto(){
 
 function pesquisarApoioPerto(termoCategoria){
   const termo = encodeURIComponent(termoCategoria + ' para crianças com autismo');
-  // Tenta obter a localização do dispositivo para centrar a pesquisa; se não houver
-  // permissão ou o navegador não suportar, faz a pesquisa só pelo termo (o serviço de
-  // mapas usa então a localização aproximada do próprio browser, quando disponível).
+  const msg = document.getElementById('msg-apoio-perto');
+  if(msg) msg.textContent = '';
+  // Tenta obter a localização do dispositivo para centrar a pesquisa. Sem coordenadas,
+  // o Google Maps não garante mostrar resultados perto do utilizador (pode cair num
+  // resultado genérico) — por isso avisamos quando isso acontece, em vez de deixar a
+  // pessoa pensar que os resultados são necessariamente locais.
   const abrirPesquisa = (lat, lon) => {
     const url = (lat != null && lon != null)
-      ? `https://www.google.com/maps/search/${termo}/@${lat},${lon},13z`
-      : `https://www.google.com/maps/search/${termo}`;
+      ? `https://www.google.com/maps/search/?api=1&query=${termo}&center=${lat},${lon}&zoom=13`
+      : `https://www.google.com/maps/search/?api=1&query=${termo}`;
+    if(lat == null && msg){
+      msg.textContent = '⚠️ Não foi possível usar a tua localização — os resultados podem não estar perto de ti. Ativa a localização e tenta novamente para resultados mais próximos.';
+    }
     window.open(url, '_blank', 'noopener');
   };
   if('geolocation' in navigator){
@@ -9171,8 +9328,8 @@ function renderResumoPerfilCrianca(){
       : 0;
     cont.innerHTML = `
       <div class="linha-nivel-materia">
-        <span class="nome-materia">${dados.nome}${dados.idade ? ', ' + dados.idade + ' anos' : ''}</span>
-        <span class="etiqueta et-medio">${dados.anoEscolar || 'sem ano definido'}</span>
+        <span class="nome-materia">${escaparHtml(dados.nome)}${dados.idade ? ', ' + escaparHtml(dados.idade) + ' anos' : ''}</span>
+        <span class="etiqueta et-medio">${escaparHtml(dados.anoEscolar || 'sem ano definido')}</span>
       </div>
       <p style="font-size:12.5px;color:var(--texto-suave);margin:8px 0 0;">${camposPreenchidos} de 4 secções detalhadas preenchidas (dificuldades, interesses, rotina, sensorial)${itensSensoriais > 0 ? ` · ${itensSensoriais} itens sensoriais marcados` : ''}.</p>
     `;
@@ -10222,21 +10379,23 @@ async function gerarRelatorioPDF(){
 
 function renderConfig(){
   const cont = document.getElementById('lista-config');
+  // Escapa cada campo de texto editável (ícone, nome, descrição, opções) antes de o
+  // inserir nos atributos value — evita quebrar o HTML com aspas ou símbolos no texto.
   cont.innerHTML = rotinaHoje.map((b,i)=>`
     <div class="bloco-config" data-indice="${i}">
       <div class="linha">
-        <input type="text" class="campo-icone" data-campo="icone" value="${b.icone}" maxlength="2" aria-label="Ícone">
+        <input type="text" class="campo-icone" data-campo="icone" value="${escaparHtml(b.icone)}" maxlength="2" aria-label="Ícone">
         <input type="time" class="campo-hora" data-campo="hora" value="${b.hora}" aria-label="Hora">
-        <input type="text" data-campo="t" value="${b.t}" placeholder="Nome da tarefa" aria-label="Nome da tarefa">
+        <input type="text" data-campo="t" value="${escaparHtml(b.t)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa">
       </div>
       <div class="linha">
-        <input type="text" data-campo="d" value="${b.d || ''}" placeholder="Descrição (opcional)" aria-label="Descrição">
+        <input type="text" data-campo="d" value="${escaparHtml(b.d || '')}" placeholder="Descrição (opcional)" aria-label="Descrição">
       </div>
       <div class="linha">
         <input type="number" class="campo-duracao" data-campo="duracaoMin" value="${b.duracaoMin || ''}" min="1" max="240" placeholder="Duração em minutos (opcional)" aria-label="Duração em minutos">
       </div>
       <div class="linha">
-        <input type="text" data-campo="opcoes" value="${(b.opcoes || []).join(', ')}" placeholder="Opções à escolha, separadas por vírgula (opcional)" aria-label="Opções à escolha">
+        <input type="text" data-campo="opcoes" value="${escaparHtml((b.opcoes || []).join(', '))}" placeholder="Opções à escolha, separadas por vírgula (opcional)" aria-label="Opções à escolha">
       </div>
       <button class="btn-remover-bloco" data-indice-remover="${i}">✕ Remover este bloco</button>
     </div>
@@ -10816,13 +10975,14 @@ async function gerarPerguntasIA(){
 
 function renderRevisaoIA(){
   const cont = document.getElementById('lista-ia-revisao');
+  // Escapa o enunciado e as opções (texto gerado pela IA, ainda por rever) antes de os inserir.
   cont.innerHTML = perguntasGeradasIA.map((q, i) => `
     <div class="bloco-pergunta-ia" data-indice-ia="${i}">
-      <textarea class="p-enunciado" rows="2" data-campo-ia="p">${q.p}</textarea>
+      <textarea class="p-enunciado" rows="2" data-campo-ia="p">${escaparHtml(q.p)}</textarea>
       ${q.o.map((op, j) => `
         <div class="p-opcao">
           <input type="radio" name="ia-correta-${i}" value="${j}" ${j === q.c ? 'checked' : ''} data-campo-ia="c">
-          <input type="text" value="${op}" data-campo-ia="o" data-opcao-indice="${j}">
+          <input type="text" value="${escaparHtml(op)}" data-campo-ia="o" data-opcao-indice="${j}">
         </div>
       `).join('')}
       <button class="p-descartar" data-descartar-ia="${i}">✕ Descartar esta pergunta</button>
@@ -11001,8 +11161,8 @@ function renderRevisaoHistoria(){
   if(!historiaGeradaIA){ cont.innerHTML = ''; return; }
   cont.innerHTML = historiaGeradaIA.paginas.map((p, i) => `
     <div class="bloco-pergunta-ia" data-indice-historia="${i}">
-      <input type="text" value="${p.emoji.replace(/"/g,'&quot;')}" maxlength="4" style="width:50px;text-align:center;font-size:20px;margin-bottom:6px;" data-campo-historia="emoji">
-      <textarea class="p-enunciado" rows="2" data-campo-historia="texto">${p.texto}</textarea>
+      <input type="text" value="${escaparHtml(p.emoji)}" maxlength="4" style="width:50px;text-align:center;font-size:20px;margin-bottom:6px;" data-campo-historia="emoji">
+      <textarea class="p-enunciado" rows="2" data-campo-historia="texto">${escaparHtml(p.texto)}</textarea>
       <button class="p-descartar" data-descartar-historia="${i}">✕ Descartar esta página</button>
     </div>
   `).join('');
@@ -11175,7 +11335,7 @@ function renderRevisaoPlano(){
       <div class="cartao-plano ${decisoesPlano.caa ? '' : 'descartado'}" data-parte="caa">
         <div class="cp-titulo">💬 Pictogramas sugeridos para o Quadro CAA</div>
         <div class="cp-linha-caa">
-          ${caa.map(p => `<div class="cp-peca-caa"><span class="pc-icone">${p.icone}</span><span class="pc-texto">${p.texto}</span></div>`).join('')}
+          ${caa.map(p => `<div class="cp-peca-caa"><span class="pc-icone">${escaparHtml(p.icone)}</span><span class="pc-texto">${escaparHtml(p.texto)}</span></div>`).join('')}
         </div>
         <div class="cp-acoes">
           <button class="btn-secundario" data-toggle-parte="caa">${decisoesPlano.caa ? '✕ Descartar' : '↺ Reativar'}</button>
@@ -11189,11 +11349,11 @@ function renderRevisaoPlano(){
       <div class="cartao-plano ${decisoesPlano.rotina ? '' : 'descartado'}" data-parte="rotina">
         <div class="cp-titulo">📅 Bloco de rotina sugerido</div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" value="${rotina.hora}" data-campo-plano="hora" style="width:64px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;text-align:center;">
-          <input type="text" value="${rotina.icone}" data-campo-plano="icone" style="width:44px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:16px;text-align:center;">
-          <input type="text" value="${rotina.titulo.replace(/"/g,'&quot;')}" data-campo-plano="titulo" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;">
+          <input type="text" value="${escaparHtml(rotina.hora)}" data-campo-plano="hora" style="width:64px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;text-align:center;">
+          <input type="text" value="${escaparHtml(rotina.icone)}" data-campo-plano="icone" style="width:44px;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:16px;text-align:center;">
+          <input type="text" value="${escaparHtml(rotina.titulo)}" data-campo-plano="titulo" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;">
         </div>
-        <textarea rows="2" data-campo-plano="descricao" style="margin-top:8px;width:100%;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;resize:vertical;">${rotina.descricao}</textarea>
+        <textarea rows="2" data-campo-plano="descricao" style="margin-top:8px;width:100%;padding:8px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13px;resize:vertical;">${escaparHtml(rotina.descricao)}</textarea>
         <div class="cp-acoes">
           <button class="btn-secundario" data-toggle-parte="rotina">${decisoesPlano.rotina ? '✕ Descartar' : '↺ Reativar'}</button>
         </div>
@@ -11204,8 +11364,8 @@ function renderRevisaoPlano(){
   if(historia){
     html += `
       <div class="cartao-plano ${decisoesPlano.historia ? '' : 'descartado'}" data-parte="historia">
-        <div class="cp-titulo">📖 História social sugerida: "${historia.titulo}"</div>
-        ${historia.paginas.map((p,i) => `<p style="font-size:12.5px;color:var(--texto-suave);margin:4px 0;">${p.emoji} ${p.texto}</p>`).join('')}
+        <div class="cp-titulo">📖 História social sugerida: "${escaparHtml(historia.titulo)}"</div>
+        ${historia.paginas.map((p,i) => `<p style="font-size:12.5px;color:var(--texto-suave);margin:4px 0;">${escaparHtml(p.emoji)} ${escaparHtml(p.texto)}</p>`).join('')}
         <div class="cp-acoes">
           <button class="btn-secundario" data-toggle-parte="historia">${decisoesPlano.historia ? '✕ Descartar' : '↺ Reativar'}</button>
         </div>
@@ -11345,7 +11505,7 @@ function preencherSelectCategoriaCaa(){
   const select = document.getElementById('add-caa-categoria');
   if(!select) return;
   const valorAnterior = select.value;
-  select.innerHTML = categoriasCaa.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  select.innerHTML = categoriasCaa.map(c => `<option value="${escaparHtml(c.id)}">${escaparHtml(c.nome)}</option>`).join('');
   if(valorAnterior && categoriasCaa.find(c => c.id === valorAnterior)){
     select.value = valorAnterior;
   }
@@ -11400,8 +11560,8 @@ function renderListaCaaPersonalizadas(){
   cont.innerHTML = '<p style="font-size:12px;font-weight:700;color:var(--texto-suave);margin:0 0 6px;">Palavras adicionadas em "🧭 Do meu Plano":</p>' +
     pecas.map((p, i) => `
       <div class="linha-nivel-materia">
-        <span class="nome-materia">${p.icone} ${p.texto}</span>
-        <button class="btn-remover-caa" data-indice="${i}" aria-label="Remover ${p.texto}">🗑️</button>
+        <span class="nome-materia">${escaparHtml(p.icone)} ${escaparHtml(p.texto)}</span>
+        <button class="btn-remover-caa" data-indice="${i}" aria-label="Remover ${escaparHtml(p.texto)}">🗑️</button>
       </div>
     `).join('');
   cont.querySelectorAll('.btn-remover-caa').forEach(btn => {
@@ -11430,10 +11590,10 @@ function renderGestaoVideos(){
   cont.innerHTML = videosReais.map((v,i)=>`
     <div class="bloco-config" data-indice="${i}">
       <div class="linha">
-        <input type="text" data-campo="titulo" value="${v.titulo}" placeholder="Título do vídeo" aria-label="Título do vídeo">
+        <input type="text" data-campo="titulo" value="${escaparHtml(v.titulo)}" placeholder="Título do vídeo" aria-label="Título do vídeo">
       </div>
       <div class="linha">
-        <input type="text" data-campo="url" value="${v.tipo==='youtube' ? v.urlOriginal : v.tipo==='vimeo' ? v.urlOriginal : v.url}" placeholder="Link do YouTube, Vimeo ou URL do ficheiro (.mp4)" aria-label="Link ou URL do ficheiro">
+        <input type="text" data-campo="url" value="${escaparHtml(v.tipo==='youtube' ? v.urlOriginal : v.tipo==='vimeo' ? v.urlOriginal : v.url)}" placeholder="Link do YouTube, Vimeo ou URL do ficheiro (.mp4)" aria-label="Link ou URL do ficheiro">
       </div>
       <button class="btn-remover-bloco" data-indice-remover="${i}">✕ Remover este vídeo</button>
     </div>
@@ -11911,7 +12071,9 @@ function obRenderPassoPergunta(){
   const corpo = document.getElementById('ob-corpo');
 
   if(passo.tipo === 'texto'){
-    corpo.innerHTML = `<input type="text" class="ob-campo" id="ob-input-texto" placeholder="${passo.placeholder}" value="${obRespostas[passo.chave] || ''}">`;
+    // O valor guardado vem de texto escrito pelo próprio utilizador num passo anterior
+    // (ex: nome da criança) — escapa antes de o inserir no atributo value.
+    corpo.innerHTML = `<input type="text" class="ob-campo" id="ob-input-texto" placeholder="${passo.placeholder}" value="${escaparHtml(obRespostas[passo.chave] || '')}">`;
   } else {
     const valorAtual = obRespostas[passo.chave];
     const ehMultipla = passo.tipo === 'opcoes-multipla';
