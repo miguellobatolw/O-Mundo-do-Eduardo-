@@ -1,60 +1,64 @@
-// Service Worker da EduKids — permite abrir e usar a app mesmo sem rede, depois de
-// pelo menos uma visita com rede. Como a app é um único ficheiro HTML autossuficiente
-// (CSS, JS e imagens já embutidos), só é preciso cachear o próprio index.html.
-//
-// IMPORTANTE: subir a versão do cache (CACHE_NOME) sempre que o index.html for
-// atualizado no repositório — sem isso, quem já tem o Service Worker instalado
-// continua a ver a versão antiga em cache mesmo depois de tu publicares uma nova,
-// até o browser decidir por si só verificar de novo (pode demorar).
-const CACHE_NOME = 'edukids-cache-v1';
-const FICHEIRO_PRINCIPAL = './index.html';
+// Service Worker do EduKids — permite abrir e usar a app sem rede depois da primeira
+// visita (quando publicada em HTTPS, como o GitHub Pages). Não interfere com o Firebase
+// (login/sincronização continuam a precisar de rede quando disponível); cobre apenas os
+// ficheiros estáticos da própria app.
 
-// Instalação: guarda o ficheiro principal em cache assim que o Service Worker é
-// instalado pela primeira vez (normalmente na primeira visita com rede).
+const NOME_CACHE = 'edukids-cache-v1';
+
+// Ficheiros a guardar em cache assim que o service worker é instalado. Ajustar esta lista
+// se a app passar a ter mais páginas ou ficheiros próprios (ex: manifest.json, ícones).
+const FICHEIROS_ESSENCIAIS = [
+  './',
+  './index.html',
+];
+
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
-    caches.open(CACHE_NOME).then((cache) => cache.add(FICHEIRO_PRINCIPAL))
+    caches.open(NOME_CACHE).then((cache) => {
+      // addAll falha por inteiro se um só ficheiro desta lista não existir — por isso a
+      // lista acima é propositadamente curta e certa, em vez de tentar adivinhar caminhos.
+      return cache.addAll(FICHEIROS_ESSENCIAIS);
+    })
   );
-  // Ativa este Service Worker imediatamente, sem esperar que todas as abas antigas
-  // fechem — importante para uma app usada em sessões curtas e frequentes.
   self.skipWaiting();
 });
 
-// Ativação: remove versões antigas do cache (de uma versão anterior deste ficheiro),
-// para não acumular ficheiros desatualizados no dispositivo indefinidamente.
 self.addEventListener('activate', (evento) => {
+  // Remove caches de versões antigas do service worker, para não acumular ficheiros
+  // desatualizados indefinidamente no dispositivo do utilizador.
   evento.waitUntil(
-    caches.keys().then((nomes) =>
-      Promise.all(
-        nomes
-          .filter((nome) => nome !== CACHE_NOME)
-          .map((nome) => caches.delete(nome))
-      )
-    )
+    caches.keys().then((chaves) => {
+      return Promise.all(
+        chaves
+          .filter((chave) => chave !== NOME_CACHE)
+          .map((chave) => caches.delete(chave))
+      );
+    })
   );
   self.clients.claim();
 });
 
-// Estratégia "network first, cache fallback": tenta sempre a rede primeiro (para a
-// Celeste ver atualizações assim que existam), e só usa a versão em cache se a rede
-// falhar ou demorar — é o que garante que a app abre mesmo offline.
 self.addEventListener('fetch', (evento) => {
-  // Só intercepta pedidos de navegação (abrir a página em si), não pedidos de outro
-  // tipo — não há mais nada para cachear, já que tudo vive dentro do próprio HTML.
-  if(evento.request.mode !== 'navigate') return;
+  // Só intercepta pedidos GET normais da própria origem — nunca chamadas ao Firebase,
+  // Firestore ou a qualquer API externa (essas continuam a ir sempre à rede real).
+  if(evento.request.method !== 'GET') return;
+  const url = new URL(evento.request.url);
+  if(url.origin !== self.location.origin) return;
 
   evento.respondWith(
-    fetch(evento.request)
-      .then((respostaDaRede) => {
-        // Rede disponível: atualiza a cache com a versão mais recente para a próxima
-        // vez que a app for aberta sem rede, e devolve essa mesma resposta agora.
-        const copia = respostaDaRede.clone();
-        caches.open(CACHE_NOME).then((cache) => cache.put(FICHEIRO_PRINCIPAL, copia));
-        return respostaDaRede;
-      })
-      .catch(() => {
-        // Sem rede: serve a última versão guardada em cache, se existir.
-        return caches.match(FICHEIRO_PRINCIPAL);
-      })
+    caches.match(evento.request).then((respostaCache) => {
+      // Estratégia "cache primeiro, rede como recurso": se já está em cache, serve
+      // imediatamente (rápido, funciona offline); tenta atualizar o cache em segundo
+      // plano sempre que há rede, para a próxima vez já vir a versão mais recente.
+      const buscarERenovar = fetch(evento.request).then((respostaRede) => {
+        if(respostaRede && respostaRede.status === 200){
+          const copia = respostaRede.clone();
+          caches.open(NOME_CACHE).then((cache) => cache.put(evento.request, copia));
+        }
+        return respostaRede;
+      }).catch(() => respostaCache); // sem rede: cai para o que já estiver em cache
+
+      return respostaCache || buscarERenovar;
+    })
   );
 });
