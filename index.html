@@ -9759,25 +9759,50 @@ function renderCategoriasApoioPerto(){
 
 function pesquisarApoioPerto(termoCategoria){
   const msg = document.getElementById('msg-apoio-perto');
-  if(msg) msg.textContent = '';
-  // Tenta obter a localização do dispositivo para centrar a pesquisa. A API pública e
-  // documentada de "Maps URLs" (api=1) só aceita um parâmetro "query" — não existe um
-  // "center"/"zoom" separado para pesquisas de texto, e o truque de embutir "termo@lat,lon"
-  // dentro do query NÃO é suportado oficialmente: na prática o Google ignora-o com
-  // frequência e mostra resultados nacionais (foi o que aconteceu: pesquisa devolveu
-  // clínicas em Lisboa/Barreiro em vez da zona real do utilizador).
-  // Correção: usar o formato "ll=lat,lon&z=zoom" (mais antigo, sem api=1), que continua
-  // ativo e efetivamente centra o mapa nas coordenadas antes da pesquisa correr — muito
-  // mais fiável do que embutir coordenadas dentro do texto da pesquisa.
-  const abrirPesquisa = (lat, lon, mensagemFalha) => {
-    const termoBase = termoCategoria + ' para crianças com autismo';
+  if(msg) msg.textContent = 'A obter a tua localização…';
+  // A API pública de "Maps URLs" (sem chave, "fora da app") não tem um parâmetro de raio
+  // para os RESULTADOS DA LISTA — só consegue centrar o MAPA visível. Por isso, mesmo com
+  // coordenadas no URL, a lista por baixo às vezes mostrava clínicas de Lisboa em vez da
+  // zona real (confirmado por captura de ecrã do utilizador, com o mapa já bem centrado no
+  // Porto mas a lista ainda a mostrar Lisboa/Barreiro).
+  // Correção: em vez de confiar só nas coordenadas, faz-se geocodificação inversa (via
+  // Nominatim/OpenStreetMap, serviço público e gratuito, sem precisar de chave da Google) para
+  // obter o NOME da localidade e incluí-lo no texto da pesquisa — isto pesa muito mais na
+  // relevância da lista do que coordenadas escondidas no URL. As coordenadas continuam
+  // também a ser usadas para centrar o mapa, com um zoom mais apertado (15z) para reforçar.
+  const abrirPesquisa = (lat, lon, nomeLocalidade, mensagemFalha) => {
+    const termoBase = termoCategoria + ' para crianças com autismo'
+      + (nomeLocalidade ? ' em ' + nomeLocalidade : '');
     const url = (lat != null && lon != null)
-      ? `https://www.google.com/maps/search/${encodeURIComponent(termoBase)}/@${lat},${lon},13z`
+      ? `https://www.google.com/maps/search/${encodeURIComponent(termoBase)}/@${lat},${lon},15z`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(termoBase)}`;
     if(lat == null && msg){
       msg.textContent = mensagemFalha || '⚠️ Não foi possível usar a tua localização — os resultados podem não estar perto de ti. Ativa a localização e tenta novamente para resultados mais próximos.';
+    } else if(msg){
+      msg.textContent = '';
     }
     window.open(url, '_blank', 'noopener');
+  };
+  // Tenta descobrir o nome da localidade a partir das coordenadas (geocodificação inversa).
+  // Se falhar por qualquer razão (sem rede, serviço em baixo, resposta lenta), a pesquisa
+  // continua na mesma — só sem o nome da localidade no texto, com as coordenadas do URL
+  // como único reforço de proximidade.
+  const obterLocalidadeEAbrir = (lat, lon) => {
+    const controlador = new AbortController();
+    const tempoLimite = setTimeout(()=> controlador.abort(), 4000);
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12&accept-language=pt`, { signal: controlador.signal })
+      .then(r => r.json())
+      .then(dados => {
+        clearTimeout(tempoLimite);
+        const end = dados && dados.address ? dados.address : {};
+        // Ordem de preferência: vila/cidade > município > distrito — o primeiro que existir.
+        const nomeLocalidade = end.city || end.town || end.village || end.municipality || end.county || null;
+        abrirPesquisa(lat, lon, nomeLocalidade);
+      })
+      .catch(()=>{
+        clearTimeout(tempoLimite);
+        abrirPesquisa(lat, lon, null);
+      });
   };
   // MENSAGEM_LOCALIZACAO_GENERICA: motivo desconhecido (ex: permissão recusada pelo
   // utilizador, ou o dispositivo não conseguiu obter um sinal de GPS a tempo).
@@ -9791,18 +9816,18 @@ function pesquisarApoioPerto(termoCategoria){
   const ehFicheiroLocal = protocoloAtual === 'file:' || protocoloAtual === 'content:';
   if('geolocation' in navigator){
     navigator.geolocation.getCurrentPosition(
-      (pos)=> abrirPesquisa(pos.coords.latitude, pos.coords.longitude),
+      (pos)=> obterLocalidadeEAbrir(pos.coords.latitude, pos.coords.longitude),
       (erro)=>{
         // A mensagem de erro da API, quando o motivo é mesmo "só origens seguras são
         // permitidas", contém esse texto em inglês — é a única forma fiável de
         // confirmar essa causa específica sem adivinhar (ver PositionError da spec).
         const foiBloqueadoPorOrigemInsegura = erro && erro.message && erro.message.includes('Only secure origins are allowed');
-        abrirPesquisa(null, null, (ehFicheiroLocal || foiBloqueadoPorOrigemInsegura) ? MENSAGEM_FICHEIRO_LOCAL : MENSAGEM_LOCALIZACAO_GENERICA);
+        abrirPesquisa(null, null, null, (ehFicheiroLocal || foiBloqueadoPorOrigemInsegura) ? MENSAGEM_FICHEIRO_LOCAL : MENSAGEM_LOCALIZACAO_GENERICA);
       },
-      { timeout: 5000 }
+      { timeout: 5000, enableHighAccuracy: true }
     );
   } else {
-    abrirPesquisa(null, null, ehFicheiroLocal ? MENSAGEM_FICHEIRO_LOCAL : MENSAGEM_LOCALIZACAO_GENERICA);
+    abrirPesquisa(null, null, null, ehFicheiroLocal ? MENSAGEM_FICHEIRO_LOCAL : MENSAGEM_LOCALIZACAO_GENERICA);
   }
 }
 
