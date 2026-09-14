@@ -9760,16 +9760,20 @@ function renderCategoriasApoioPerto(){
 function pesquisarApoioPerto(termoCategoria){
   const msg = document.getElementById('msg-apoio-perto');
   if(msg) msg.textContent = '';
-  // Tenta obter a localização do dispositivo para centrar a pesquisa. A API pública de
-  // "Maps URLs" da Google só aceita um parâmetro "query" — não existe um "center"/"zoom"
-  // separado para pesquisas de texto (esses só funcionam para mostrar um mapa, não para
-  // procurar algo). A forma documentada de influenciar onde a pesquisa acontece é embutir
-  // as coordenadas DENTRO do próprio texto da pesquisa, no formato "termo@lat,lon" — sem
-  // isto, o Google decide sozinho onde mostrar resultados, ignorando a localização real.
+  // Tenta obter a localização do dispositivo para centrar a pesquisa. A API pública e
+  // documentada de "Maps URLs" (api=1) só aceita um parâmetro "query" — não existe um
+  // "center"/"zoom" separado para pesquisas de texto, e o truque de embutir "termo@lat,lon"
+  // dentro do query NÃO é suportado oficialmente: na prática o Google ignora-o com
+  // frequência e mostra resultados nacionais (foi o que aconteceu: pesquisa devolveu
+  // clínicas em Lisboa/Barreiro em vez da zona real do utilizador).
+  // Correção: usar o formato "ll=lat,lon&z=zoom" (mais antigo, sem api=1), que continua
+  // ativo e efetivamente centra o mapa nas coordenadas antes da pesquisa correr — muito
+  // mais fiável do que embutir coordenadas dentro do texto da pesquisa.
   const abrirPesquisa = (lat, lon, mensagemFalha) => {
     const termoBase = termoCategoria + ' para crianças com autismo';
-    const termoComLocal = (lat != null && lon != null) ? `${termoBase} @${lat},${lon}` : termoBase;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(termoComLocal)}`;
+    const url = (lat != null && lon != null)
+      ? `https://www.google.com/maps/search/${encodeURIComponent(termoBase)}/@${lat},${lon},13z`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(termoBase)}`;
     if(lat == null && msg){
       msg.textContent = mensagemFalha || '⚠️ Não foi possível usar a tua localização — os resultados podem não estar perto de ti. Ativa a localização e tenta novamente para resultados mais próximos.';
     }
