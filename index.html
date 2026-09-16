@@ -501,6 +501,8 @@
   .forma-caract.certa{ border-color:#4C8C6B; background:#EAF6EF; }
   .forma-caract.errada{ border-color:var(--coral-suave); opacity:.55; pointer-events:none; }
   .item-classificar.selecionado{ border-color:var(--petroleo); background:var(--salva-clara); transform:scale(1.08); }
+  .cor-pintura{ border:3px solid transparent; transition:transform .15s; }
+  .cor-pintura.cor-ativa{ border-color:var(--petroleo); transform:scale(1.15); }
   .carta{
     aspect-ratio:1/1;
     background:var(--petroleo);
@@ -6850,6 +6852,7 @@ function abrirItemGenerico(it, origem){
   }
   const btnPintura = document.getElementById('btn-concluir-pintura');
   if(btnPintura){
+    configurarTelaPintura();
     btnPintura.addEventListener('click', ()=> darEstrela('Que bonito!','Terminaste a tua pintura.'));
   }
   document.querySelectorAll('.opcao-emocao').forEach(el=>{
@@ -7099,12 +7102,110 @@ function alternarSom(chave){
   if(dEl){ dEl.textContent = 'A tocar — toca para parar'; }
   if(sEl){ sEl.textContent = '⏸'; }
 }
+const CORES_PINTURA = ['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7','#2E3D3E'];
+
 function gerarPintura(){
-  return `<p class="desc">Escolhe uma cor e desenha livremente numa folha à parte, ou pinta no ecrã se tiveres uma app de desenho.</p>
-    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:18px;">
-      ${['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7'].map(c=>`<div style="width:38px;height:38px;border-radius:50%;background:${c};box-shadow:var(--sombra);"></div>`).join('')}
+  return `<p class="desc">Escolhe uma cor e desenha livremente com o dedo.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;" id="paleta-pintura">
+      ${CORES_PINTURA.map((c,i)=>`<div class="cor-pintura${i===0?' cor-ativa':''}" data-cor="${c}" style="width:38px;height:38px;border-radius:50%;background:${c};box-shadow:var(--sombra);cursor:pointer;" role="button" tabindex="0" aria-label="Cor"></div>`).join('')}
+      <div class="cor-pintura cor-borracha" data-cor="borracha" style="width:38px;height:38px;border-radius:50%;background:var(--areia-clara);box-shadow:var(--sombra);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;" role="button" tabindex="0" aria-label="Borracha">🧽</div>
     </div>
-    <button class="btn-primario" id="btn-concluir-pintura">Terminei</button>`;
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px;">
+      <span style="font-size:12px;color:var(--texto-suave);align-self:center;">Espessura:</span>
+      <input type="range" id="espessura-pintura" min="3" max="24" value="8" style="width:120px;">
+    </div>
+    <canvas id="tela-pintura" width="600" height="420" style="width:100%;max-width:100%;height:auto;aspect-ratio:600/420;background:#fff;border-radius:var(--raio);box-shadow:var(--sombra);touch-action:none;display:block;margin:0 auto 16px;"></canvas>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secundario" id="btn-limpar-pintura" style="flex:1;">🗑️ Limpar</button>
+      <button class="btn-primario" id="btn-concluir-pintura" style="flex:1;">Terminei</button>
+    </div>`;
+}
+
+// Configura o canvas de pintura livre: desenho por toque/rato, escolha de cor e espessura,
+// e borracha. É chamada depois do HTML entrar no DOM, tal como os outros jogos fazem com
+// os seus botões — o canvas só existe depois de gerarPintura() ser injetado.
+function configurarTelaPintura(){
+  const canvas = document.getElementById('tela-pintura');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let aDesenhar = false;
+  let ultimoX = 0, ultimoY = 0;
+  let corAtual = CORES_PINTURA[0];
+  let modoBorracha = false;
+
+  function posicaoNoCanvas(evento){
+    const rect = canvas.getBoundingClientRect();
+    const escalaX = canvas.width / rect.width;
+    const escalaY = canvas.height / rect.height;
+    const ponto = evento.touches ? evento.touches[0] : evento;
+    return {
+      x: (ponto.clientX - rect.left) * escalaX,
+      y: (ponto.clientY - rect.top) * escalaY
+    };
+  }
+
+  function comecarTraco(evento){
+    evento.preventDefault();
+    aDesenhar = true;
+    const p = posicaoNoCanvas(evento);
+    ultimoX = p.x; ultimoY = p.y;
+    ctx.globalCompositeOperation = modoBorracha ? 'destination-out' : 'source-over';
+    // Um toque só (sem arrastar) desenha um pontinho, não fica sem reação nenhuma
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Number(document.getElementById('espessura-pintura').value)/2, 0, Math.PI*2);
+    ctx.fillStyle = modoBorracha ? '#000000' : corAtual;
+    ctx.fill();
+  }
+
+  function continuarTraco(evento){
+    if(!aDesenhar) return;
+    evento.preventDefault();
+    const p = posicaoNoCanvas(evento);
+    ctx.globalCompositeOperation = modoBorracha ? 'destination-out' : 'source-over';
+    ctx.beginPath();
+    ctx.moveTo(ultimoX, ultimoY);
+    ctx.lineTo(p.x, p.y);
+    ctx.strokeStyle = modoBorracha ? '#000000' : corAtual;
+    ctx.lineWidth = Number(document.getElementById('espessura-pintura').value);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    ultimoX = p.x; ultimoY = p.y;
+  }
+
+  function terminarTraco(){ aDesenhar = false; }
+
+  canvas.addEventListener('pointerdown', comecarTraco);
+  canvas.addEventListener('pointermove', continuarTraco);
+  canvas.addEventListener('pointerup', terminarTraco);
+  canvas.addEventListener('pointerleave', terminarTraco);
+  // Fallback para navegadores/dispositivos sem Pointer Events consistente em touch
+  canvas.addEventListener('touchstart', comecarTraco, {passive:false});
+  canvas.addEventListener('touchmove', continuarTraco, {passive:false});
+  canvas.addEventListener('touchend', terminarTraco);
+
+  document.querySelectorAll('#paleta-pintura .cor-pintura').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('#paleta-pintura .cor-pintura').forEach(e=>e.classList.remove('cor-ativa'));
+      el.classList.add('cor-ativa');
+      const dataCor = el.getAttribute('data-cor');
+      if(dataCor === 'borracha'){
+        modoBorracha = true;
+      } else {
+        modoBorracha = false;
+        corAtual = dataCor;
+      }
+      tocarSomClique();
+    });
+  });
+
+  const btnLimpar = document.getElementById('btn-limpar-pintura');
+  if(btnLimpar){
+    btnLimpar.addEventListener('click', ()=>{
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      tocarSomClique();
+    });
+  }
 }
 
 /* ======================= OUVIR E PERCEBER (história narrada + perguntas de compreensão) ======================= */
