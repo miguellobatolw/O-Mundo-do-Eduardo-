@@ -652,6 +652,135 @@
   .forma-caract.certa{ border-color:#4C8C6B; background:#EAF6EF; }
   .forma-caract.errada{ border-color:var(--coral-suave); opacity:.55; pointer-events:none; }
   .item-classificar.selecionado{ border-color:var(--petroleo); background:var(--salva-clara); transform:scale(1.08); }
+  /* Grelha do jogo "Juntar e Limpar" — número de colunas definido em JS (varia por
+     nível), por isso só o essencial fica fixo aqui. Peças mais pequenas que
+     .forma-caract porque a grelha pode ir até 7×6 e precisa de caber no ecrã. */
+  .grelha-juntar-limpar{
+    display:grid;
+    gap:6px;
+    margin-bottom:14px;
+    /* Sem isto, o browser interpreta o dedo a mover-se sobre a grelha como um gesto de
+       scroll da página, e o arrasto do jogo nunca chega a funcionar — a mesma regra já
+       usada no Puzzle de Encaixe, que também depende de arrastar o dedo livremente. */
+    touch-action:none;
+  }
+  .peca-juntar-limpar{
+    aspect-ratio:1;
+    border-radius:10px;
+    border:none;
+    background:var(--branco);
+    box-shadow:var(--sombra);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+    padding:0;
+    transition:transform .1s ease;
+    touch-action:none;
+    user-select:none;
+  }
+  .peca-juntar-limpar:active{ transform:scale(0.9); }
+  .peca-juntar-limpar.vazia{
+    background:transparent;
+    box-shadow:none;
+    pointer-events:none;
+  }
+  /* Peça tocada durante o arrasto do dedo — destaque visual claro do que já entrou
+     no grupo em formação, para o Eduardo ver exatamente o que vai ser removido. */
+  .peca-juntar-limpar.selecionada-arrasto{
+    transform:scale(1.12);
+    box-shadow:0 0 0 3px var(--petroleo), var(--sombra);
+  }
+  /* Ao soltar o dedo sobre um grupo válido: pulsa (cresce um pouco mais), FICA visível
+     mais um instante, e só depois desvanece a opacidade de forma gradual e bem notada
+     — o problema do desenho anterior era que ease-in concentra a mudança no fim, dando
+     a sensação de "desaparece de repente" mesmo com a animação a durar bastante tempo. */
+  .peca-juntar-limpar.a-desaparecer{
+    animation: desvanecerPeca .7s linear forwards;
+    pointer-events:none;
+    z-index:2;
+  }
+  @keyframes desvanecerPeca{
+    0%{ opacity:1; transform:scale(1.12) rotate(0deg); }
+    20%{ opacity:1; transform:scale(1.35) rotate(-6deg); }
+    45%{ opacity:0.85; transform:scale(1.1) rotate(4deg); }
+    70%{ opacity:0.4; transform:scale(0.6) rotate(8deg); }
+    100%{ opacity:0; transform:scale(0.1) rotate(14deg); }
+  }
+  /* Peça a cair para preencher o espaço deixado pelas removidas — um pequeno
+     deslizar-se de cima para a posição final, imitando peças a cair por gravidade,
+     como em jogos de blocos. Distância fixa e curta: o efeito visual de "a cair"
+     importa mais do que a exatidão física de quantas posições cada peça desceu. */
+  .peca-juntar-limpar.a-cair{
+    animation: cairPeca .28s cubic-bezier(.34,1.2,.64,1) forwards;
+  }
+  @keyframes cairPeca{
+    from{ transform:translateY(-130%); opacity:0.6; }
+    to{ transform:translateY(0); opacity:1; }
+  }
+
+  /* ===== Frasco de progresso (substitui a antiga barra "a encher") =====
+     Um contentor com forma de frasco, largo em baixo e com um "gargalo" mais estreito
+     em cima — as bolas das peças já limpas empilham-se de baixo para cima à medida que
+     o Eduardo joga. Mais concreto e legível do que uma barra abstrata: o Eduardo vê o
+     mesmo tipo de bolinha colorida que estava a arrastar na grelha, só que agora "presa"
+     dentro do frasco como prova visível do que já foi feito. */
+  .frasco-juntar-limpar{
+    width:110px;
+    height:150px;
+    margin:6px auto 0;
+    position:relative;
+    background:var(--areia-clara);
+    border:3px solid var(--salva-clara);
+    border-radius:14px 14px 30px 30px;
+    /* Gargalo: estreita a zona de cima com um recorte em trapézio, via clip-path. */
+    clip-path:polygon(20% 0%, 80% 0%, 100% 18%, 100% 100%, 0% 100%, 0% 18%);
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .frasco-bolas{
+    width:100%;
+    display:flex;
+    flex-wrap:wrap-reverse; /* cada bolinha nova entra por baixo, empurrando as existentes para cima */
+    align-content:flex-start;
+    justify-content:center;
+    gap:3px;
+    padding:4px 6px;
+  }
+  .frasco-bolas .bola-frasco{
+    width:15px; height:15px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:inset 0 -2px 2px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.1);
+    animation: entrarBolaFrasco .35s ease-out;
+  }
+  @keyframes entrarBolaFrasco{
+    from{ transform:scale(0); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+  }
+  body.movimento-reduzido .frasco-bolas .bola-frasco{ animation:none; }
+
+  /* Dica por inatividade: cintila as peças de um grupo jogável (ver mostrarDicaJuntarLimpar).
+     Repete indefinidamente (infinite) até o Eduardo interagir com a grelha, que é quando
+     cancelarDicaJuntarLimpar remove a classe (ver essa função). Sem mudança de cor de
+     fundo — só o crescer/rodar, que já chama a atenção sem introduzir um amarelo forte
+     sobre peças que já têm cor própria (o emoji). */
+  .peca-juntar-limpar.a-cintilar{
+    animation: saltarDica 0.6s ease-in-out infinite;
+    z-index:3; /* por cima das peças vizinhas enquanto cresce, para não ficar tapada por elas */
+  }
+  @keyframes saltarDica{
+    0%, 100%{ transform:scale(1) rotate(0deg); }
+    30%{ transform:scale(1.4) rotate(-8deg); }
+    60%{ transform:scale(1.4) rotate(6deg); }
+  }
+  /* Em movimento reduzido, a dica ainda existe mas fica só uma sombra mais forte fixa, sem
+     saltar nem rodar — coerente com o resto da app nesse modo (ver movimentoReduzidoAtivo). */
+  body.movimento-reduzido .peca-juntar-limpar.a-cintilar{
+    animation:none;
+    box-shadow:0 0 0 3px var(--petroleo), var(--sombra);
+  }
   .cor-pintura{ border:3px solid transparent; transition:transform .15s; }
   .cor-pintura.cor-ativa{ border-color:var(--petroleo); transform:scale(1.15); }
   .carta{
@@ -674,23 +803,15 @@
      para o feedback de acerto/erro, colocado junto às opções, não no topo. */
   .nivel-jogo{ font-size:14px; color:var(--texto-suave); margin-bottom:10px; }
   .aviso-novo-tracado{
-    background:#D6E4F7;
-    border:3px solid #7FA6DD;
+    background:#EAF0FB;
+    border:2px solid #A9C2E8;
     border-radius:var(--raio);
-    padding:10px 12px;
-    font-size:14.5px;
-    font-weight:800;
+    padding:8px 12px;
+    font-size:13px;
+    font-weight:700;
     color:var(--petroleo);
     text-align:center;
-    margin:10px 0 0;
-    animation: apareceAvisoNovoTracado 0.3s ease;
-  }
-  @keyframes apareceAvisoNovoTracado{
-    0%{ transform:scale(0.9); opacity:0; }
-    100%{ transform:scale(1); opacity:1; }
-  }
-  body.movimento-reduzido .aviso-novo-tracado{
-    animation:none;
+    margin:0 0 10px;
   }
 
   /* ===== Traça a Letra ===== */
@@ -2524,6 +2645,21 @@
         <div id="lista-comportamentos-alvo"></div>
       </div>
 
+      <div class="cartao-grafico" id="cartao-registo-alimentacao" style="display:none;">
+        <div class="t-grafico">Alimentação (últimos 14 dias)</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Regista aqui alimentos experimentados, sem julgamento — só para acompanhar se a aceitação vai mudando ao longo de várias tentativas.</p>
+        <div id="lista-registo-alimentacao"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <input type="text" id="campo-alimento-nome" placeholder="Ex: brócolos" style="flex:1;min-width:0;padding:10px 12px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-size:14px;">
+          <select id="campo-alimento-resultado" style="padding:10px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-size:13px;">
+            <option value="aceite">😊 Aceitou</option>
+            <option value="a_provar">🤏 Provou</option>
+            <option value="recusado">🙅 Recusou</option>
+          </select>
+        </div>
+        <button class="btn-primario" id="btn-registar-alimento" style="margin-top:8px;">Registar</button>
+      </div>
+
       <div class="cartao-grafico" id="cartao-jogos-sociais" style="display:none;">
         <div class="t-grafico">Competências sociais — Como se Sente? e O Que Dirias?</div>
         <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Estes dois jogos treinam, em conjunto, reconhecer a emoção de outra pessoa numa situação e escolher uma resposta social ajustada — a mesma competência em dois passos.</p>
@@ -3442,7 +3578,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.50.2';
+window.APP_VERSION = '1.52.0';
 
 /* ======================= DADOS ======================= */
 
@@ -4571,6 +4707,566 @@ const NIVEIS_PUZZLE_SENSORIAL = {
   ]},
 };
 
+// ===== Juntar e Limpar =====
+// Jogo de correspondência de padrões inspirado num jogo comercial que o Eduardo gostou
+// de jogar (mecanismo "match"), mas com a mecânica de interação reformulada a pedido:
+// ARRASTAR o dedo por peças adjacentes da mesma cor (não precisam de estar pré-agrupadas
+// — o próprio arrasto define o grupo), soltar para as remover com um desvanecer suave,
+// e as peças de cima caem para preencher os espaços, como em jogos de blocos por gravidade.
+// Mantém deliberadamente SEM as duas partes desse jogo comercial mais problemáticas para
+// uma criança autista: sem cronómetro/pressão de tempo visível, e sem sistema de moedas/
+// compras (que ensina padrões de recompensa variável tipo jogo a dinheiro, um objetivo
+// bem diferente do desta app). Progressão de nível pelo mesmo critério já usado no resto
+// da EduKids — grelha maior e mais tipos de peça tornam mais difícil encontrar grupos,
+// sem qualquer pressão de tempo.
+const NIVEIS_JUNTAR_LIMPAR = {
+  1: { nome:'Fácil', linhas:5, colunas:4, tiposDePeca:['🔴','🔵','🟢'], alvoLimpar:12, minimoGrupo:2, tempoAteDica:18000 },
+  2: { nome:'Médio', linhas:6, colunas:5, tiposDePeca:['🔴','🔵','🟢','🟡'], alvoLimpar:20, minimoGrupo:3, tempoAteDica:15000 },
+  3: { nome:'Difícil', linhas:7, colunas:6, tiposDePeca:['🔴','🔵','🟢','🟡','🟣'], alvoLimpar:30, minimoGrupo:4, tempoAteDica:10000 },
+};
+
+// Cor CSS sólida correspondente a cada emoji de peça — usada para colorir as bolinhas
+// do frasco de progresso (ver atualizarProgressoJuntarLimpar), já que o emoji em si não
+// pode ser usado como valor de "background". Tons próximos dos que o próprio emoji mostra.
+const CORES_PECA_JUNTAR_LIMPAR = {
+  '🔴':'#E0574F', '🔵':'#3E7CB8', '🟢':'#4C8C6B', '🟡':'#E8C468', '🟣':'#9B6BB3',
+};
+// Nome em português (plural, para "Limpa as/os ___") de cada cor — usado na instrução
+// da cor-alvo (ver iniciarJogoJuntarLimpar). Inclui o artigo certo (as/os) já embutido,
+// para não ter de tratar concordância de género espalhada pelo código.
+const NOMES_COR_JUNTAR_LIMPAR = {
+  '🔴':'as vermelhas', '🔵':'as azuis', '🟢':'as verdes', '🟡':'as amarelas', '🟣':'as roxas',
+};
+
+let juntarLimparNivelAtual = 1;
+let juntarLimparNivelConteudo = 1;
+let juntarLimparTeveErro = false; // nunca chega a ficar true — não há "erro" possível neste jogo (ver comentário em soltarArrastoJuntarLimpar), mas mantém-se por consistência com avaliarProgressaoNivel
+let juntarLimparGrelha = []; // matriz [linha][coluna] com o emoji de cada peça, ou null se vazia
+let juntarLimparPecasRemovidas = 0;
+// A cor que conta para o objetivo desta ronda ("Limpa as verdes!") — escolhida ao acaso
+// de entre as cores do nível em iniciarJogoJuntarLimpar. Peças doutras cores continuam
+// a poder ser limpas livremente (sem penalização, como o resto deste jogo), só não
+// avançam o progresso nem entram no frasco.
+let juntarLimparCorAlvo = null;
+// Cor (emoji) de cada peça já limpa nesta sessão de jogo, pela ordem em que foi
+// removida — alimenta as bolinhas do frasco de progresso (ver soltarArrastoJuntarLimpar
+// e atualizarProgressoJuntarLimpar). Reposto a cada novo jogo em iniciarJogoJuntarLimpar.
+let juntarLimparCoresNoFrasco = [];
+let juntarLimparLinhas = 5;
+let juntarLimparColunas = 4;
+// Estado do arrasto em curso: array de [linha,coluna] pela ordem em que o dedo passou.
+// Vazio quando não há arrasto ativo.
+let juntarLimparArrastoAtual = [];
+let juntarLimparArrastando = false;
+// Mínimo de peças exigido para formar um grupo válido no nível atual — Fácil aceita
+// pares, Médio exige trios, Difícil exige quatro ou mais (ver NIVEIS_JUNTAR_LIMPAR).
+let juntarLimparMinimoGrupo = 2;
+let juntarLimparAlvo = 12; // total de peças a remover para completar o nível atual — usado pela barra de progresso
+// Temporizador da dica por inatividade: se o Eduardo ficar parado tempo demais sem
+// conseguir ver um grupo por si (mais provável no nível Difícil, com mais cores e um
+// mínimo maior), as peças de um grupo válido cintilam para indicar o caminho. Guarda o
+// id do setTimeout para poder cancelar/reiniciar a cada jogada ou redesenho da grelha.
+let juntarLimparTimeoutDica = null;
+
+function gerarHtmlJuntarLimpar(){
+  return `
+    <div class="painel">
+      <div class="nivel-jogo" id="nivel-jogo-juntar-limpar">A preparar...</div>
+      <p class="desc">Arrasta o dedo por peças da mesma cor que estejam juntas — quanto maior o grupo, melhor!</p>
+      <div class="frasco-juntar-limpar" id="frasco-juntar-limpar" role="img" aria-label="Frasco a encher com as peças já limpas">
+        <div class="frasco-bolas" id="frasco-bolas-juntar-limpar"></div>
+      </div>
+      <p class="legenda-progresso-juntar-limpar" id="legenda-progresso-juntar-limpar" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin:8px 0 14px;"></p>
+      <div class="grelha-juntar-limpar" id="grelha-juntar-limpar"></div>
+      <div class="estado-jogo" id="estado-juntar-limpar"></div>
+    </div>
+  `;
+}
+
+function iniciarJogoJuntarLimpar(){
+  juntarLimparNivelAtual = obterNivelAtual('juntar-limpar');
+  juntarLimparNivelConteudo = obterNivelParaRonda('juntar-limpar');
+  const config = NIVEIS_JUNTAR_LIMPAR[juntarLimparNivelConteudo] || NIVEIS_JUNTAR_LIMPAR[1];
+  juntarLimparLinhas = config.linhas;
+  juntarLimparColunas = config.colunas;
+  juntarLimparPecasRemovidas = 0;
+  juntarLimparCoresNoFrasco = [];
+  juntarLimparTeveErro = false;
+  juntarLimparArrastoAtual = [];
+  juntarLimparArrastando = false;
+  juntarLimparMinimoGrupo = config.minimoGrupo || 2;
+  juntarLimparAlvo = config.alvoLimpar || 12;
+  juntarLimparCorAlvo = config.tiposDePeca[Math.floor(Math.random() * config.tiposDePeca.length)];
+  const nivelEl = document.getElementById('nivel-jogo-juntar-limpar');
+  if(nivelEl) nivelEl.textContent = `Nível ${config.nome} — limpa ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'a cor pedida'} ${juntarLimparCorAlvo}`;
+  atualizarProgressoJuntarLimpar();
+
+  // Gera a grelha aleatoriamente e depois GARANTE que existe pelo menos um grupo
+  // jogável (tamanho >= minimoGrupo): com poucos tipos de peça e mínimo baixo (nível
+  // Fácil/Médio) um grupo grande aparece quase sempre por acaso, mas no nível Difícil
+  // (5 cores, mínimo de 4) a distribuição puramente aleatória pode não formar nenhum
+  // grupo desse tamanho em toda a grelha — tornando o nível impossível de terminar.
+  // Por isso, depois de gerar, verifica-se sempre e, faltando um grupo válido, planta-se
+  // um mínimo de peças da mesma cor num bloco compacto para garantir que há sempre uma
+  // jogada possível, sem reescrever a grelha toda.
+  juntarLimparGrelha = [];
+  for(let l = 0; l < juntarLimparLinhas; l++){
+    const linha = [];
+    for(let c = 0; c < juntarLimparColunas; c++){
+      linha.push(config.tiposDePeca[Math.floor(Math.random() * config.tiposDePeca.length)]);
+    }
+    juntarLimparGrelha.push(linha);
+  }
+  // Garante jogabilidade em geral (qualquer cor) e, especificamente, também da cor-alvo
+  // — sem isto, o objetivo "limpa as verdes" podia calhar numa grelha sem nenhum grupo
+  // de verdes grande o suficiente, tornando o nível impossível de completar mesmo que
+  // outras cores tivessem grupos válidos.
+  garantirGrupoJogavelJuntarLimpar(config.tiposDePeca);
+  garantirGrupoJogavelJuntarLimpar([juntarLimparCorAlvo]);
+  renderGrelhaJuntarLimpar();
+}
+
+// Devolve, para cada cor presente na grelha, o tamanho do maior grupo conectado
+// (ortogonalmente) e as posições [linha,coluna] desse grupo — através de flood-fill.
+// As posições servem tanto para verificar resolubilidade (ver garantirGrupoJogavelJuntarLimpar)
+// como para destacar visualmente um grupo jogável como dica (ver mostrarDicaJuntarLimpar),
+// sem repetir o flood-fill uma segunda vez só para saber onde ele está.
+function maiorGrupoConectadoPorCor(){
+  const visitado = Array.from({length: juntarLimparLinhas}, () => Array(juntarLimparColunas).fill(false));
+  const maiorPorCor = {}; // {cor: {tamanho, posicoes: [[l,c], ...]}}
+  for(let l = 0; l < juntarLimparLinhas; l++){
+    for(let c = 0; c < juntarLimparColunas; c++){
+      if(visitado[l][c]) continue;
+      const cor = juntarLimparGrelha[l][c];
+      // Flood-fill iterativo (pilha), evita risco de estouro de pilha em grelhas maiores
+      const pilha = [[l,c]];
+      visitado[l][c] = true;
+      const posicoesDesteGrupo = [];
+      while(pilha.length > 0){
+        const [pl,pc] = pilha.pop();
+        posicoesDesteGrupo.push([pl,pc]);
+        const vizinhos = [[pl-1,pc],[pl+1,pc],[pl,pc-1],[pl,pc+1]];
+        for(const [vl,vc] of vizinhos){
+          if(vl < 0 || vl >= juntarLimparLinhas || vc < 0 || vc >= juntarLimparColunas) continue;
+          if(visitado[vl][vc]) continue;
+          if(juntarLimparGrelha[vl][vc] !== cor) continue;
+          visitado[vl][vc] = true;
+          pilha.push([vl,vc]);
+        }
+      }
+      if(!maiorPorCor[cor] || posicoesDesteGrupo.length > maiorPorCor[cor].tamanho){
+        maiorPorCor[cor] = { tamanho: posicoesDesteGrupo.length, posicoes: posicoesDesteGrupo };
+      }
+    }
+  }
+  return maiorPorCor;
+}
+
+// Se nenhuma cor tiver um grupo conectado >= juntarLimparMinimoGrupo, planta um bloco
+// retangular compacto de uma única cor grande o suficiente para satisfazer o mínimo —
+// sempre cabe, porque o próprio tamanho da grelha por nível (ver NIVEIS_JUNTAR_LIMPAR)
+// tem linhas/colunas suficientes para o mínimo mais exigente (4, no Difícil, numa
+// grelha de 7x6). Chamada tanto na geração inicial da grelha como depois de cada queda
+// de peças (ver aplicarQuedaJuntarLimpar) — sem isto, uma jogada podia esgotar o único
+// grupo válido e deixar o tabuleiro sem nenhuma jogada possível a seguir.
+// Posição e cor do bloco são escolhidas ao acaso a cada vez que esta função intervém,
+// para nunca ficar previsível (ex: "o canto superior esquerdo é sempre a jogada certa").
+// Garante que existe pelo menos um grupo jogável (tamanho >= minimoGrupo) usando SÓ as
+// cores da lista passada — não qualquer cor da grelha. Isto importa desde que o jogo
+// passou a ter uma cor-alvo: chamar isto com [juntarLimparCorAlvo] garante especificamente
+// que o objetivo da ronda é sempre possível de cumprir, mesmo que outra cor já tivesse
+// por acaso um grupo grande (o que não ajudaria a cor pedida).
+function garantirGrupoJogavelJuntarLimpar(tiposDePeca){
+  const maiores = maiorGrupoConectadoPorCor();
+  const jaTemGrupoValido = tiposDePeca.some(t => maiores[t] && maiores[t].tamanho >= juntarLimparMinimoGrupo);
+  if(jaTemGrupoValido) return;
+
+  const corDeReserva = tiposDePeca[Math.floor(Math.random() * tiposDePeca.length)];
+  // Bloco o mais "quadrado" possível (ex: 4 peças -> 2x2; 3 peças -> linha de 3).
+  const larguraBloco = Math.min(juntarLimparColunas, Math.ceil(Math.sqrt(juntarLimparMinimoGrupo)));
+  const alturaBloco = Math.ceil(juntarLimparMinimoGrupo / larguraBloco);
+  // Linha/coluna de início aleatórias, garantindo que o bloco inteiro cabe dentro da
+  // grelha (por isso o intervalo de escolha já subtrai a altura/largura do bloco).
+  const linhaInicio = Math.floor(Math.random() * Math.max(1, juntarLimparLinhas - alturaBloco + 1));
+  const colunaInicio = Math.floor(Math.random() * Math.max(1, juntarLimparColunas - larguraBloco + 1));
+
+  let colocadas = 0;
+  for(let l = linhaInicio; l < juntarLimparLinhas && colocadas < juntarLimparMinimoGrupo; l++){
+    for(let c = colunaInicio; c < juntarLimparColunas && colocadas < juntarLimparMinimoGrupo; c++){
+      juntarLimparGrelha[l][c] = corDeReserva;
+      colocadas++;
+    }
+  }
+}
+
+// ======================= Dica por inatividade (cintilação) =======================
+// A jogabilidade já está sempre garantida (ver garantirGrupoJogavelJuntarLimpar), mas
+// "existir uma jogada possível" não é o mesmo que "ser fácil de ver" — no nível Difícil,
+// com 5 cores numa grelha 7x6, um grupo de 4 pode estar lá sem se destacar visualmente.
+// Se o Eduardo ficar parado tempo demais, as peças desse grupo cintilam para mostrar o
+// caminho, sem revelar automaticamente qual é a jogada "certa" caso haja mais do que uma
+// — só reduz a procura, não decide por ele.
+function agendarDicaJuntarLimpar(){
+  cancelarDicaJuntarLimpar();
+  const config = NIVEIS_JUNTAR_LIMPAR[juntarLimparNivelConteudo] || NIVEIS_JUNTAR_LIMPAR[1];
+  const tempo = config.tempoAteDica || 15000;
+  juntarLimparTimeoutDica = setTimeout(mostrarDicaJuntarLimpar, tempo);
+}
+
+function cancelarDicaJuntarLimpar(){
+  if(juntarLimparTimeoutDica){
+    clearTimeout(juntarLimparTimeoutDica);
+    juntarLimparTimeoutDica = null;
+  }
+  // Remove a cintilação de qualquer peça que a tivesse, caso o Eduardo comece a jogar
+  // (ou a arrastar) antes da dica ter terminado o seu próprio ciclo de animação.
+  document.querySelectorAll('.peca-juntar-limpar.a-cintilar').forEach(el => el.classList.remove('a-cintilar'));
+}
+
+// Dado um conjunto de posições [linha,coluna] da mesma cor (já confirmado conectado por
+// maiorGrupoConectadoPorCor), procura o maior CAMINHO SIMPLES dentro desse conjunto — uma
+// sequência de posições em que cada uma é adjacente (cima/baixo/esquerda/direita) só à
+// anterior, sem repetir nenhuma e sem "atalhos": exatamente o que um arrasto contínuo do
+// dedo consegue percorrer (ver adicionarPecaAoArrastoJuntarLimpar). Um grupo em T ou L
+// tem sempre um caminho assim dentro de si — só não é o grupo inteiro, é o maior "braço"
+// contíguo. Por-arrastar-se em qualquer direção reta ou em zigue-zague conta; o que não
+// conta é ter de visitar uma peça, "saltar" para outro ramo, e voltar depois à primeira.
+function maiorCaminhoPercorrivel(posicoes){
+  const chave = ([l,c]) => l + ',' + c;
+  const noConjunto = new Set(posicoes.map(chave));
+  let melhor = [];
+  // Limite de segurança: a busca é por backtracking (custo pode crescer rápido em
+  // grupos muito ramificados), mas os grupos aqui são pequenos (grelha máxima 7x6) —
+  // isto só protege contra um caso extremo nunca visto em testes, não afeta o resultado
+  // em grupos normais, já que o caminho mais longo possível nunca passa deste número
+  // de chamadas para os tamanhos de grelha existentes.
+  let chamadas = 0;
+  const LIMITE_CHAMADAS = 20000;
+
+  function dfs(atual, visitado, caminho){
+    chamadas++;
+    if(chamadas > LIMITE_CHAMADAS) return;
+    if(caminho.length > melhor.length) melhor = caminho.slice();
+    const [l,c] = atual;
+    const vizinhos = [[l-1,c],[l+1,c],[l,c-1],[l,c+1]];
+    for(const v of vizinhos){
+      if(chamadas > LIMITE_CHAMADAS) return;
+      const k = chave(v);
+      if(!noConjunto.has(k) || visitado.has(k)) continue;
+      visitado.add(k);
+      caminho.push(v);
+      dfs(v, visitado, caminho);
+      caminho.pop();
+      visitado.delete(k);
+    }
+  }
+
+  // Tenta a partir de cada célula do grupo como ponto de partida — o caminho mais longo
+  // pode começar em qualquer uma delas, não necessariamente na primeira do flood-fill.
+  for(const inicio of posicoes){
+    if(chamadas > LIMITE_CHAMADAS) break;
+    const k = chave(inicio);
+    dfs(inicio, new Set([k]), [inicio]);
+  }
+  return melhor;
+}
+
+// Encontra o maior grupo válido (>= mínimo do nível) na grelha atual — sempre existe,
+// porque garantirGrupoJogavelJuntarLimpar já corre a cada geração/queda — e acende uma
+// cintilação suave nessas peças durante alguns segundos. Não usa som nem vibração: é
+// uma dica visual discreta, não um alerta, para não interromper quem só está a pensar.
+//
+// IMPORTANTE: maiorGrupoConectadoPorCor usa flood-fill, que encontra o maior CONJUNTO
+// de peças da mesma cor ligadas entre si — mas esse conjunto pode ter forma de T, L ou
+// outra ramificação, que não corresponde a nenhum caminho que o dedo consiga percorrer
+// arrastando (o arrasto só avança para uma peça adjacente à ÚLTIMA tocada, sem poder
+// "voltar atrás" e seguir por outro braço — ver adicionarPecaAoArrastoJuntarLimpar). Uma
+// dica que cintile um T inteiro sugere uma jogada que não é fisicamente possível de
+// fazer com um único arrasto contínuo. Por isso a dica não usa o grupo do flood-fill
+// diretamente: procura antes o maior CAMINHO reto/em linha simples (sem ramificações)
+// dentro desse grupo, que é exatamente o que o arrasto consegue selecionar.
+//
+// Prioriza sempre a cor-alvo da ronda (ver juntarLimparCorAlvo) — é para essa cor que a
+// dica realmente ajuda a cumprir o objetivo. Só sugere outra cor se, por alguma razão,
+// não houver nenhum caminho válido da cor-alvo disponível neste preciso momento (não
+// deveria acontecer, graças a garantirGrupoJogavelJuntarLimpar, mas nunca deixa a dica
+// simplesmente não aparecer por essa causa).
+function mostrarDicaJuntarLimpar(){
+  juntarLimparTimeoutDica = null;
+  const maiores = maiorGrupoConectadoPorCor();
+
+  function melhorCaminhoEntre(cores){
+    let melhor = null;
+    cores.forEach(cor => {
+      const g = maiores[cor];
+      if(!g || g.tamanho < juntarLimparMinimoGrupo) return;
+      const caminho = maiorCaminhoPercorrivel(g.posicoes);
+      if(caminho.length >= juntarLimparMinimoGrupo && (!melhor || caminho.length > melhor.length)){
+        melhor = caminho;
+      }
+    });
+    return melhor;
+  }
+
+  const melhorCaminho = melhorCaminhoEntre(juntarLimparCorAlvo ? [juntarLimparCorAlvo] : [])
+    || melhorCaminhoEntre(Object.keys(maiores));
+  if(!melhorCaminho) return; // não deve acontecer (ver garantia acima), mas nunca quebra por segurança
+  const cont = document.getElementById('grelha-juntar-limpar');
+  if(!cont) return;
+  melhorCaminho.forEach(([l,c]) => {
+    const el = cont.querySelector(`.peca-juntar-limpar[data-linha="${l}"][data-coluna="${c}"]`);
+    if(el){
+      // Remove e força reflow antes de reaplicar — mesmo padrão já usado no brilho da
+      // estrela (ver darEstrela) e no desvanecer das peças (ver soltarArrastoJuntarLimpar):
+      // sem isto, se esta função corre uma 2ª vez com a classe ainda presente do ciclo
+      // anterior, a animação simplesmente não reinicia.
+      el.classList.remove('a-cintilar');
+      void el.offsetWidth;
+      el.classList.add('a-cintilar');
+    }
+  });
+  // Não volta a agendar-se aqui: a cintilação agora é contínua (infinite, ver CSS) até
+  // o Eduardo tocar na grelha, que é o que cancelarDicaJuntarLimpar trata. Antes disto,
+  // a dica corria só por 1.8s e desligava-se sozinha sem deixar rasto, o que a tornava
+  // fácil de perder por completo — bastava não estar a olhar para o ecrã nesse instante.
+}
+
+function renderGrelhaJuntarLimpar(comAnimacaoQueda){
+  const cont = document.getElementById('grelha-juntar-limpar');
+  if(!cont) return;
+  cont.style.gridTemplateColumns = `repeat(${juntarLimparColunas}, 1fr)`;
+  let html = '';
+  for(let l = 0; l < juntarLimparLinhas; l++){
+    for(let c = 0; c < juntarLimparColunas; c++){
+      const peca = juntarLimparGrelha[l][c];
+      if(peca === null){
+        html += `<div class="peca-juntar-limpar vazia" data-linha="${l}" data-coluna="${c}" aria-hidden="true"></div>`;
+      } else {
+        const classeQueda = (comAnimacaoQueda && !movimentoReduzidoAtivo()) ? ' a-cair' : '';
+        html += `<button class="peca-juntar-limpar${classeQueda}" data-linha="${l}" data-coluna="${c}" aria-label="Peça ${peca}, linha ${l+1}, coluna ${c+1}">${peca}</button>`;
+      }
+    }
+  }
+  cont.innerHTML = html;
+  configurarArrastoJuntarLimpar(cont);
+  agendarDicaJuntarLimpar();
+  // A classe "a-cair" fica na classList do elemento depois do innerHTML a inserir — se
+  // não for removida ao terminar, continua lá presa na jogada seguinte, e como CSS dá
+  // prioridade à classe declarada mais abaixo no ficheiro, "a-cair" acabava a sobrepor-se
+  // sempre a "a-desaparecer" da jogada seguinte no mesmo elemento reciclado do DOM,
+  // impedindo o desvanecer de aparecer a partir da 2ª vez.
+  if(comAnimacaoQueda){
+    cont.querySelectorAll('.a-cair').forEach(el => {
+      el.addEventListener('animationend', () => el.classList.remove('a-cair'), { once: true });
+    });
+  }
+}
+
+// Configura o arrasto por toque (pointer events cobrem rato e dedo). Usa
+// elementFromPoint durante o movimento, porque o dedo se desloca sobre elementos sem
+// disparar eventos individuais neles — é a forma padrão de detetar "arrastar por cima de".
+function configurarArrastoJuntarLimpar(cont){
+  cont.addEventListener('pointerdown', (e) => {
+    const peca = e.target.closest('.peca-juntar-limpar:not(.vazia)');
+    if(!peca) return;
+    e.preventDefault();
+    cancelarDicaJuntarLimpar();
+    // Garante que os eventos seguintes (pointermove/pointerup) continuam a chegar a
+    // este elemento mesmo que o dedo se mova depressa e "saia" fisicamente da grelha
+    // por um instante — sem isto, um arrasto rápido pode perder eventos a meio.
+    try{ cont.setPointerCapture(e.pointerId); }catch(err){ /* alguns browsers antigos não suportam — o resto continua a funcionar sem isto */ }
+    juntarLimparArrastando = true;
+    juntarLimparArrastoAtual = [];
+    adicionarPecaAoArrastoJuntarLimpar(peca);
+  });
+  // { passive:false } é essencial aqui: sem isto, alguns browsers tratam o listener
+  // como "passivo" por otimização de scroll e IGNORAM silenciosamente a chamada a
+  // preventDefault() lá dentro — o toque continuaria a fazer scroll da página apesar
+  // do código parecer correto.
+  cont.addEventListener('pointermove', (e) => {
+    if(!juntarLimparArrastando) return;
+    e.preventDefault();
+    const alvo = document.elementFromPoint(e.clientX, e.clientY);
+    const peca = alvo && alvo.closest ? alvo.closest('.peca-juntar-limpar:not(.vazia)') : null;
+    if(peca) adicionarPecaAoArrastoJuntarLimpar(peca);
+  }, { passive: false });
+  const terminarArrasto = (e) => {
+    if(!juntarLimparArrastando) return;
+    juntarLimparArrastando = false;
+    try{ cont.releasePointerCapture(e.pointerId); }catch(err){ /* já libertado ou não suportado — sem impacto */ }
+    soltarArrastoJuntarLimpar();
+  };
+  cont.addEventListener('pointerup', terminarArrasto);
+  cont.addEventListener('pointercancel', terminarArrasto);
+}
+
+// Adiciona uma peça ao grupo em formação, só se for adjacente à última peça do arrasto
+// (cima/baixo/esquerda/direita, não diagonal) e da mesma cor que a primeira peça tocada.
+// Voltar a passar por cima de uma peça já no meio do caminho não faz nada (evita
+// duplicar); isto permite ao Eduardo corrigir a direção sem ter de recomeçar o arrasto.
+function adicionarPecaAoArrastoJuntarLimpar(botaoPeca){
+  const l = parseInt(botaoPeca.dataset.linha, 10);
+  const c = parseInt(botaoPeca.dataset.coluna, 10);
+  const tipo = juntarLimparGrelha[l]?.[c];
+  if(tipo === null || tipo === undefined) return;
+
+  const jaEstaNoArrasto = juntarLimparArrastoAtual.some(([pl,pc]) => pl===l && pc===c);
+  if(jaEstaNoArrasto) return;
+
+  if(juntarLimparArrastoAtual.length === 0){
+    juntarLimparArrastoAtual.push([l,c]);
+    botaoPeca.classList.add('selecionada-arrasto');
+    return;
+  }
+
+  const tipoDoGrupo = juntarLimparGrelha[juntarLimparArrastoAtual[0][0]][juntarLimparArrastoAtual[0][1]];
+  if(tipo !== tipoDoGrupo) return; // cor diferente da do grupo em formação — ignora
+
+  const [ultL, ultC] = juntarLimparArrastoAtual[juntarLimparArrastoAtual.length - 1];
+  const adjacente = (Math.abs(ultL - l) === 1 && ultC === c) || (Math.abs(ultC - c) === 1 && ultL === l);
+  if(!adjacente) return; // só aceita passos para uma peça vizinha de cada vez
+
+  juntarLimparArrastoAtual.push([l,c]);
+  botaoPeca.classList.add('selecionada-arrasto');
+  vibrar(10); // feedback tátil discreto a cada peça que entra no grupo, sem som (o som fica para o resultado final)
+}
+
+// Ao soltar o dedo: se o grupo tem 2+ peças, remove-as com desvanecer e faz cair as
+// peças de cima para preencher os espaços. Um grupo abaixo do mínimo exigido pelo
+// nível atual (juntarLimparMinimoGrupo) não faz nada — não há "erro" possível neste
+// jogo, só oportunidades por aproveitar; isto é deliberado, para manter a experiência
+// livre de pressão e de julgamento de "errado".
+function soltarArrastoJuntarLimpar(){
+  const grupo = juntarLimparArrastoAtual;
+  document.querySelectorAll('.peca-juntar-limpar.selecionada-arrasto').forEach(el => el.classList.remove('selecionada-arrasto'));
+  juntarLimparArrastoAtual = [];
+
+  if(grupo.length < juntarLimparMinimoGrupo){
+    vibrar(15); // feedback tátil suave de "ainda não", sem som de erro nem penalização
+    return;
+  }
+
+  tocarSomAcerto();
+  // "Impressionante" exige superar o mínimo do nível em pelo menos 2 peças — assim o
+  // elogio continua a soar proporcional em todos os níveis (no Difícil, por exemplo,
+  // 4 peças já é só o mínimo aceite, não um feito extra).
+  const limiarImpressionante = juntarLimparMinimoGrupo + 2;
+  vibrar(grupo.length >= limiarImpressionante ? [15,40,15,40,60] : [15,40,60]);
+
+  const estadoEl = document.getElementById('estado-juntar-limpar');
+  if(estadoEl){
+    const corDoGrupo = juntarLimparGrelha[grupo[0][0]][grupo[0][1]];
+    if(corDoGrupo !== juntarLimparCorAlvo){
+      // Continua a ser uma jogada válida e celebrada (sem "erro" neste jogo), mas o
+      // texto deixa claro que esta cor não conta para o objetivo do frasco — sem isto,
+      // "Juntaste 3 peças!" sem o frasco mexer pareceria uma falha silenciosa da app.
+      estadoEl.textContent = `Juntaste ${grupo.length} peças! (não são ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'da cor pedida'})`;
+    } else {
+      estadoEl.textContent = grupo.length >= limiarImpressionante ? `Grupo de ${grupo.length}! Impressionante!` : `Juntaste ${grupo.length} peças!`;
+    }
+  }
+
+  // Fase 1: desvanece visualmente as peças removidas antes de as tirar da grelha lógica,
+  // para o olhar acompanhar o que está a desaparecer em vez de um corte instantâneo.
+  // Força reflow antes de aplicar a classe — sem isto, a partir da 2ª jogada o browser
+  // por vezes não reinicia a animação (o mesmo problema que já resolvemos no brilho da
+  // estrela em darEstrela): o elemento "nasce" já com a classe aplicada em lote com a
+  // criação do DOM, sem disparar o keyframe do zero.
+  const cont = document.getElementById('grelha-juntar-limpar');
+  grupo.forEach(([l,c]) => {
+    const el = cont.querySelector(`.peca-juntar-limpar[data-linha="${l}"][data-coluna="${c}"]`);
+    if(el && !movimentoReduzidoAtivo()){
+      // Remove também "a-cair", caso ainda esteja presente de uma jogada anterior (ver
+      // nota em renderGrelhaJuntarLimpar) — as duas classes no mesmo elemento entrariam
+      // em conflito, e "a-cair" ganharia por estar declarada depois no CSS.
+      el.classList.remove('a-cair', 'a-desaparecer');
+      void el.offsetWidth; // força o browser a "esquecer" qualquer animação anterior antes de reaplicar
+      el.classList.add('a-desaparecer');
+    }
+  });
+
+  const atraso = movimentoReduzidoAtivo() ? 0 : 700;
+  setTimeout(() => {
+    // Só as peças da cor-alvo desta ronda (ver juntarLimparCorAlvo) contam para o
+    // progresso e entram no frasco — as outras cores continuam a poder ser limpas
+    // livremente (sem qualquer penalização, como sempre neste jogo), só não avançam
+    // o objetivo. Sem isto, "Limpa as verdes!" não faria sentido: qualquer cor teria
+    // o mesmo efeito no frasco, tornando a instrução do topo enganosa.
+    const pecasDaCorAlvo = grupo.filter(([l,c]) => juntarLimparGrelha[l][c] === juntarLimparCorAlvo);
+    pecasDaCorAlvo.forEach(() => { juntarLimparCoresNoFrasco.push(juntarLimparCorAlvo); });
+    grupo.forEach(([l,c]) => { juntarLimparGrelha[l][c] = null; });
+    juntarLimparPecasRemovidas += pecasDaCorAlvo.length;
+    aplicarQuedaJuntarLimpar();
+    renderGrelhaJuntarLimpar(true);
+    atualizarProgressoJuntarLimpar();
+
+    const config = NIVEIS_JUNTAR_LIMPAR[juntarLimparNivelConteudo] || NIVEIS_JUNTAR_LIMPAR[1];
+    if(juntarLimparPecasRemovidas >= config.alvoLimpar){
+      setTimeout(concluirJogoJuntarLimpar, 500);
+    }
+  }, atraso);
+}
+
+// Atualiza o frasco (bolinhas coloridas) e a legenda numérica com o progresso até ao
+// alvo do nível — sem isto, o Eduardo não tinha forma de ver "quanto falta" enquanto
+// joga, só descobria que tinha terminado quando o ecrã de conclusão aparecia de repente.
+// Reconstrói todas as bolinhas a cada chamada (lista pequena, no máximo = alvoLimpar,
+// no pior caso 30) em vez de só acrescentar a última — mais simples e sem risco de
+// desalinhar entre o array de cores e o DOM.
+function atualizarProgressoJuntarLimpar(){
+  const cont = document.getElementById('frasco-bolas-juntar-limpar');
+  const legenda = document.getElementById('legenda-progresso-juntar-limpar');
+  if(!cont || !legenda) return;
+  cont.innerHTML = juntarLimparCoresNoFrasco.map(cor => {
+    const corCss = CORES_PECA_JUNTAR_LIMPAR[cor] || '#999';
+    return `<div class="bola-frasco" style="background:${corCss};"></div>`;
+  }).join('');
+  legenda.textContent = `${juntarLimparPecasRemovidas} de ${juntarLimparAlvo} peças`;
+}
+
+// Para cada coluna, empurra as peças que restam para baixo (preenchendo os espaços
+// vazios deixados pelas removidas) e gera peças novas no topo para repor o total —
+// exatamente como a gravidade em jogos de blocos por queda.
+function aplicarQuedaJuntarLimpar(){
+  const config = NIVEIS_JUNTAR_LIMPAR[juntarLimparNivelConteudo] || NIVEIS_JUNTAR_LIMPAR[1];
+  for(let c = 0; c < juntarLimparColunas; c++){
+    const coluna = [];
+    for(let l = 0; l < juntarLimparLinhas; l++){
+      if(juntarLimparGrelha[l][c] !== null) coluna.push(juntarLimparGrelha[l][c]);
+    }
+    const vaziosNoTopo = juntarLimparLinhas - coluna.length;
+    // Repõe peças novas no topo para manter a grelha sempre cheia — o jogo nunca "acaba"
+    // por falta de peças, só pelo alvo de peças limpas ser atingido.
+    const novasPecas = [];
+    for(let i = 0; i < vaziosNoTopo; i++){
+      novasPecas.push(config.tiposDePeca[Math.floor(Math.random() * config.tiposDePeca.length)]);
+    }
+    const colunaFinal = [...novasPecas, ...coluna];
+    for(let l = 0; l < juntarLimparLinhas; l++){
+      juntarLimparGrelha[l][c] = colunaFinal[l];
+    }
+  }
+  // As peças novas que caem são tão aleatórias como as da geração inicial — por isso
+  // sofrem exatamente do mesmo risco de ficar sem nenhum grupo jogável (visto em jogo
+  // real: ficou só 1 grupo de 4+ em toda a grelha, mal esse fosse jogado o tabuleiro
+  // ficaria travado). A mesma garantia aplicada no início tem de se repetir aqui, depois
+  // de cada queda, não só uma vez no arranque do nível — incluindo a garantia específica
+  // da cor-alvo (ver iniciarJogoJuntarLimpar): sem repetir também essa aqui, uma jogada
+  // podia "gastar" o único grupo válido da cor pedida e não sobrar nenhum outro depois
+  // da queda, fazendo a dica (que agora prioriza sempre a cor-alvo) parecer não aparecer.
+  garantirGrupoJogavelJuntarLimpar(config.tiposDePeca);
+  garantirGrupoJogavelJuntarLimpar([juntarLimparCorAlvo]);
+}
+
+function concluirJogoJuntarLimpar(){
+  // Progressão pelo mesmo critério já usado no resto da EduKids: só sobe de nível
+  // depois de 2 sessões seguidas concluídas neste nível (ver avaliarProgressaoNivel).
+  avaliarProgressaoNivel('juntar-limpar', false, NIVEIS_JUNTAR_LIMPAR);
+  guardarEstado();
+  renderListaJogosPorCategoria();
+  darEstrela('Muito bem!', 'Limpaste todas as peças que precisavas — boa perceção de padrões!');
+}
+
 let puzzleNivelAtual = 1, puzzleRondaAtual = 0, puzzleTotalRondas = 5;
 let puzzleNivelConteudo = 1;
 let puzzleErrouNestaRonda = false, puzzleTeveErro = false;
@@ -4968,6 +5664,7 @@ const jogosItens = [
   {icone:"📦", cor:"#FDEDE4", t:"Jogo de Classificar", d:"Separa os itens nas caixas certas", tipo:"classificar", dados:"classificar", categoria:"percecao"},
   {icone:"🧩", cor:"#E4EEF0", t:"Puzzle Sensorial", d:"Encontra a peça que combina com a pista", tipo:"puzzle", dados:"puzzle", categoria:"percecao"},
   {icone:"🧷", cor:"#FDEDE4", t:"Puzzle de Encaixe", d:"Arrasta cada peça para o lugar certo", tipo:"encaixe", dados:"encaixe", categoria:"percecao"},
+  {icone:"🟢", cor:"#E7F1E8", t:"Juntar e Limpar", d:"Arrasta o dedo por peças da mesma cor para as juntar", tipo:"juntar-limpar", dados:"juntar-limpar", categoria:"percecao"},
   {icone:"🔁", cor:"#E7F1E8", t:"Jogo das Sequências", d:"O que vem a seguir no padrão?", tipo:"sequencias", dados:"sequencias", categoria:"logica"},
   {icone:"🔢", cor:"#F3E3E0", t:"Sequências Numéricas", d:"Qual é o número a seguir?", tipo:"quiz", dados:"numeros", categoria:"logica"},
   {icone:"📋", cor:"#FBEFDD", t:"Pôr em Ordem", d:"Arrasta as tarefas do dia para a ordem certa", tipo:"ordenar-rotina", dados:"ordenar-rotina", categoria:"logica"},
@@ -6755,6 +7452,7 @@ function irPara(ecra){
   }
   pararSomAtivo();
   pararTemporizador();
+  cancelarDicaJuntarLimpar();
   tocarSomClique();
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-'+ecra).classList.add('ativo');
@@ -7500,6 +8198,7 @@ function gerarHtmlItemLista(it, i, idLista){
     : (it.tipo === 'opostos' && it.dados) ? obterNivelAtual(it.dados)
     : (it.tipo === 'puzzle' && it.dados) ? obterNivelAtual(it.dados)
     : (it.tipo === 'encaixe' && it.dados) ? obterNivelAtual(it.dados)
+    : (it.tipo === 'juntar-limpar' && it.dados) ? obterNivelAtual(it.dados)
     : (it.tipo === 'emocoesrosto' && it.dados) ? obterNivelAtual(it.dados)
     : (it.tipo === 'quedirias' && it.dados) ? obterNivelAtual(it.dados) : null;
   const chaveNivel = nivelReal === 1 ? 'facil' : nivelReal === 2 ? 'medio' : nivelReal === 3 ? 'dificil' : it.nivel;
@@ -8181,6 +8880,10 @@ function abrirItemGenerico(it, origem){
   }
   if(it.tipo === 'encaixe'){
     irParaDetalhe(gerarHtmlPuzzleEncaixe(), origem);
+    return;
+  }
+  if(it.tipo === 'juntar-limpar'){
+    irParaDetalhe(gerarHtmlJuntarLimpar(), origem);
     return;
   }
   if(it.tipo === 'opostos'){
@@ -9427,6 +10130,10 @@ const observador = new MutationObserver(()=>{
     document.getElementById('grelha-zonas-encaixe').dataset.iniciado = '1';
     iniciarJogoPuzzleEncaixe();
   }
+  if(document.getElementById('grelha-juntar-limpar') && !document.getElementById('grelha-juntar-limpar').dataset.iniciado){
+    document.getElementById('grelha-juntar-limpar').dataset.iniciado = '1';
+    iniciarJogoJuntarLimpar();
+  }
   if(document.getElementById('grelha-opostos') && !document.getElementById('grelha-opostos').dataset.iniciado){
     document.getElementById('grelha-opostos').dataset.iniciado = '1';
     iniciarJogoOpostos();
@@ -9919,13 +10626,6 @@ function concluirJogoDiferente(){
    Letras maiúsculas simples, por serem visualmente mais claras e mais próximas do que se
    vê escrito à sua volta (rótulos, sinalética) do que a minúscula cursiva. */
 
-// Proporção altura/largura do canvas de traçado (ver configurarCanvasTracado). O canvas
-// não é quadrado — por isso um círculo definido em coordenadas 0-100 (que pressupõem
-// espaço quadrado) fica achatado horizontalmente quando convertido para pixels reais
-// (pontoParaPixel usa esta mesma proporção). gerarPontosArco compensa isto ao encolher
-// o raio no eixo Y por este fator, para o resultado final no ecrã ser mesmo redondo.
-const RACIO_CANVAS_TRACADO = 0.8;
-
 // Gera pontos ao longo de um arco de circunferência, do ângulo inicial ao final (em
 // graus, sentido horário a partir do topo — 0° = topo, 90° = direita, 180° = fundo,
 // 270° = esquerda), com "pontos" pontos intermédios. Usado para o O e o C ficarem
@@ -9938,14 +10638,12 @@ function gerarPontosArco(cx, cy, raio, anguloInicialGraus, anguloFinalGraus, num
   const pontos = [];
   const inicioRad = (anguloInicialGraus - 90) * Math.PI / 180;
   const fimRad = (anguloFinalGraus - 90) * Math.PI / 180;
-  const raioY = raio / RACIO_CANVAS_TRACADO; // eixo Y pré-esticado, para compensar
-                                              // a compressão que pontoParaPixel aplica depois
   for(let i = 0; i <= numPontos; i++){
     const t = i / numPontos;
     const angulo = inicioRad + (fimRad - inicioRad) * t;
     pontos.push([
       Math.round((cx + raio * Math.cos(angulo)) * 100) / 100,
-      Math.round((cy + raioY * Math.sin(angulo)) * 100) / 100,
+      Math.round((cy + raio * Math.sin(angulo)) * 100) / 100,
     ]);
   }
   return pontos;
@@ -10160,6 +10858,7 @@ function gerarHtmlTracado(){
   return `
     <div class="painel">
       <div class="nivel-jogo" id="nivel-jogo-tracado">Desenha por cima da linha com o dedo</div>
+      <p class="aviso-novo-tracado" id="aviso-novo-tracado" style="display:none;"></p>
       ${nomeCrianca ? `<button class="btn-secundario" id="btn-tracar-nome" style="margin-bottom:10px;">✏️ Traçar o meu nome: ${nomeCrianca}</button>` : ''}
       ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras (do quadro de comunicação)</button>` : ''}
       <div class="grelha-temas-tracado">${botoesTemas}</div>
@@ -10168,7 +10867,6 @@ function gerarHtmlTracado(){
         <canvas id="canvas-tracado-desenho"></canvas>
         <canvas id="canvas-tracado"></canvas>
       </div>
-      <p class="aviso-novo-tracado" id="aviso-novo-tracado" style="display:none;"></p>
       <button class="btn-pagina" id="btn-ouvir-tracado" style="margin-bottom:10px;">🔊 Ouvir</button>
       <button class="btn-secundario" id="btn-recomecar-tracado">↺ Recomeçar esta letra</button>
     </div>
@@ -10308,7 +11006,7 @@ function configurarCanvasTracado(){
   if(!canvas || !canvasDesenho) return;
   const dpr = window.devicePixelRatio || 1;
   const larg = canvasDesenho.clientWidth || 320;
-  const alt = Math.round(larg * RACIO_CANVAS_TRACADO);
+  const alt = Math.round(larg * 0.8);
 
   canvas.style.height = alt + 'px';
   canvas.width = larg * dpr;
@@ -11994,6 +12692,7 @@ function renderEvolucaoParental(){
   renderEvolucaoIndependenciaPorMateria();
   renderTendenciaPista();
   renderComportamentosAlvo();
+  renderRegistoAlimentacao();
   renderJogosSociais();
   renderRegistoEmocoes();
   renderCalmaContexto();
@@ -12212,6 +12911,79 @@ function renderTendenciaPista(){
     </div>
     <div style="color:${tendenciaCor};font-weight:600;">${tendenciaTexto}</div>
   `;
+}
+
+// Registo de alimentação: tal como o registo de comportamentos-alvo abaixo, mas para
+// alimentos experimentados/aceites. Útil em seletividade alimentar, tema comum em
+// autismo — o objetivo é acompanhar tendências ao longo do tempo, nunca fazer qualquer
+// julgamento sobre o que "devia" ser comido; o registo é neutro (aceite/recusado/a provar).
+function registarAlimentoHoje(nomeAlimento, resultado){
+  const hoje = dataHojeChave();
+  if(!historicoDiario[hoje]){
+    historicoDiario[hoje] = { tarefasFeitas:0, tarefasTotal:0, estrelasGanhas:0, fichasEscola:0, perguntasTotal:0, perguntasComPista:0 };
+  }
+  const registo = historicoDiario[hoje];
+  if(!registo.alimentos) registo.alimentos = [];
+  registo.alimentos.push({ nome: nomeAlimento, resultado, hora: new Date().toISOString() });
+  guardarHistorico();
+}
+
+const ROTULO_RESULTADO_ALIMENTO = {
+  aceite: { icone: '😊', nome: 'Aceitou bem' },
+  a_provar: { icone: '🤏', nome: 'Provou um pouco' },
+  recusado: { icone: '🙅', nome: 'Recusou' },
+};
+
+// Mostra a lista de alimentos registados nos últimos 14 dias, mais recentes primeiro,
+// agrupados por nome — para se perceber rapidamente se um alimento já experimentado
+// está a ganhar aceitação ao longo de várias tentativas, sem ter de contar à mão.
+function renderRegistoAlimentacao(){
+  const cartao = document.getElementById('cartao-registo-alimentacao');
+  const cont = document.getElementById('lista-registo-alimentacao');
+  if(!cartao || !cont) return;
+
+  const ultimos14 = obterUltimosDias(14);
+  const porAlimento = {};
+  ultimos14.forEach(dia => {
+    (dia.alimentos || []).forEach(registo => {
+      const chave = registo.nome.trim().toLowerCase();
+      if(!porAlimento[chave]) porAlimento[chave] = { nome: registo.nome, tentativas: [] };
+      porAlimento[chave].tentativas.push(registo.resultado);
+    });
+  });
+
+  const alimentos = Object.values(porAlimento);
+  if(alimentos.length === 0){
+    cartao.style.display = 'none';
+    return;
+  }
+
+  cartao.style.display = '';
+  cont.innerHTML = alimentos.map(a => {
+    const total = a.tentativas.length;
+    const aceites = a.tentativas.filter(r => r === 'aceite').length;
+    const ultimoResultado = ROTULO_RESULTADO_ALIMENTO[a.tentativas[a.tentativas.length - 1]];
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+        <span>${ultimoResultado ? ultimoResultado.icone : '•'} ${a.nome}</span>
+        <span style="color:var(--texto-suave);font-size:12px;">${aceites}/${total} vezes aceite</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function configurarFormularioAlimentacao(){
+  const btn = document.getElementById('btn-registar-alimento');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const campoNome = document.getElementById('campo-alimento-nome');
+    const campoResultado = document.getElementById('campo-alimento-resultado');
+    const nome = campoNome.value.trim();
+    if(!nome) return;
+    registarAlimentoHoje(nome, campoResultado.value);
+    campoNome.value = '';
+    renderRegistoAlimentacao();
+  });
 }
 
 // Rótulo e emoji de cada comportamento-alvo, para leitura rápida pelos pais — os IDs
@@ -14957,6 +15729,7 @@ document.getElementById('btn-vista-agora').addEventListener('click', ()=> defini
 document.getElementById('btn-vista-dia').addEventListener('click', ()=> definirVistaRotina('dia'));
 document.getElementById('btn-ver-semana').addEventListener('click', ()=>{ renderSemana(); irPara('semana'); });
 document.getElementById('btn-sitio-novo').addEventListener('click', ()=>{ renderSitioNovo(); irPara('sitio-novo'); });
+configurarFormularioAlimentacao();
 document.getElementById('ia-fornecedor').addEventListener('change', alternarBlocoChaveGemini);
 document.getElementById('btn-gerar-ia').addEventListener('click', gerarPerguntasIA);
 document.getElementById('btn-adicionar-ia').addEventListener('click', adicionarPerguntasIAaoBanco);
