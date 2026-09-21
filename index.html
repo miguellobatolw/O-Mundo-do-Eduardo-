@@ -12670,6 +12670,7 @@ function abrirModalPerfil(){
 function fecharModalPerfil(){
   document.getElementById('overlay-perfil').classList.remove('mostrar');
   renderResumoPerfilCrianca();
+  renderSeletorCriancas();
 }
 
 // ===== Acesso multi-cuidador (UI) =====
@@ -12951,6 +12952,18 @@ async function revogarCodigoConviteAtual(){
 // adicionar uma nova. Tocar num avatar que já não é o ativo troca a criança e recarrega
 // a página — ver nota em chaveCrianca() sobre porquê recarregar em vez de re-renderizar
 // tudo em memória (as chaves CHAVE_* só são recalculadas corretamente no arranque).
+// Emoji do avatar de cada criança, conforme o género guardado no perfil dessa criança
+// (👧 feminino, 👦 masculino, 🧒 neutro quando ainda não foi indicado ou "prefiro não dizer").
+function emojiAvatarCrianca(id){
+  try{
+    const bruto = localStorage.getItem('mundoDoEduardo_questionario_v1__' + id);
+    const dados = bruto ? JSON.parse(bruto) : null;
+    if(dados && dados.genero === 'f') return '👧';
+    if(dados && dados.genero === 'm') return '👦';
+  }catch(e){}
+  return '🧒';
+}
+
 function renderSeletorCriancas(){
   const cont = document.getElementById('seletor-criancas');
   if(!cont) return;
@@ -12970,7 +12983,7 @@ function renderSeletorCriancas(){
   };
   cont.innerHTML = lista.map(c => `
     <button class="avatar-crianca" data-id="${escaparHtml(c.id)}" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:4px;cursor:pointer;width:64px;">
-      <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:${c.id===ativa ? 'var(--salva)' : 'var(--areia-clara)'};border:3px solid ${c.id===ativa ? 'var(--petroleo)' : 'transparent'};">${c.id===ativa ? '⭐' : '🙂'}</span>
+      <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;background:${c.id===ativa ? 'var(--salva)' : 'var(--areia-clara)'};border:3px solid ${c.id===ativa ? 'var(--petroleo)' : 'transparent'};">${emojiAvatarCrianca(c.id)}${c.id===ativa ? '<span style="position:absolute;right:-6px;bottom:-6px;font-size:15px;line-height:1;">⭐</span>' : ''}</span>
       <span style="font-size:11px;color:var(--texto);text-align:center;line-height:1.2;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHtml(nomePorCrianca(c))}</span>
     </button>
   `).join('') + `
@@ -16739,9 +16752,28 @@ window.aoEntrarNaApp = async function(user){
 // funciona à mesma nesses casos, só sem o benefício do cache offline.
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {
+    // updateViaCache:'none' — o navegador vai sempre buscar o sw.js à rede, nunca à cache HTTP.
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
+      // Procura uma versão nova ao abrir, sempre que a app volta ao primeiro plano e de 30 em 30 min.
+      const procurar = () => { reg.update().catch(() => {}); };
+      procurar();
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible') procurar();
+      });
+      setInterval(procurar, 30 * 60 * 1000);
+    }).catch(() => {
       // Falha silenciosa: contexto inseguro, sw.js ausente, ou navegador sem suporte.
       // Nunca deve impedir a app de continuar a funcionar normalmente.
+    });
+    // Quando um service worker NOVO assume o controlo, recarrega uma vez para mostrar a versão
+    // nova. Na primeira instalação (ainda sem service worker) não recarrega.
+    let jaTinhaControlo = !!navigator.serviceWorker.controller;
+    let recarregou = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(!jaTinhaControlo){ jaTinhaControlo = true; return; }
+      if(recarregou) return;
+      recarregou = true;
+      location.reload();
     });
   });
 }
