@@ -2405,6 +2405,15 @@
       <div class="abas-config" id="abas-config" role="tablist"></div>
 
       <div class="painel-aba" data-aba="perfil">
+      <!-- ===================== SELETOR DE CRIANÇA (várias crianças no mesmo login) =====================
+           Mostra um avatar por criança guardada nesta conta/dispositivo. Tocar num avatar troca a
+           criança ativa e recarrega a página — a forma mais segura de garantir que toda a app (rotina,
+           estrelas, histórico, questionário, CAA, quizzes) passa a ler/escrever os dados da criança
+           certa, já que essas chaves são calculadas uma vez no arranque (ver chaveCrianca()). -->
+      <div class="titulo-secao" style="font-size:18px;">👦👧 Crianças</div>
+      <div class="subtitulo-secao">Toca num avatar para trocar de criança. Cada criança tem a sua própria rotina, estrelas e histórico.</div>
+      <div id="seletor-criancas" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; margin:10px 0 20px;"></div>
+
       <!-- ===================== QUESTIONÁRIO SOBRE A CRIANÇA (área parental) ===================== -->
       <div class="titulo-secao" style="font-size:18px;">📝 Sobre o utilizador</div>
       <div class="subtitulo-secao">O nome e a idade personalizam a app. As restantes respostas ajudam a IA a adaptar as perguntas do quiz.</div>
@@ -2420,17 +2429,17 @@
       <div id="resumo-perfil-crianca"></div>
       <button class="btn-primario" id="btn-abrir-editar-perfil" style="margin-top:10px;">✏️ Editar perfil</button>
 
-      <!-- ===== Acesso partilhado: dá a outro adulto (o outro progenitor, um terapeuta) acesso
-           ao nome e idade guardados neste perfil. IMPORTANTE: a rotina, as estrelas, o
-           histórico de emoções e o uso do CAA ainda NÃO são sincronizados entre contas —
-           cada dispositivo guarda o seu próprio progresso. O aviso abaixo existe para não
-           criar a falsa impressão de que os dois adultos veem exatamente a mesma coisa. ===== -->
+      <!-- ===== Acesso partilhado: dá a outro adulto (o outro progenitor, um terapeuta) acesso a
+           este perfil. Os dados da criança (rotina, estrelas, histórico, emoções, CAA, etc.)
+           são sincronizados por EduSync (ver script no início do bloco Firebase); quem se
+           liga vê e edita o mesmo progresso. O aviso abaixo lista o que é e o que não é
+           partilhado. ===== -->
       <div class="titulo-secao" style="font-size:18px; margin-top:26px;">👥 Acesso partilhado</div>
       <div class="subtitulo-secao">Convida outro adulto (o outro pai/mãe, um terapeuta) a ligar-se a este perfil.</div>
       <div style="background:var(--areia-clara);border:2px solid var(--salva-clara);border-radius:12px;padding:12px 14px;margin:10px 0;">
         <p style="font-size:12.5px;color:var(--texto);margin:0;line-height:1.5;">
-          <strong>O que é partilhado:</strong> o nome e a idade da criança.<br>
-          <strong>O que NÃO é partilhado (ainda):</strong> a rotina, as estrelas, o histórico de emoções e o uso do quadro CAA. Cada dispositivo guarda o seu próprio progresso — se tu e a outra pessoa usarem a app ao mesmo tempo, cada um vê rotinas e históricos diferentes.
+          <strong>O que é partilhado:</strong> o nome e a idade, o perfil detalhado, a rotina, as estrelas, o histórico (incluindo emoções e Modo Calma), o quadro CAA, as histórias sociais e os vídeos. Quem se ligar <strong>vê e pode editar</strong> tudo isto, e as alterações chegam a todos os aparelhos quando há internet.<br>
+          <strong>O que NÃO é partilhado:</strong> a chave da IA (Gemini), o PIN da área dos pais, a voz e o tamanho do texto — ficam só em cada aparelho. Vídeos muito grandes também não são sincronizados.
         </p>
       </div>
       <button class="btn-secundario" id="btn-gerar-codigo-convite">Gerar código de convite</button>
@@ -2443,9 +2452,9 @@
         <div id="lista-colaboradores"></div>
       </div>
 
-      <div class="subtitulo-secao" style="margin-top:16px;">Recebeste um código de outra pessoa? Insere-o aqui para te ligares ao perfil dela (só o nome e idade, ver aviso acima).</div>
+      <div class="subtitulo-secao" style="margin-top:16px;">Recebeste um código de outra pessoa? Cola-o aqui para te ligares ao perfil dela (só o nome e idade, ver aviso acima). Respeita maiúsculas e minúsculas.</div>
       <div style="display:flex; gap:8px;">
-        <input type="text" id="campo-codigo-convite" placeholder="Código de 6 letras" maxlength="6" style="flex:1; text-transform:uppercase; padding:12px; border-radius:12px; border:2px solid var(--salva-clara); font-size:15px; text-align:center; letter-spacing:2px;">
+        <input type="text" id="campo-codigo-convite" placeholder="Código de convite (16 caracteres)" maxlength="16" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="flex:1; min-width:0; padding:12px; border-radius:12px; border:2px solid var(--salva-clara); font-size:15px; text-align:center; letter-spacing:1px; font-family:ui-monospace,Menlo,Consolas,monospace;">
         <button class="btn-secundario" id="btn-usar-codigo-convite" style="width:auto; padding:0 16px;">Ligar</button>
       </div>
       <p id="msg-codigo-convite" style="font-size:12.5px;margin-top:6px;"></p>
@@ -3415,6 +3424,269 @@
     }
   }, 10000);
 </script>
+<script>
+/* ===================== SINCRONIZAÇÃO ENTRE DISPOSITIVOS E PESSOAS =====================
+   Espelha no Firestore os dados de cada criança que a app guarda em localStorage (rotina,
+   estrelas, histórico, emoções/Modo Calma, quadro CAA, questionário, histórias sociais,
+   banco de perguntas, vídeos) para o dono e as pessoas ligadas por convite (pai/mãe,
+   terapeuta) verem e editarem o mesmo progresso.
+
+   Como funciona, sem mexer em cada sítio da app que grava dados:
+   - Este script corre ANTES do script principal e envolve localStorage.setItem/removeItem.
+     Quando uma chave da lista branca muda, marca-a como "suja" (com a hora da alteração).
+   - Passados uns segundos (ou ao sair da app) as chaves sujas são enviadas para
+     perfis/{dono}/dados/{chave}. Vence sempre a alteração mais recente (last-write-wins).
+   - Ao entrar na app (e ao voltar a ela depois de >30 s) descarrega o que é mais recente
+     no servidor, grava em localStorage e recarrega a página UMA vez, porque a app guarda
+     o estado em memória e voltaria a sobrepor os dados novos.
+   NÃO são sincronizados: chave da API Gemini, PIN da área dos pais, voz/tamanho do texto,
+   registo de diagnóstico, caches e estado de sessão — ficam sempre só neste aparelho. */
+(function(){
+  'use strict';
+  const BASES = [
+    'mundoDoEduardo_estado_v1', 'mundoDoEduardo_historico_v1', 'mundoDoEduardo_rotina_v1',
+    'mundoDoEduardo_questionario_v1', 'mundoDoEduardo_historiasSociais_v1',
+    'mundoDoEduardo_frasesGuardadasCaa_v1', 'mundoDoEduardo_caaPersonalizado_v1',
+    'mundoDoEduardo_bancoPerguntas_v1', 'mundoDoEduardo_videosReais_v1'
+  ];
+  const CHAVE_LISTA = 'mundoDoEduardo_listaCriancas_v1';
+  const CHAVE_ATIVA = 'mundoDoEduardo_criancaAtivaId_v1';
+  const CHAVE_META = 'edukids_sync_meta_v1';
+  const PREFIXO_BACKUP = 'edukids_sync_backup__';
+  const ID_HERDADO = '_principal';
+  const LIMITE_BYTES = 900000; // o Firestore limita cada documento a ~1 MB
+
+  let ls = null;
+  try{ ls = window.localStorage; }catch(e){}
+  if(!ls || typeof Storage === 'undefined') return;
+
+  const _get = Storage.prototype.getItem;
+  const _set = Storage.prototype.setItem;
+  const _rem = Storage.prototype.removeItem;
+  const lerRaw = k => { try{ return _get.call(ls, k); }catch(e){ return null; } };
+  const gravarRaw = (k, v) => _set.call(ls, k, v);
+  const apagarRaw = k => _rem.call(ls, k);
+
+  function ehSync(k){
+    if(typeof k !== 'string') return false;
+    if(k === CHAVE_LISTA) return true;
+    return BASES.some(b => k.indexOf(b + '__') === 0);
+  }
+  function idDaChave(k){ const i = k.indexOf('__'); return i < 0 ? null : k.slice(i + 2); }
+  function bytes(s){ return new TextEncoder().encode(s).length; }
+
+  // ---- Metadados locais: por chave, { t: hora da última alteração, d: 1 se ainda não enviada } ----
+  function lerMeta(){
+    try{
+      const m = JSON.parse(lerRaw(CHAVE_META));
+      if(m && typeof m === 'object' && m.chaves) return m;
+    }catch(e){}
+    return { ns: null, legado: false, ativoDef: false, chaves: {} };
+  }
+  function gravarMeta(m){ try{ gravarRaw(CHAVE_META, JSON.stringify(m)); }catch(e){} }
+  function mudarMeta(fn){ const m = lerMeta(); fn(m); gravarMeta(m); return m; }
+
+  // Último valor conhecido no servidor (memória), para não marcar como sujas escritas idênticas.
+  const cache = new Map();
+  let aplicando = false; // true enquanto gravamos dados vindos do servidor (não marcar como sujos)
+  let estado = null;     // { ns, colab, ids } depois da 1.ª sincronização completa
+
+  Storage.prototype.setItem = function(k, v){
+    _set.call(this, k, v);
+    if(this === ls && !aplicando && ehSync(k) && cache.get(k) !== String(v)) marcar(k);
+  };
+  Storage.prototype.removeItem = function(k){
+    _rem.call(this, k);
+    if(this === ls && !aplicando && ehSync(k)) marcar(k);
+  };
+
+  function marcar(k){
+    mudarMeta(m => { m.chaves[k] = { t: Date.now(), d: 1 }; });
+    agendar();
+  }
+  let temporizador = null;
+  function agendar(){
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => { empurrarSujas().catch(() => {}); }, 4000);
+  }
+
+  // ---- Âmbito: o dono sincroniza tudo; um convidado só as crianças da lista do dono ----
+  function alcanceLeitura(k){
+    if(k === CHAVE_LISTA) return true;
+    return !estado.colab || (estado.ids && estado.ids.has(idDaChave(k)));
+  }
+  function alcanceEscrita(k){
+    if(k === CHAVE_LISTA) return !estado.colab; // só o dono altera a lista de crianças
+    return alcanceLeitura(k);
+  }
+
+  async function empurrarUma(k){
+    const api = window.firebaseAuthApi;
+    const c0 = lerMeta().chaves[k];
+    if(!c0 || !c0.d) return;
+    const t = c0.t;
+    const valor = lerRaw(k); // null = chave removida
+    if(valor !== null && bytes(valor) > LIMITE_BYTES){
+      console.warn('EduSync: valor grande demais para sincronizar (' + k + ')');
+      mudarMeta(m => { const c = m.chaves[k]; if(c && c.t === t) m.chaves[k] = { t, d: 0 }; });
+      return;
+    }
+    try{
+      await api.guardarDado(estado.ns, { chave: k, valor, t });
+      cache.set(k, valor);
+      mudarMeta(m => { const c = m.chaves[k]; if(c && c.t === t) m.chaves[k] = { t, d: 0 }; });
+    }catch(e){ /* fica suja: nova tentativa mais tarde */ }
+  }
+
+  async function empurrarSujas(){
+    const api = window.firebaseAuthApi;
+    if(!estado || !api || !api.guardarDado || navigator.onLine === false) return;
+    const m = lerMeta();
+    if(m.ns !== estado.ns) return;
+    const chaves = Object.keys(m.chaves).filter(k => m.chaves[k].d && ehSync(k) && alcanceEscrita(k));
+    for(const k of chaves) await empurrarUma(k);
+  }
+
+  function aplicarRemoto(k, r, semMeta){
+    const atual = lerRaw(k);
+    const igual = (atual === r.valor);
+    if(!igual){
+      // Primeira vez que esta chave é substituída: guarda uma cópia do que existia neste aparelho.
+      if(semMeta && atual !== null && lerRaw(PREFIXO_BACKUP + k) === null){
+        try{ gravarRaw(PREFIXO_BACKUP + k, atual); }catch(e){}
+      }
+      try{
+        if(r.valor === null) apagarRaw(k); else gravarRaw(k, r.valor);
+      }catch(e){ return false; } // sem espaço: tenta de novo na próxima vez
+    }
+    mudarMeta(m => { m.chaves[k] = { t: r.t, d: 0 }; });
+    return !igual;
+  }
+
+  // Num convidado, a lista local é a união (por id) da lista do dono com a lista local.
+  function aplicarListaConvidado(r){
+    let remota = [], local = [];
+    try{ const a = JSON.parse(r.valor); if(Array.isArray(a)) remota = a; }catch(e){}
+    try{ const a = JSON.parse(lerRaw(CHAVE_LISTA)); if(Array.isArray(a)) local = a; }catch(e){}
+    const vistos = new Set(), fundida = [];
+    remota.concat(local).forEach(c => {
+      if(c && c.id && !vistos.has(c.id)){ vistos.add(c.id); fundida.push(c); }
+    });
+    const novo = JSON.stringify(fundida);
+    const mudou = novo !== lerRaw(CHAVE_LISTA);
+    if(mudou){
+      try{ gravarRaw(CHAVE_LISTA, novo); }catch(e){ return false; }
+    }
+    mudarMeta(m => { m.chaves[CHAVE_LISTA] = { t: r.t, d: 0 }; });
+    return mudou;
+  }
+
+  let ocupado = null;
+  async function _sincronizar(api, user){
+    const own = user.uid, ns = window.uidPerfilAtivo || own, colab = ns !== own;
+    let m = lerMeta();
+    if(m.ns !== ns){
+      // Primeira sincronização com este perfil neste aparelho. Só o dono, na sua primeira
+      // vez, envia os dados que já existiam ("legado"); noutros casos nada existente é
+      // enviado — evita levar dados de outra conta/criança para este perfil.
+      m = { ns, legado: !m.ns && !colab, ativoDef: false, chaves: {} };
+      gravarMeta(m);
+    }
+    const remotos = await api.lerDados(ns);
+    const mapa = {};
+    remotos.forEach(r => { mapa[r.chave] = r; cache.set(r.chave, r.valor); });
+
+    let ids = null, primeiroId = null;
+    if(colab){
+      ids = new Set();
+      const rl = mapa[CHAVE_LISTA];
+      if(rl && rl.valor){
+        try{
+          const arr = JSON.parse(rl.valor);
+          if(Array.isArray(arr)) arr.forEach(c => {
+            if(c && c.id){ ids.add(String(c.id)); if(primeiroId === null) primeiroId = String(c.id); }
+          });
+        }catch(e){}
+      }
+    }
+    estado = { ns, colab, ids };
+
+    // Dono sem lista de crianças guardada: cria a lista por defeito para os convidados a poderem ver.
+    if(!colab && lerRaw(CHAVE_LISTA) === null && !mapa[CHAVE_LISTA]){
+      aplicando = true;
+      try{ gravarRaw(CHAVE_LISTA, JSON.stringify([{ id: ID_HERDADO, nome: '', criadoEm: Date.now() }])); }
+      finally{ aplicando = false; }
+      mudarMeta(x => { x.chaves[CHAVE_LISTA] = { t: Date.now(), d: 1 }; });
+    }
+
+    // 1) Descarregar: o mais recente ganha.
+    let aplicou = false;
+    aplicando = true;
+    try{
+      for(const r of remotos){
+        const k = r.chave;
+        if(!ehSync(k) || !alcanceLeitura(k)) continue;
+        if(colab && k === CHAVE_LISTA){ if(aplicarListaConvidado(r)) aplicou = true; continue; }
+        const c = lerMeta().chaves[k];
+        if(r.t > (c ? c.t : 0)){ if(aplicarRemoto(k, r, !c)) aplicou = true; }
+      }
+      // Na primeira ligação, o convidado passa a ver a primeira criança partilhada.
+      if(colab && primeiroId && !lerMeta().ativoDef){
+        if(lerRaw(CHAVE_ATIVA) !== primeiroId){ gravarRaw(CHAVE_ATIVA, primeiroId); aplicou = true; }
+        mudarMeta(x => { x.ativoDef = true; });
+      }
+    }finally{ aplicando = false; }
+
+    // 2) Enviar o que ainda não está no servidor.
+    const locais = new Set();
+    for(let i = 0; i < ls.length; i++){ const k = ls.key(i); if(ehSync(k)) locais.add(k); }
+    Object.keys(lerMeta().chaves).forEach(k => { if(lerMeta().chaves[k].d && ehSync(k)) locais.add(k); });
+    for(const k of locais){
+      if(!alcanceEscrita(k)) continue;
+      const c = lerMeta().chaves[k];
+      if(!c && !mapa[k] && lerMeta().legado && lerRaw(k) !== null){
+        mudarMeta(x => { x.chaves[k] = { t: Date.now(), d: 1 }; });
+      }
+      await empurrarUma(k);
+    }
+    return { aplicou };
+  }
+
+  function sincronizar(){
+    const api = window.firebaseAuthApi, user = window.utilizadorAtual;
+    if(!api || !api.lerDados || !api.guardarDado || !user || user.semConta || !user.uid) return Promise.resolve({ aplicou: false });
+    if(navigator.onLine === false) return Promise.resolve({ aplicou: false });
+    if(ocupado) return ocupado;
+    ocupado = _sincronizar(api, user).finally(() => { ocupado = null; });
+    return ocupado;
+  }
+
+  // Recarregar no máximo uma vez a cada 15 s (defesa contra ciclos).
+  function podeRecarregar(){
+    try{
+      const ult = Number(sessionStorage.getItem('edukids_sync_reload_ts') || 0);
+      if(Date.now() - ult < 15000) return false;
+      sessionStorage.setItem('edukids_sync_reload_ts', String(Date.now()));
+    }catch(e){}
+    return true;
+  }
+
+  let ocultoEm = 0;
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden'){
+      ocultoEm = Date.now();
+      empurrarSujas().catch(() => {});
+    }else if(ocultoEm && Date.now() - ocultoEm > 30000){
+      ocultoEm = 0;
+      sincronizar().then(r => { if(r && r.aplicou && podeRecarregar()) location.reload(); }).catch(() => {});
+    }
+  });
+  window.addEventListener('online', () => { empurrarSujas().catch(() => {}); });
+
+  window.EduSync = { sincronizar, empurrarSujas, podeRecarregar };
+})();
+
+</script>
 <script type="module">
   try{
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
@@ -3423,7 +3695,7 @@
       sendPasswordResetEmail, onAuthStateChanged, signOut
     } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js");
     const {
-      getFirestore, doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs
+      getFirestore, doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs, writeBatch
     } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
 
     // ⚠️ SUBSTITUI pelos valores do TEU projeto Firebase (ver instruções acima).
@@ -3445,6 +3717,37 @@
       const auth = getAuth(firebaseApp);
       const db = getFirestore(firebaseApp);
 
+      // ===== Código de convite forte =====
+      // 16 caracteres (maiúsculas, minúsculas, números e símbolos) ≈ 97 bits de entropia,
+      // contra ~31 bits do antigo código de 6 caracteres. Usa crypto.getRandomValues (CSPRNG)
+      // em vez de Math.random (previsível). Exclui caracteres ambíguos (0 O o I l 1) e
+      // caracteres que dão problemas em HTML/Firestore (& < > " ' / _ .), porque o código
+      // também é usado como ID do documento em "vinculos".
+      const CODIGO_CONVITE_TAMANHO = 16;
+      const CODIGO_MAIUSC = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+      const CODIGO_MINUSC = "abcdefghijkmnopqrstuvwxyz";
+      const CODIGO_DIGITOS = "23456789";
+      const CODIGO_SIMBOLOS = "#@$%*+=?!()";
+      const CODIGO_ALFABETO = CODIGO_MAIUSC + CODIGO_MINUSC + CODIGO_DIGITOS + CODIGO_SIMBOLOS;
+      // Sorteio uniforme (sem viés de módulo) no intervalo [0, max).
+      function sorteioSeguro(max){
+        const limite = Math.floor(0x100000000 / max) * max;
+        const buf = new Uint32Array(1);
+        do { crypto.getRandomValues(buf); } while(buf[0] >= limite);
+        return buf[0] % max;
+      }
+      function gerarCodigoConviteSeguro(){
+        while(true){
+          let c = '';
+          for(let i = 0; i < CODIGO_CONVITE_TAMANHO; i++){
+            c += CODIGO_ALFABETO[sorteioSeguro(CODIGO_ALFABETO.length)];
+          }
+          // Garante pelo menos um de cada tipo (aspeto e força consistentes).
+          if([CODIGO_MAIUSC, CODIGO_MINUSC, CODIGO_DIGITOS, CODIGO_SIMBOLOS]
+              .every(grupo => [...c].some(ch => grupo.includes(ch)))) return c;
+        }
+      }
+
       // Exposto em window para o script de onboarding (não-módulo) conseguir chamar estas funções.
       window.firebaseAuthApi = {
         criarConta: (email, senha) => createUserWithEmailAndPassword(auth, email, senha),
@@ -3456,8 +3759,39 @@
           const snap = await getDoc(doc(db, "perfis", uid));
           return snap.exists() ? snap.data() : null;
         },
+        // ===== Sincronização de dados (ver EduSync) =====
+        // Um documento por chave de localStorage, em perfis/{dono}/dados/{chave}.
+        lerDados: async (uidDono) => {
+          const snap = await getDocs(collection(db, "perfis", uidDono, "dados"));
+          const lista = [];
+          snap.forEach(d => {
+            const x = d.data();
+            if(x && typeof x.chave === 'string'){
+              lista.push({ chave: x.chave, valor: (x.valor === undefined ? null : x.valor), t: Number(x.t) || 0 });
+            }
+          });
+          return lista;
+        },
+        guardarDado: (uidDono, d) => setDoc(
+          doc(db, "perfis", uidDono, "dados", d.chave.replace(/[^A-Za-z0-9_-]/g, '_')),
+          { chave: d.chave, valor: d.valor, t: d.t, por: auth.currentUser.uid }
+        ),
+        // ===== Dados partilhados com colaboradores =====
+        // O documento principal "perfis/{uid}" guarda dados sensíveis (nível de autismo,
+        // objetivos, email…) e só o dono o lê. Aos colaboradores ligados por convite só é
+        // dado acesso a "perfis/{uid}/partilhado/dados", que contém APENAS nome e idade
+        // (as regras do Firestore recusam quaisquer outros campos aqui).
+        lerPerfilPartilhado: async (uid) => {
+          const snap = await getDoc(doc(db, "perfis", uid, "partilhado", "dados"));
+          return snap.exists() ? snap.data() : null;
+        },
+        guardarPerfilPartilhado: (uid, dados) => setDoc(
+          doc(db, "perfis", uid, "partilhado", "dados"),
+          { nomeCrianca: (dados && dados.nomeCrianca) || null, idade: (dados && dados.idade) || null },
+          { merge: true }
+        ),
         // ===== Acesso multi-cuidador =====
-        // Gera um código curto (6 caracteres) que outro adulto (o outro progenitor, um
+        // Gera um código forte (16 caracteres) que outro adulto (o outro progenitor, um
         // terapeuta) pode usar para se ligar a este perfil. Hoje isto partilha apenas o
         // nome e a idade guardados em "perfis" — a rotina, o histórico de emoções e o uso
         // do CAA continuam só em localStorage, por dispositivo (ver aviso na UI de
@@ -3468,7 +3802,7 @@
         // criança a quem o encontrasse. Se um dia a rotina/histórico passarem a ser
         // sincronizados também, esta nota tem de ser atualizada e a exposição reavaliada.
         gerarCodigoConvite: async (uidDono) => {
-          const codigo = Math.random().toString(36).slice(2, 8).toUpperCase();
+          const codigo = gerarCodigoConviteSeguro();
           const HORAS_VALIDADE = 48;
           await setDoc(doc(db, "vinculos", codigo), {
             uidPerfil: uidDono,
@@ -3483,7 +3817,7 @@
         // nas instruções para autorizar isto. Recusa códigos expirados ou já usados — cada
         // código serve para ligar exatamente UMA conta nova, nunca mais que isso.
         usarCodigoConvite: async (codigo, uidConvidado, emailConvidado) => {
-          const codigoNormalizado = codigo.trim().toUpperCase();
+          const codigoNormalizado = codigo.trim(); // sensível a maiúsculas/minúsculas
           const refVinculo = doc(db, "vinculos", codigoNormalizado);
           const snapVinculo = await getDoc(refVinculo);
           if(!snapVinculo.exists()){
@@ -3500,24 +3834,31 @@
           if(uidPerfil === uidConvidado){
             throw new Error('Este é o teu próprio código — não é preciso ligares-te a ti mesmo.');
           }
-          // Guarda a ligação: esta conta passa a apontar para o perfil partilhado.
-          await setDoc(doc(db, "perfis", uidConvidado), { uidPerfilPartilhado: uidPerfil }, { merge: true });
-          // Regista este acesso do lado do DONO do perfil, para ele poder ver e revogar
-          // quem tem acesso — sem isto, a ligação era invisível e permanente, sem forma
-          // de a desfazer depois de o código já ter sido usado.
-          await setDoc(doc(db, "perfis", uidPerfil, "colaboradores", uidConvidado), {
+          // As três escritas vão num único batch atómico: ou acontecem todas ou nenhuma.
+          // As regras do Firestore validam o código no servidor (existe, não usado, não
+          // expirado, pertence a este perfil) através do campo "codigo" do colaborador e
+          // de getAfter() sobre o vínculo — ver firestore.rules. Sem isto, qualquer conta
+          // podia escrever uidPerfilPartilhado à mão e ler o perfil de outra pessoa.
+          // Também elimina a corrida em que dois convidados usam o mesmo código ao mesmo tempo.
+          const batch = writeBatch(db);
+          // 1) Esta conta passa a apontar para o perfil partilhado (conveniência da app).
+          batch.set(doc(db, "perfis", uidConvidado), { uidPerfilPartilhado: uidPerfil }, { merge: true });
+          // 2) Regista o acesso do lado do DONO (é isto que dá acesso de leitura no servidor).
+          batch.set(doc(db, "perfis", uidPerfil, "colaboradores", uidConvidado), {
             email: emailConvidado || null,
             ligadoEm: Date.now(),
+            codigo: codigoNormalizado,
           });
-          // Marca o código como usado — impede que sirva para ligar uma segunda conta.
-          await updateDoc(refVinculo, { usado: true, usadoPor: uidConvidado, usadoEm: Date.now() });
+          // 3) Marca o código como usado — impede que sirva para ligar uma segunda conta.
+          batch.update(refVinculo, { usado: true, usadoPor: uidConvidado, usadoEm: Date.now() });
+          await batch.commit();
           return uidPerfil;
         },
         // Permite aos pais revogar um código gerado antes de ele ser usado — ex: se o
         // partilharam por engano, ou já não é preciso. Apagar o documento torna o código
         // imediatamente inválido, sem esperar pela expiração.
         revogarCodigoConvite: async (codigo) => {
-          await deleteDoc(doc(db, "vinculos", codigo.trim().toUpperCase()));
+          await deleteDoc(doc(db, "vinculos", codigo.trim()));
         },
         // Lista quem tem acesso ao perfil (para o dono ver e decidir se quer remover alguém).
         listarColaboradores: async (uidDono) => {
@@ -3532,7 +3873,12 @@
         // para a próxima vez que essa conta abrir a app deixar de ver os dados partilhados.
         removerColaborador: async (uidDono, uidColaborador) => {
           await deleteDoc(doc(db, "perfis", uidDono, "colaboradores", uidColaborador));
-          await setDoc(doc(db, "perfis", uidColaborador), { uidPerfilPartilhado: null }, { merge: true });
+          // O acesso já foi cortado no servidor ao apagar o registo acima. Limpar o ponteiro na
+          // conta do colaborador é só conveniência e o dono não tem permissão para isso; o
+          // colaborador limpa-o sozinho na próxima abertura (ver aoEntrarNaApp).
+          try{
+            await setDoc(doc(db, "perfis", uidColaborador), { uidPerfilPartilhado: null }, { merge: true });
+          }catch(e){ /* esperado: sem permissão */ }
         },
       };
 
@@ -5250,12 +5596,8 @@ function aplicarQuedaJuntarLimpar(){
   // sofrem exatamente do mesmo risco de ficar sem nenhum grupo jogável (visto em jogo
   // real: ficou só 1 grupo de 4+ em toda a grelha, mal esse fosse jogado o tabuleiro
   // ficaria travado). A mesma garantia aplicada no início tem de se repetir aqui, depois
-  // de cada queda, não só uma vez no arranque do nível — incluindo a garantia específica
-  // da cor-alvo (ver iniciarJogoJuntarLimpar): sem repetir também essa aqui, uma jogada
-  // podia "gastar" o único grupo válido da cor pedida e não sobrar nenhum outro depois
-  // da queda, fazendo a dica (que agora prioriza sempre a cor-alvo) parecer não aparecer.
+  // de cada queda, não só uma vez no arranque do nível.
   garantirGrupoJogavelJuntarLimpar(config.tiposDePeca);
-  garantirGrupoJogavelJuntarLimpar([juntarLimparCorAlvo]);
 }
 
 function concluirJogoJuntarLimpar(){
@@ -5942,6 +6284,116 @@ const quizzes = {
   ],
 };
 
+/* ======================= MÚLTIPLAS CRIANÇAS NO MESMO LOGIN =======================
+   Antes de existir isto, TODAS as chaves de localStorage abaixo (rotina, estrelas,
+   histórico, questionário, CAA, quizzes, PIN, etc.) eram globais ao dispositivo — não
+   distinguiam sequer contas diferentes, quanto mais crianças diferentes na mesma conta.
+   Esta secção acrescenta um "espaço de nomes" por criança, sem mudar o formato de cada
+   chave individual: cada CHAVE_* deixa de ser uma string fixa e passa a ser calculada
+   por chaveCrianca(base), que lhe acrescenta o id da criança ativa como sufixo.
+
+   IMPORTANTE — compatibilidade com quem já usa a app: a primeira criança criada em
+   cada conta usa o id especial CRIANCA_ID_HERDADA ('_principal'), NÃO um id novo
+   gerado ao acaso. Isto faz com que chaveCrianca('mundoDoEduardo_rotina_v1') dessa
+   primeira criança resolva para 'mundoDoEduardo_rotina_v1__principal' — ainda assim
+   uma chave nova. Por isso migrarDadosAntigosParaPrimeiraCrianca() (mais abaixo) copia,
+   uma única vez, o conteúdo das chaves antigas (sem sufixo) para as novas chaves com
+   sufixo '__principal', na primeira vez que a app corre depois desta atualização. */
+const CRIANCA_ID_HERDADA = '_principal';
+const CHAVE_LISTA_CRIANCAS = 'mundoDoEduardo_listaCriancas_v1';
+const CHAVE_CRIANCA_ATIVA = 'mundoDoEduardo_criancaAtivaId_v1';
+
+// Lista de crianças (perfis) guardadas neste dispositivo/conta. Cada entrada:
+// { id, nome, criadoEm }. O "nome" aqui é só para o seletor de avatares — o nome
+// completo/oficial da criança continua a viver no questionário (CHAVE_QUESTIONARIO_EDUARDO),
+// já namespaced por criança.
+function listarCriancas(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_LISTA_CRIANCAS);
+    const lista = bruto ? JSON.parse(bruto) : null;
+    if(Array.isArray(lista) && lista.length > 0) return lista;
+  }catch(e){ /* localStorage indisponível ou dados corrompidos: cai para a lista por defeito abaixo */ }
+  // Nenhuma lista guardada ainda: garante que existe sempre pelo menos a criança herdada,
+  // para o resto da app nunca ficar sem nenhuma criança ativa.
+  return [{ id: CRIANCA_ID_HERDADA, nome: '', criadoEm: Date.now() }];
+}
+
+function guardarListaCriancas(lista){
+  try{ localStorage.setItem(CHAVE_LISTA_CRIANCAS, JSON.stringify(lista)); }catch(e){}
+}
+
+// Id da criança atualmente selecionada. Nunca devolve vazio: se não houver nada
+// guardado, ou o valor guardado já não existir na lista, cai para a primeira da lista.
+function idCriancaAtiva(){
+  let id = null;
+  try{ id = localStorage.getItem(CHAVE_CRIANCA_ATIVA); }catch(e){}
+  const lista = listarCriancas();
+  if(id && lista.some(c => c.id === id)) return id;
+  return lista[0].id;
+}
+
+function definirCriancaAtiva(id){
+  try{ localStorage.setItem(CHAVE_CRIANCA_ATIVA, id); }catch(e){}
+}
+
+// Transforma uma chave "base" (ex: 'mundoDoEduardo_rotina_v1') na chave real a usar,
+// já com o sufixo da criança ativa. TODAS as leituras/escritas de localStorage relativas
+// a dados de UMA criança específica devem passar por aqui — configurações que são da
+// conta como um todo (ex: chave da API do Gemini) não passam por esta função.
+function chaveCrianca(chaveBase){
+  return chaveBase + '__' + idCriancaAtiva();
+}
+
+// Cria uma criança nova: gera um id, acrescenta à lista, torna-a ativa e devolve o id.
+// Não copia dados de nenhuma criança existente — a app trata uma criança nova como uma
+// rotina/questionário em branco, tal como acontecia com uma conta nova antes desta função existir.
+function criarNovaCrianca(nome){
+  const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const lista = listarCriancas();
+  lista.push({ id, nome: nome || '', criadoEm: Date.now() });
+  guardarListaCriancas(lista);
+  definirCriancaAtiva(id);
+  return id;
+}
+
+// Corre uma única vez por conta, o mais cedo possível no arranque da app: se ainda não
+// existir lista de crianças guardada, mas já existirem dados antigos (de antes desta
+// funcionalidade) numa das chaves sem sufixo, copia-os para a chave da criança herdada
+// ('__principal'), para ninguém perder a rotina/histórico/questionário já preenchidos.
+// As chaves antigas (sem sufixo) ficam intocadas, como cópia de segurança — não há
+// necessidade de as apagar, e apagá-las seria um risco desnecessário nesta migração.
+const CHAVES_BASE_POR_CRIANCA = [
+  'mundoDoEduardo_frasesGuardadasCaa_v1', 'mundoDoEduardo_historico_v1',
+  'mundoDoEduardo_estado_v1', 'mundoDoEduardo_rotina_v1', 'mundoDoEduardo_videosReais_v1',
+  'mundoDoEduardo_vistaRotina_v1', 'mundoDoEduardo_questionario_v1',
+  'mundoDoEduardo_registoDiagnostico_v1', 'mundoDoEduardo_bancoPerguntas_v1',
+  'mundoDoEduardo_historiasSociais_v1', 'mundoDoEduardo_caaPersonalizado_v1',
+  'mundoDoEduardo_cacheDicaIA_v1',
+];
+function migrarDadosAntigosParaPrimeiraCrianca(){
+  try{
+    if(localStorage.getItem(CHAVE_LISTA_CRIANCAS)) return; // já migrado (ou já é conta nova)
+    let encontrouAlgumDadoAntigo = false;
+    CHAVES_BASE_POR_CRIANCA.forEach(chaveBase => {
+      const valorAntigo = localStorage.getItem(chaveBase);
+      if(valorAntigo !== null){
+        encontrouAlgumDadoAntigo = true;
+        localStorage.setItem(chaveBase + '__' + CRIANCA_ID_HERDADA, valorAntigo);
+      }
+    });
+    // Só grava a lista/ativa explicitamente se havia algo para migrar OU se isto é
+    // mesmo a primeira vez — em ambos os casos, listarCriancas()/idCriancaAtiva() já
+    // dão o resultado certo por defeito, mas gravar aqui evita recalcular sempre.
+    if(encontrouAlgumDadoAntigo || true){
+      guardarListaCriancas([{ id: CRIANCA_ID_HERDADA, nome: '', criadoEm: Date.now() }]);
+      definirCriancaAtiva(CRIANCA_ID_HERDADA);
+    }
+  }catch(e){
+    // Sem acesso a localStorage: nada a migrar, a app segue com os valores por defeito.
+  }
+}
+migrarDadosAntigosParaPrimeiraCrianca();
+
 // Nível de dificuldade atualmente desbloqueado por matéria (chave do banco de perguntas).
 let nivelDesbloqueado = {};
 
@@ -5951,10 +6403,10 @@ let nivelDesbloqueado = {};
    e mostra-os como um percurso com progresso visível, um de cada vez, com início e fim
    claros. A lista de "Jogos" continua a existir tal como está — a sessão é uma forma
    adicional e opcional de jogar, nunca substitui a rotina diária nem a lista livre. */
-const CHAVE_NUM_JOGOS_SESSAO = 'mundoDoEduardo_numJogosSessao_v1';
+const CHAVE_NUM_JOGOS_SESSAO = chaveCrianca('mundoDoEduardo_numJogosSessao_v1');
 let numJogosPorSessao = 5;
 
-const CHAVE_SESSAO_JOGOS = 'mundoDoEduardo_sessaoJogos_v1';
+const CHAVE_SESSAO_JOGOS = chaveCrianca('mundoDoEduardo_sessaoJogos_v1');
 let sessaoJogosAtiva = null; // null quando não há sessão em curso
 
 function carregarNumJogosPorSessao(){
@@ -6445,7 +6897,7 @@ let caaEcraAnterior = 'inicio'; // para o botão "Voltar" regressar ao ecrã de 
 // reconstruir pedidos frequentes ("quero mais comer", "preciso de calma") símbolo a
 // símbolo sempre que forem precisos. Ao tocar, fala de imediato (não se junta a uma
 // frase em curso: é o próprio pedido já pronto). { icone, texto, palavras: [...] }
-const CHAVE_FRASES_GUARDADAS_CAA = 'mundoDoEduardo_frasesGuardadasCaa_v1';
+const CHAVE_FRASES_GUARDADAS_CAA = chaveCrianca('mundoDoEduardo_frasesGuardadasCaa_v1');
 let frasesGuardadasCaa = [];
 
 // Aviso discreto e reutilizável para quando uma gravação em localStorage falha
@@ -6680,7 +7132,7 @@ function periodoCalmaAtual(){
 // Guarda, por dia, um retrato simples do progresso: tarefas da rotina feitas/total,
 // estrelas ganhas nesse dia, e fichas de escola concluídas nesse dia.
 // Não é um registo clínico — só serve para os pais acompanharem tendências gerais de utilização.
-const CHAVE_HISTORICO = 'mundoDoEduardo_historico_v1';
+const CHAVE_HISTORICO = chaveCrianca('mundoDoEduardo_historico_v1');
 const DIAS_HISTORICO_GUARDADOS = 90; // mantém ~3 meses, para caber a vista de 12 semanas na área parental
 let historicoDiario = {}; // { 'AAAA-MM-DD': { tarefasFeitas, tarefasTotal, estrelasGanhas, fichasEscola } }
 let estrelasNoInicioDoDia = null; // valor de 'estrelas' no momento em que o dia atual começou a ser rastreado
@@ -6806,7 +7258,7 @@ function obterUltimosDias(n){
 }
 
 /* ======================= PERSISTÊNCIA (localStorage) ======================= */
-const CHAVE_ESTADO = 'mundoDoEduardo_estado_v1';
+const CHAVE_ESTADO = chaveCrianca('mundoDoEduardo_estado_v1');
 
 // Data de hoje no formato AAAA-MM-DD, usada para saber se a rotina "feita" ainda é válida
 function dataHojeChave(){
@@ -7035,7 +7487,7 @@ function ajustarVolumeSom(valorSlider){
 
 // A rotina personalizada (guardada pelos pais/cuidador em Configuração) é gravada
 // separadamente do estado de "feito", para poder substituir por completo os blocos padrão.
-const CHAVE_ROTINA = 'mundoDoEduardo_rotina_v1';
+const CHAVE_ROTINA = chaveCrianca('mundoDoEduardo_rotina_v1');
 
 function guardarRotinaPersonalizada(){
   try{
@@ -7063,7 +7515,7 @@ function carregarRotinaPersonalizada(){
 
 // Vídeos reais (links YouTube ou ficheiros), guardados separadamente para
 // não interferir com os temas de enciclopédia já existentes.
-const CHAVE_VIDEOS_REAIS = 'mundoDoEduardo_videosReais_v1';
+const CHAVE_VIDEOS_REAIS = chaveCrianca('mundoDoEduardo_videosReais_v1');
 
 // Devolve true/false consoante a escrita no localStorage teve sucesso, para quem chama
 // (guardarVideos) poder avisar o responsável em vez de mostrar sempre "guardado com
@@ -7680,7 +8132,7 @@ function calcularProximaTransicao(indiceAgora){
 
 // Modo de vista da rotina: "dia" mostra tudo, "agora" mostra só a tarefa atual + a seguinte.
 // Guardado em localStorage para se manter entre visitas — é uma preferência estável, não do momento.
-const CHAVE_VISTA_ROTINA = 'mundoDoEduardo_vistaRotina_v1';
+const CHAVE_VISTA_ROTINA = chaveCrianca('mundoDoEduardo_vistaRotina_v1');
 let vistaRotina = 'dia';
 
 function carregarVistaRotina(){
@@ -12294,7 +12746,8 @@ async function usarCodigoConviteERecarregar(){
   const campo = document.getElementById('campo-codigo-convite');
   const msg = document.getElementById('msg-codigo-convite');
   const codigo = campo.value.trim();
-  if(!codigo){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Escreve o código que recebeste.'; return; }
+  if(!codigo){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Cola o código que recebeste.'; return; }
+  if(codigo.length !== 16){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'O código tem 16 caracteres. Confirma se o copiaste inteiro.'; return; }
   if(!window.firebaseAuthApi || !window.utilizadorAtual || window.utilizadorAtual.semConta){
     msg.style.color = 'var(--coral-suave)';
     msg.textContent = 'É preciso ter uma conta (com email) para usar um código de convite.';
@@ -12326,7 +12779,7 @@ async function usarCodigoConviteERecarregar(){
   btn.disabled = false;
 }
 
-// Gera um código de 6 letras para PARTILHAR este perfil com outra pessoa, que o usa em
+// Gera um código forte (16 caracteres) para PARTILHAR este perfil com outra pessoa, que o usa em
 // usarCodigoConviteERecarregar() acima para se ligar ao mesmo perfil desta criança.
 async function gerarEMostrarCodigoConvite(){
   const btn = document.getElementById('btn-gerar-codigo-convite');
@@ -12336,21 +12789,43 @@ async function gerarEMostrarCodigoConvite(){
     resultado.innerHTML = `<p style="font-size:13px;color:var(--coral-suave);margin-top:10px;">É preciso ter uma conta (com email) para partilhar o acesso. Isto não está disponível no modo "sem conta".</p>`;
     return;
   }
+  if(window.uidPerfilAtivo && window.uidPerfilAtivo !== window.utilizadorAtual.uid){
+    resultado.style.display = 'block';
+    resultado.innerHTML = `<p style="font-size:13px;color:var(--coral-suave);margin-top:10px;">Só quem criou este perfil pode gerar códigos de convite.</p>`;
+    return;
+  }
   btn.disabled = true;
   btn.textContent = 'A gerar...';
   try{
     const uidPerfilReal = window.uidPerfilAtivo || window.utilizadorAtual.uid;
     const codigo = await window.firebaseAuthApi.gerarCodigoConvite(uidPerfilReal);
     resultado.style.display = 'block';
+    const codigoSeguroHtml = String(codigo).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     resultado.innerHTML = `
       <div style="background:var(--areia-clara);border:2px solid var(--salva-clara);border-radius:14px;padding:14px;margin-top:10px;text-align:center;">
-        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 8px;">Partilha este código com a outra pessoa. Ela deve escolher "Já tenho um código de convite" ao criar a sua conta.</p>
-        <p style="font-size:26px;font-weight:800;letter-spacing:3px;color:var(--petroleo);margin:0 0 10px;">${codigo}</p>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 8px;">Partilha este código só com a pessoa a quem queres dar acesso. Ela deve criar a sua conta, abrir o separador Perfil e colar o código em "Recebeste um código de outra pessoa?".</p>
+        <p id="texto-codigo-convite" style="font-size:19px;font-weight:800;letter-spacing:1px;color:var(--petroleo);margin:0 0 10px;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;user-select:all;">${codigoSeguroHtml}</p>
+        <button class="btn-secundario" id="btn-copiar-codigo-convite" style="width:100%;margin-bottom:8px;">Copiar código</button>
         <p style="font-size:11.5px;color:var(--texto-suave);margin:0 0 10px;">Válido por 48 horas ou até ser usado uma vez — o que acontecer primeiro.</p>
-        <button class="btn-secundario" id="btn-revogar-codigo-convite" data-codigo="${codigo}" style="width:100%;">Cancelar este código</button>
+        <button class="btn-secundario" id="btn-revogar-codigo-convite" style="width:100%;">Cancelar este código</button>
       </div>
     `;
+    document.getElementById('btn-revogar-codigo-convite').dataset.codigo = codigo;
     document.getElementById('btn-revogar-codigo-convite').addEventListener('click', revogarCodigoConviteAtual);
+    document.getElementById('btn-copiar-codigo-convite').addEventListener('click', async function(){
+      const b = this;
+      try{
+        await navigator.clipboard.writeText(codigo);
+      }catch(e){
+        // Fallback (contextos sem Clipboard API): seleciona o texto para copiar à mão.
+        const el = document.getElementById('texto-codigo-convite');
+        const r = document.createRange(); r.selectNodeContents(el);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        try{ document.execCommand('copy'); }catch(e2){}
+      }
+      b.textContent = '✓ Copiado';
+      setTimeout(() => { b.textContent = 'Copiar código'; }, 2000);
+    });
   }catch(e){
     resultado.style.display = 'block';
     resultado.innerHTML = `<p style="font-size:13px;color:var(--coral-suave);margin-top:10px;">Não foi possível gerar o código agora. Verifica a ligação à internet e tenta de novo.</p>`;
@@ -12415,7 +12890,7 @@ async function renderListaColaboradores(){
     const ultimaVista = Number(localStorage.getItem(CHAVE_ULTIMA_VISTA_COLABORADORES) || 0);
     cont.innerHTML = colaboradores.map(c => {
       const data = new Date(c.ligadoEm).toLocaleDateString('pt-PT');
-      const identificador = c.email || 'Conta ligada em ' + data;
+      const identificador = c.email ? escaparHtml(String(c.email)) : 'Conta ligada em ' + data;
       const eNovo = c.ligadoEm > ultimaVista;
       return `
         <div class="linha-nivel-materia">
@@ -12443,7 +12918,7 @@ async function renderListaColaboradores(){
 // a rotina, o CAA e o histórico nunca chegaram a ser partilhados (ver aviso na secção
 // "Convidar" em Configuração), por isso o texto abaixo não deve prometer mais do que isso.
 async function removerColaboradorAtual(uidColaborador){
-  const confirmado = window.confirm('Remover o acesso desta pessoa a este perfil? Ela deixa de ver o nome e a idade partilhados a partir de agora. (A rotina, o CAA e o histórico nunca foram partilhados — cada dispositivo guarda sempre o seu próprio progresso.)');
+  const confirmado = window.confirm('Remover o acesso desta pessoa a este perfil? Ela deixa de ver e de sincronizar os dados a partir de agora. (O que já está guardado no aparelho dela não pode ser apagado à distância.)');
   if(!confirmado) return;
   try{
     const uidPerfilReal = window.uidPerfilAtivo || window.utilizadorAtual.uid;
@@ -12468,6 +12943,60 @@ async function revogarCodigoConviteAtual(){
   }catch(e){
     btnRevogar.disabled = false;
     btnRevogar.textContent = 'Cancelar este código';
+  }
+}
+
+// ===== Seletor de crianças (avatares) na aba Perfil =====
+// Mostra um avatar por criança guardada nesta conta/dispositivo, mais um botão para
+// adicionar uma nova. Tocar num avatar que já não é o ativo troca a criança e recarrega
+// a página — ver nota em chaveCrianca() sobre porquê recarregar em vez de re-renderizar
+// tudo em memória (as chaves CHAVE_* só são recalculadas corretamente no arranque).
+function renderSeletorCriancas(){
+  const cont = document.getElementById('seletor-criancas');
+  if(!cont) return;
+  const lista = listarCriancas();
+  const ativa = idCriancaAtiva();
+  const nomePorCrianca = (c) => {
+    // Nome a mostrar no avatar: usa o nome guardado na lista se já existir; caso
+    // contrário tenta ir buscar ao questionário dessa criança (pode já ter nome
+    // preenchido lá sem a lista ter sido atualizada); por fim usa um rótulo genérico.
+    if(c.nome) return c.nome;
+    try{
+      const bruto = localStorage.getItem('mundoDoEduardo_questionario_v1__' + c.id);
+      const dados = bruto ? JSON.parse(bruto) : null;
+      if(dados && dados.nome) return dados.nome;
+    }catch(e){}
+    return 'Sem nome';
+  };
+  cont.innerHTML = lista.map(c => `
+    <button class="avatar-crianca" data-id="${escaparHtml(c.id)}" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:4px;cursor:pointer;width:64px;">
+      <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:${c.id===ativa ? 'var(--salva)' : 'var(--areia-clara)'};border:3px solid ${c.id===ativa ? 'var(--petroleo)' : 'transparent'};">${c.id===ativa ? '⭐' : '🙂'}</span>
+      <span style="font-size:11px;color:var(--texto);text-align:center;line-height:1.2;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHtml(nomePorCrianca(c))}</span>
+    </button>
+  `).join('') + `
+    <button id="btn-adicionar-crianca" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:4px;cursor:pointer;width:64px;">
+      <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--areia-clara);border:3px dashed var(--salva);">➕</span>
+      <span style="font-size:11px;color:var(--texto-suave);">Adicionar</span>
+    </button>
+  `;
+  cont.querySelectorAll('.avatar-crianca').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if(id === idCriancaAtiva()) return; // já é a criança ativa, não faz nada
+      vibrar(15);
+      definirCriancaAtiva(id);
+      location.reload();
+    });
+  });
+  const btnAdicionar = document.getElementById('btn-adicionar-crianca');
+  if(btnAdicionar){
+    btnAdicionar.addEventListener('click', () => {
+      const nome = (prompt('Nome da nova criança:') || '').trim();
+      if(!nome) return; // cancelado ou vazio: não cria nada
+      vibrar(15);
+      criarNovaCrianca(nome);
+      location.reload();
+    });
   }
 }
 
@@ -12585,6 +13114,7 @@ function abrirConfigSemPin(){
   renderConfig();
   renderAbasConfig();
   aplicarAbaConfigAtiva();
+  renderSeletorCriancas();
   renderResumoPerfilCrianca();
   const interruptor = document.getElementById('interruptor-efeitos-calmos');
   if(interruptor) interruptor.classList.toggle('ligado', efeitosCalmosAtivo);
@@ -13444,7 +13974,7 @@ function renderDicasParaPais(){
 // em vez de conselhos genéricos.
 // Guarda a última dica de IA gerada para os pais, junto com a data, para evitar
 // chamadas repetidas à API no mesmo dia (ver gerarDicaParaPaisIA).
-const CHAVE_CACHE_DICA_IA = 'mundoDoEduardo_cacheDicaIA_v1';
+const CHAVE_CACHE_DICA_IA = chaveCrianca('mundoDoEduardo_cacheDicaIA_v1');
 
 function montarResumoUtilizacaoParaIA(){
   const ultimos7 = obterUltimosDias(7);
@@ -14054,7 +14584,7 @@ function alternarBlocoChaveGemini(){
 /* ======================= QUESTIONÁRIO SOBRE O EDUARDO (área parental) ======================= */
 // Guardado à parte da chave da API e do banco de perguntas — respostas da mãe sobre o Eduardo,
 // usadas para dar contexto automático ao gerador de perguntas por IA (junto do campo de contexto manual).
-const CHAVE_QUESTIONARIO_EDUARDO = 'mundoDoEduardo_questionario_v1';
+const CHAVE_QUESTIONARIO_EDUARDO = chaveCrianca('mundoDoEduardo_questionario_v1');
 
 // Perfil sensorial estruturado por canal, cada um com respostas específicas e observáveis
 // (não perguntas vagas tipo "é sensível ao som?") e separadas em "busca" (procura ativamente
@@ -14398,7 +14928,7 @@ function verificarLigacaoAntesDeIA(elementoMensagem){
 // configurações quando o Eduardo (ou quem o acompanha) reportar "aconteceu um erro"
 // sem saber precisar o quê. Sem isto, os console.error() de baixo só existem enquanto
 // a consola do browser estiver aberta, que na prática nunca está em uso normal da app.
-const CHAVE_REGISTO_DIAGNOSTICO = 'mundoDoEduardo_registoDiagnostico_v1';
+const CHAVE_REGISTO_DIAGNOSTICO = chaveCrianca('mundoDoEduardo_registoDiagnostico_v1');
 const MAX_ENTRADAS_DIAGNOSTICO = 50;
 
 function registarDiagnostico(contexto, detalhe){
@@ -14840,7 +15370,7 @@ function adicionarPerguntasIAaoBanco(){
 
 // Persistência do banco de perguntas (inclui as geradas por IA e já aprovadas),
 // separada da rotina, para sobreviver a fechar a app.
-const CHAVE_BANCO_PERGUNTAS = 'mundoDoEduardo_bancoPerguntas_v1';
+const CHAVE_BANCO_PERGUNTAS = chaveCrianca('mundoDoEduardo_bancoPerguntas_v1');
 function guardarBancoPerguntasPersonalizado(){
   try{
     localStorage.setItem(CHAVE_BANCO_PERGUNTAS, JSON.stringify(quizzes));
@@ -14865,7 +15395,7 @@ function carregarBancoPerguntasPersonalizado(){
 
 // Persistência das histórias sociais (inclui as geradas por IA e já aprovadas),
 // separada da rotina, para sobreviver a fechar a app — mesmo padrão do banco de perguntas.
-const CHAVE_HISTORIAS_SOCIAIS = 'mundoDoEduardo_historiasSociais_v1';
+const CHAVE_HISTORIAS_SOCIAIS = chaveCrianca('mundoDoEduardo_historiasSociais_v1');
 function guardarHistoriasSociais(){
   try{
     localStorage.setItem(CHAVE_HISTORIAS_SOCIAIS, JSON.stringify(historiasSociais));
@@ -15259,7 +15789,7 @@ function aplicarPlanoAceite(){
   document.getElementById('plano-objetivo').value = '';
 }
 
-const CHAVE_CAA_PERSONALIZADO = 'mundoDoEduardo_caaPersonalizado_v1';
+const CHAVE_CAA_PERSONALIZADO = chaveCrianca('mundoDoEduardo_caaPersonalizado_v1');
 function guardarCategoriasCaaPersonalizadas(){
   try{
     const extra = categoriasCaa.filter(c => c.id === 'plano');
@@ -16012,6 +16542,11 @@ async function obSubmeterCriarConta(){
       objetivos: obRespostas.objetivos,
       criadoEm: new Date().toISOString(),
     });
+    // Só nome e idade vão para o documento que os colaboradores podem ler.
+    await window.firebaseAuthApi.guardarPerfilPartilhado(credencial.user.uid, {
+      nomeCrianca: obRespostas.nomeCrianca,
+      idade: obRespostas.idade,
+    });
     // Sinaliza que a conta acabou de ser criada agora mesmo: quando aoEntrarNaApp()
     // correr a seguir (chamado pelo onAuthStateChanged), abre logo a área parental
     // para o responsável completar o perfil detalhado do Eduardo (dificuldades,
@@ -16115,9 +16650,34 @@ window.aoEntrarNaApp = async function(user){
     // era reaberta, porque uidPerfilAtivo só era definido no momento em que o código
     // era usado, nunca reposto a partir dos dados já guardados.
     window.uidPerfilAtivo = (perfilProprio && perfilProprio.uidPerfilPartilhado) || user.uid;
-    const perfil = window.uidPerfilAtivo === user.uid
-      ? perfilProprio
-      : await window.firebaseAuthApi.lerPerfil(window.uidPerfilAtivo);
+    let perfil;
+    if(window.uidPerfilAtivo === user.uid){
+      perfil = perfilProprio;
+      // Migração: contas criadas antes da separação não têm o subdocumento partilhado.
+      // Cria-o (ou atualiza-o) a partir do documento principal, para os colaboradores
+      // continuarem a ver nome e idade sem terem acesso aos restantes dados.
+      if(perfilProprio && (perfilProprio.nomeCrianca || perfilProprio.idade)){
+        try{
+          const atual = await window.firebaseAuthApi.lerPerfilPartilhado(user.uid);
+          if(!atual || atual.nomeCrianca !== (perfilProprio.nomeCrianca || null) || atual.idade !== (perfilProprio.idade || null)){
+            await window.firebaseAuthApi.guardarPerfilPartilhado(user.uid, perfilProprio);
+          }
+        }catch(eMig){ /* tenta de novo na próxima abertura */ }
+      }
+    }else{
+      try{
+        perfil = await window.firebaseAuthApi.lerPerfilPartilhado(window.uidPerfilAtivo);
+      }catch(eAcesso){
+        if(eAcesso && eAcesso.code === 'permission-denied'){
+          // O dono removeu o acesso desta conta: volta ao perfil próprio e limpa o ponteiro.
+          window.uidPerfilAtivo = user.uid;
+          perfil = perfilProprio;
+          try{ await window.firebaseAuthApi.guardarPerfil(user.uid, { uidPerfilPartilhado: null }); }catch(e2){}
+        }else{
+          throw eAcesso;
+        }
+      }
+    }
     if(perfil && perfil.nomeCrianca){
       definirTextoSaudacaoNome('Olá, ' + perfil.nomeCrianca + '!');
       document.title = 'EduKids — ' + perfil.nomeCrianca;
@@ -16127,6 +16687,20 @@ window.aoEntrarNaApp = async function(user){
     // normalmente com os valores locais já guardados em localStorage.
     window.uidPerfilAtivo = window.uidPerfilAtivo || user.uid;
   }
+
+  // Sincroniza os dados da criança (rotina, estrelas, histórico, CAA…) com o servidor. Se
+  // veio algo mais recente de outro dispositivo/pessoa, recarrega UMA vez para a app o usar.
+  try{
+    if(window.EduSync){
+      // Espera no máximo 8 s (rede lenta) para não atrasar o arranque; se demorar mais, a
+      // sincronização continua em segundo plano e recarrega no fim, se trouxer algo novo.
+      const pSync = window.EduSync.sincronizar();
+      const rs = await Promise.race([pSync, new Promise(res => setTimeout(() => res(null), 8000))]);
+      const aoTerminar = r => { if(r && r.aplicou && window.EduSync.podeRecarregar()) location.reload(); };
+      if(rs === null){ pSync.then(aoTerminar).catch(() => {}); }
+      else if(rs.aplicou && window.EduSync.podeRecarregar()){ location.reload(); return; }
+    }
+  }catch(eSync){ /* sem rede ou sem permissão: a app continua com os dados locais */ }
 
   // Verifica se há colaboradores ligados desde a última vez que a lista foi vista, para
   // mostrar o aviso discreto junto ao nome mesmo sem o responsável abrir a Configuração.

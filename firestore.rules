@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== Perfis =====
+    // O documento principal (nível de autismo, objetivos, email…) é só do dono.
+    // Colaboradores ligados por convite acedem ao subdocumento "partilhado" (nome e
+    // idade) e aos "dados" sincronizados da criança. O acesso é dado pela existência do registo em
+    // /perfis/{dono}/colaboradores/{uid}, que só se cria com um código válido —
+    // e NÃO por um campo que a própria conta possa escrever no seu perfil.
+    match /perfis/{perfilId} {
+      function eDono() {
+        return request.auth != null && request.auth.uid == perfilId;
+      }
+      function eColaborador() {
+        return request.auth != null &&
+          exists(/databases/$(database)/documents/perfis/$(perfilId)/colaboradores/$(request.auth.uid));
+      }
+      function dadoValido() {
+        return request.resource.data.keys().hasOnly(['chave', 'valor', 't', 'por'])
+          && request.resource.data.chave is string
+          && (request.resource.data.valor == null ||
+              (request.resource.data.valor is string && request.resource.data.valor.size() < 900000))
+          && request.resource.data.t is number
+          && request.resource.data.t <= request.time.toMillis() + 3600000  // tolera até 1 h de relógio adiantado
+          && request.resource.data.por == request.auth.uid;
+      }
+
+      allow read, write: if eDono();
+
+      // Dados partilhados: SÓ nome e idade.
+      match /partilhado/{docId} {
+        allow read: if eDono() || eColaborador();
+
+        allow create, update: if eDono()
+          && request.resource.data.keys().hasOnly(['nomeCrianca', 'idade']);
+
+        allow delete: if eDono();
+      }
+
+      // Dados sincronizados da criança (rotina, estrelas, histórico, emoções, CAA…):
+      // um documento por chave de localStorage. O dono e os colaboradores ligados leem e
+      // escrevem; só o dono apaga. Uma escrita mais antiga nunca substitui uma mais recente,
+      // e só o dono altera a lista de crianças.
+      match /dados/{docId} {
+        allow read: if eDono() || eColaborador();
+
+        allow create: if (eDono() || (eColaborador() && docId != 'mundoDoEduardo_listaCriancas_v1'))
+          && dadoValido();
+
+        allow update: if (eDono() || (eColaborador() && docId != 'mundoDoEduardo_listaCriancas_v1'))
+          && dadoValido()
+          && request.resource.data.t >= resource.data.t;
+
+        allow delete: if eDono();
+      }
+
+      // Registo de quem tem acesso.
+      match /colaboradores/{colabId} {
+        // O dono vê a lista; o colaborador vê apenas o seu próprio registo.
+        allow read: if request.auth != null &&
+          (request.auth.uid == perfilId || request.auth.uid == colabId);
+
+        // Criar o registo exige um código válido, usado por ESTA conta, no MESMO batch
+        // (get = estado antes do batch, getAfter = estado depois). Só são aceites os
+        // campos esperados (o email é mostrado ao dono, por isso tem tamanho limitado).
+        allow create: if request.auth != null
+          && request.auth.uid == colabId
+          && request.auth.uid != perfilId
+          && request.resource.data.keys().hasOnly(['email', 'ligadoEm', 'codigo'])
+          && request.resource.data.codigo is string
+          && (request.resource.data.email == null ||
+              (request.resource.data.email is string && request.resource.data.email.size() <= 200))
+          && exists(/databases/$(database)/documents/vinculos/$(request.resource.data.codigo))
+          && get(/databases/$(database)/documents/vinculos/$(request.resource.data.codigo)).data.uidPerfil == perfilId
+          && get(/databases/$(database)/documents/vinculos/$(request.resource.data.codigo)).data.usado == false
+          && get(/databases/$(database)/documents/vinculos/$(request.resource.data.codigo)).data.expiraEm > request.time.toMillis()
+          && getAfter(/databases/$(database)/documents/vinculos/$(request.resource.data.codigo)).data.usadoPor == request.auth.uid;
+
+        allow update: if false;
+
+        // O dono remove o acesso; o colaborador também pode sair por si.
+        allow delete: if request.auth != null &&
+          (request.auth.uid == perfilId || request.auth.uid == colabId);
+      }
+    }
+
+    // ===== Vínculos (códigos de convite) =====
+    // Cada código é o ID do documento. Só se pode LER um código que já se conhece
+    // (get); nunca listar a coleção — senão qualquer conta veria todos os códigos.
+    match /vinculos/{codigo} {
+      allow get: if request.auth != null;
+      allow list: if false;
+
+      // Só o dono cria códigos, com o formato novo (16 caracteres), ainda por usar.
+      allow create: if request.auth != null
+        && codigo.size() == 16
+        && request.resource.data.uidPerfil == request.auth.uid
+        && request.resource.data.usado == false;
+
+      // Marcar como usado: uma única vez, antes de expirar, só os campos de uso.
+      allow update: if request.auth != null
+        && resource.data.usado == false
+        && resource.data.expiraEm > request.time.toMillis()
+        && request.resource.data.usado == true
+        && request.resource.data.usadoPor == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usado', 'usadoPor', 'usadoEm']);
+
+      // Só o dono do perfil pode cancelar (revogar) um código.
+      allow delete: if request.auth != null && resource.data.uidPerfil == request.auth.uid;
+    }
+  }
+}
