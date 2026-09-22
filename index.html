@@ -338,8 +338,8 @@
   }
   .bloco-rotina.feito .info .t{ font-size:13px; font-weight:600; }
   .bloco-rotina.feito .info .d{ display:none; }
-  .bloco-rotina.feito .btn-ouvir-rotina{ width:24px; height:24px; font-size:11px; }
-  .bloco-rotina.feito .check-rotina{ width:24px; height:24px; font-size:12px; }
+  .bloco-rotina.feito .btn-ouvir-rotina{ width:44px; height:44px; font-size:15px; }
+  .bloco-rotina.feito .check-rotina{ width:44px; height:44px; font-size:16px; }
   .bloco-rotina .hora{
     font-size:12px; font-weight:700; color:var(--petroleo);
     width:40px; flex-shrink:0;
@@ -359,21 +359,21 @@
   }
   .bloco-rotina.agora .info .t{ font-size:17px; }
   .btn-ouvir-rotina{
-    width:30px;height:30px;border-radius:50%;
+    width:44px;height:44px;border-radius:50%;
     border:none;
     background:var(--salva-clara);
     display:flex;align-items:center;justify-content:center;
-    font-size:14px;
+    font-size:16px;
     flex-shrink:0; cursor:pointer;
     padding:0;
   }
   .btn-ouvir-rotina:active{ transform:scale(0.92); }
   .check-rotina{
-    width:30px;height:30px;border-radius:50%;
+    width:44px;height:44px;border-radius:50%;
     border:2px solid var(--salva);
     background:transparent;
     display:flex;align-items:center;justify-content:center;
-    font-size:15px; color:transparent;
+    font-size:18px; color:transparent;
     flex-shrink:0; cursor:pointer;
   }
   .bloco-rotina.feito .check-rotina{
@@ -1914,6 +1914,7 @@
     cursor:pointer;
     white-space:nowrap;
     padding:0;
+    min-height:44px;
   }
   .fr-usar .pc-icone{ font-size:18px; }
   .fr-remover{
@@ -1925,6 +1926,17 @@
     color:var(--texto-suave);
     cursor:pointer;
     flex-shrink:0;
+    /* Área de toque real maior do que o círculo visível (22px): o dedo tem 44px de
+       margem para acertar, mesmo que a bolinha pequena continue a caber visualmente
+       na cápsula compacta da frase rápida, sem alargar o design. */
+    position:relative;
+  }
+  .fr-remover::before{
+    content:'';
+    position:absolute;
+    top:50%; left:50%;
+    width:44px; height:44px;
+    transform:translate(-50%,-50%);
   }
 
   ::-webkit-scrollbar{ width:0; }
@@ -2239,6 +2251,7 @@
           <span class="legenda"><span id="total-estrelas">0</span> estrelas</span>
         </div>
       </div>
+      <div id="mensagem-objetivo-eduardo" style="display:none;"></div>
     </section>
 
     <!-- ===================== ROTINA ===================== -->
@@ -2375,7 +2388,7 @@
       <button class="btn-secundario" id="btn-alternar-pratica-caa" onclick="alternarModoPraticaCaa()" style="width:100%;margin-bottom:12px;">🎯 Modo Treino (sem enviar de verdade)</button>
 
       <div class="frase-caa" id="frase-caa" role="status" aria-live="polite">
-        <span class="frase-caa-vazia" id="frase-caa-vazia">Toca numa imagem para começar…</span>
+        <span class="frase-caa-vazia">Toca numa imagem para começar…</span>
       </div>
       <div class="frase-caa-acoes">
         <button class="btn-secundario" id="btn-apagar-caa" onclick="apagarUltimoCaa()">⌫ Apagar</button>
@@ -2428,6 +2441,15 @@
       </div>
       <div id="resumo-perfil-crianca"></div>
       <button class="btn-primario" id="btn-abrir-editar-perfil" style="margin-top:10px;">✏️ Editar perfil</button>
+
+      <!-- ===== Disciplinas do menu Escola: por omissão seguem o currículo nacional do ano
+           escolar indicado no perfil (ver CURRICULO_DISCIPLINAS), mas podem ser ligadas ou
+           desligadas aqui uma a uma — a escolha manual vence sempre a sugestão do ano
+           (ver escolaItensParaExibir). Útil quando o currículo real da criança difere do
+           currículo nacional padrão (percurso adaptado, escola internacional, etc.). ===== -->
+      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">📚 Disciplinas no menu Escola</div>
+      <div class="subtitulo-secao">Por omissão seguem o ano escolar do perfil. Podes ajustar aqui uma a uma.</div>
+      <div id="lista-disciplinas-config" style="margin-top:10px;"></div>
 
       <!-- ===== Acesso partilhado: dá a outro adulto (o outro progenitor, um terapeuta) acesso a
            este perfil. Os dados da criança (rotina, estrelas, histórico, emoções, CAA, etc.)
@@ -2582,6 +2604,19 @@
 
       <div class="linha-definicao" style="align-items:flex-start;">
         <div class="txt-def" style="width:100%;">
+          <div class="t">🍇 Peças do jogo Juntar e Limpar</div>
+          <div class="d">Muda só o desenho das peças na grelha (frutas, animais ou bolas lisas). O pedido no topo do jogo ("Limpa as vermelhas") e o frasco continuam sempre com bolas de cor lisa, para o objetivo se manter claro.</div>
+          <select id="select-tema-juntar-limpar" onchange="guardarTemaVisualJuntarLimpar(this.value)"
+            style="margin-top:10px;width:100%;padding:10px;border-radius:10px;border:1px solid var(--salva-clara);background:var(--branco);color:var(--texto);font-size:14px;">
+            <option value="frutas">🍎 Frutas</option>
+            <option value="animais">🐸 Animais</option>
+            <option value="bolas">🔴 Bolas de cor</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
           <div class="t">🧭 Jogos por Sessão</div>
           <div class="d">Quando o Eduardo escolhe "Começar uma Sessão de Jogos", quantos jogos diferentes o percurso inclui de cada vez (em vez de mostrar a lista toda). Um número mais pequeno é mais fácil de terminar sem cansar.</div>
           <input type="range" id="slider-num-jogos-sessao" min="3" max="10" step="1" value="5"
@@ -2602,6 +2637,17 @@
       <div class="separador-secao" style="display:none;"></div>
       <div class="titulo-secao" style="font-size:18px;">📈 Evolução do Eduardo</div>
       <div class="subtitulo-secao">Um resumo simples de utilização — não substitui a avaliação de um profissional.</div>
+
+      <!-- Objetivo Ativo: nenhum dado novo é registado aqui — só destaca, com um foco
+           único e ativo, dados que a app já mede noutros cartões desta aba. -->
+      <div class="cartao-grafico">
+        <div class="t-grafico">🎯 Objetivo Ativo</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Escolhe um foco de cada vez — mais fácil de acompanhar do que tentar tudo ao mesmo tempo.</p>
+        <select id="seletor-objetivo-ativo" style="width:100%;padding:10px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);margin-bottom:12px;">
+          <option value="">Nenhum objetivo escolhido</option>
+        </select>
+        <div id="cartao-progresso-objetivo-ativo"></div>
+      </div>
 
       <div class="grelha-resumo-parental" id="grelha-resumo-parental"></div>
 
@@ -2811,6 +2857,15 @@
 
       <p id="versao-app" style="text-align:center;font-size:11px;color:var(--texto-suave);opacity:.6;margin-top:22px;"></p>
 
+      <!-- ===================== OS TEUS DADOS (RGPD) ===================== -->
+      <div class="separador-secao"></div>
+      <div class="titulo-secao" style="font-size:18px;">🔐 Os teus dados</div>
+      <div class="subtitulo-secao">O que está guardado na tua conta (perfil, rotina, estrelas, histórico, CAA…). Podes descarregar uma cópia ou apagar tudo em definitivo.</div>
+      <button class="btn-secundario" id="btn-exportar-conta" style="margin-top:6px;">⬇️ Exportar os meus dados</button>
+      <p id="msg-exportar-conta" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
+      <button class="btn-secundario" id="btn-apagar-conta" style="margin-top:10px;color:var(--erro,#b3452c);border-color:var(--erro,#b3452c);">🗑️ Apagar conta e dados</button>
+      <p id="msg-apagar-conta" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
+
       <!-- ===================== TERMINAR SESSÃO ===================== -->
       <div class="separador-secao"></div>
       <button class="btn-secundario" id="btn-terminar-sessao" style="margin-top:6px;color:var(--erro,#b3452c);border-color:var(--erro,#b3452c);">🚪 Terminar sessão</button>
@@ -2850,6 +2905,7 @@
           <div class="d">Guardada só neste dispositivo (localStorage). Nunca é enviada para nós — só para a Google, ao gerar as perguntas.</div>
           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--petroleo);text-decoration:underline;">🔑 Criar chave gratuita no Google AI Studio</a>
           <input type="password" id="ia-chave-gemini" placeholder="Cola aqui a tua chave Gemini" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
+          <p id="estado-chave-gemini" style="font-size:12px;margin:6px 0 0;color:var(--texto-suave);"></p>
         </div>
       </div>
 
@@ -3453,6 +3509,60 @@
   const CHAVE_ATIVA = 'mundoDoEduardo_criancaAtivaId_v1';
   const CHAVE_META = 'edukids_sync_meta_v1';
   const PREFIXO_BACKUP = 'edukids_sync_backup__';
+
+  // ===== Mesclagem por campo (em vez de o mais recente substituir tudo) =====
+  // Sem isto, duas pessoas ativas no mesmo dia (a criança no telemóvel dela, o terapeuta a
+  // rever mais tarde) fariam a alteração mais recente apagar por completo o progresso mais
+  // antigo desse dia. Só existe mesclador para as chaves em que sabemos, com segurança, como
+  // combinar os dois lados — as restantes (rotina personalizada, definições, PIN…) continuam
+  // a funcionar como antes: o valor mais recente ganha por inteiro.
+  function ehObjetoSimples(x){ return x !== null && typeof x === 'object' && !Array.isArray(x); }
+
+  // Histórico diário: { 'AAAA-MM-DD': { tarefasFeitas, tarefasTotal, estrelasGanhas, fichasEscola } }.
+  // Por cada dia, fica o registo mais "cheio" (mais tarefas+estrelas+fichas) desse dia em
+  // cada aparelho — nunca perde um dia só porque outro aparelho sincronizou depois.
+  function mesclarHistorico(localStr, remotoStr){
+    const local = JSON.parse(localStr), remoto = JSON.parse(remotoStr);
+    if(!ehObjetoSimples(local) || !ehObjetoSimples(remoto)) throw new Error('formato inesperado');
+    const peso = (x) => (Number(x && x.tarefasFeitas) || 0) + (Number(x && x.estrelasGanhas) || 0) + (Number(x && x.fichasEscola) || 0);
+    const fundido = {};
+    new Set([...Object.keys(local), ...Object.keys(remoto)]).forEach((dia) => {
+      const le = local[dia], re = remoto[dia];
+      fundido[dia] = (le && re) ? (peso(le) >= peso(re) ? le : re) : (le || re);
+    });
+    return JSON.stringify(fundido);
+  }
+
+  // Estado da criança: a maior parte (definições, rotina de hoje, registos detalhados) fica
+  // como o lado mais recente tiver — mas os contadores cumulativos (nunca diminuem: só têm
+  // "+=" no código da app) usam o maior dos dois valores, para uma sessão feita num aparelho
+  // nunca ser apagada pela sincronização de outro aparelho que ainda não a tinha visto.
+  const CAMPOS_CONTADOR_ESTADO = [
+    'estrelas', 'estrelasGastas', 'contadorFichasEscola', 'contadorVitoriasMemoria',
+    'contadorUsosCalma', 'contadorQuizzesConcluidos', 'contadorEsperasCompletas',
+    'contadorSessoesPraticaCaa', 'streakDias', 'recordeStreakDias',
+  ];
+  function mesclarEstado(localStr, remotoStr){
+    const local = JSON.parse(localStr), remoto = JSON.parse(remotoStr);
+    if(!ehObjetoSimples(local) || !ehObjetoSimples(remoto)) throw new Error('formato inesperado');
+    const fundido = Object.assign({}, remoto);
+    CAMPOS_CONTADOR_ESTADO.forEach((k) => {
+      const a = Number(local[k]), b = Number(remoto[k]);
+      if(!isNaN(a) && !isNaN(b)) fundido[k] = Math.max(a, b);
+      else if(!isNaN(a)) fundido[k] = a;
+    });
+    if(Array.isArray(local.medalhasDesbloqueadas) || Array.isArray(remoto.medalhasDesbloqueadas)){
+      const la = local.medalhasDesbloqueadas || [], ra = remoto.medalhasDesbloqueadas || [];
+      const n = Math.max(la.length, ra.length);
+      fundido.medalhasDesbloqueadas = Array.from({ length: n }, (_, i) => !!(la[i] || ra[i]));
+    }
+    return JSON.stringify(fundido);
+  }
+
+  const MESCLADORES = {
+    mundoDoEduardo_historico_v1: mesclarHistorico,
+    mundoDoEduardo_estado_v1: mesclarEstado,
+  };
   const ID_HERDADO = '_principal';
   const LIMITE_BYTES = 900000; // o Firestore limita cada documento a ~1 MB
 
@@ -3489,6 +3599,7 @@
   // Último valor conhecido no servidor (memória), para não marcar como sujas escritas idênticas.
   const cache = new Map();
   let aplicando = false; // true enquanto gravamos dados vindos do servidor (não marcar como sujos)
+  let suspenso = false;  // true depois de pausar(): nada é enviado nem descarregado
   let estado = null;     // { ns, colab, ids } depois da 1.ª sincronização completa
 
   Storage.prototype.setItem = function(k, v){
@@ -3540,7 +3651,7 @@
 
   async function empurrarSujas(){
     const api = window.firebaseAuthApi;
-    if(!estado || !api || !api.guardarDado || navigator.onLine === false) return;
+    if(suspenso || !estado || !api || !api.guardarDado || navigator.onLine === false) return;
     const m = lerMeta();
     if(m.ns !== estado.ns) return;
     const chaves = Object.keys(m.chaves).filter(k => m.chaves[k].d && ehSync(k) && alcanceEscrita(k));
@@ -3549,17 +3660,30 @@
 
   function aplicarRemoto(k, r, semMeta){
     const atual = lerRaw(k);
-    const igual = (atual === r.valor);
+    let valorFinal = r.valor;
+    let precisaReenviar = false;
+    const mesclador = MESCLADORES[k.slice(0, k.indexOf('__'))];
+    if(mesclador && atual !== null && r.valor !== null){
+      try{
+        const fundido = mesclador(atual, r.valor);
+        if(fundido !== r.valor){ valorFinal = fundido; precisaReenviar = (fundido !== atual); }
+      }catch(e){ /* algo não bateu certo (formato inesperado): usa o comportamento simples de sempre */ }
+    }
+    const igual = (atual === valorFinal);
     if(!igual){
       // Primeira vez que esta chave é substituída: guarda uma cópia do que existia neste aparelho.
       if(semMeta && atual !== null && lerRaw(PREFIXO_BACKUP + k) === null){
         try{ gravarRaw(PREFIXO_BACKUP + k, atual); }catch(e){}
       }
       try{
-        if(r.valor === null) apagarRaw(k); else gravarRaw(k, r.valor);
+        if(valorFinal === null) apagarRaw(k); else gravarRaw(k, valorFinal);
       }catch(e){ return false; } // sem espaço: tenta de novo na próxima vez
     }
-    mudarMeta(m => { m.chaves[k] = { t: r.t, d: 0 }; });
+    // Se a mesclagem produziu algo diferente do que está no servidor, marca como suja para
+    // ser reenviada (com uma hora mais recente, para não perder para o próprio remoto na
+    // próxima comparação); senão, fica alinhada com a hora do servidor, como antes.
+    if(precisaReenviar) mudarMeta(m => { m.chaves[k] = { t: Date.now(), d: 1 }; });
+    else mudarMeta(m => { m.chaves[k] = { t: r.t, d: 0 }; });
     return !igual;
   }
 
@@ -3654,7 +3778,7 @@
 
   function sincronizar(){
     const api = window.firebaseAuthApi, user = window.utilizadorAtual;
-    if(!api || !api.lerDados || !api.guardarDado || !user || user.semConta || !user.uid) return Promise.resolve({ aplicou: false });
+    if(suspenso || !api || !api.lerDados || !api.guardarDado || !user || user.semConta || !user.uid) return Promise.resolve({ aplicou: false });
     if(navigator.onLine === false) return Promise.resolve({ aplicou: false });
     if(ocupado) return ocupado;
     ocupado = _sincronizar(api, user).finally(() => { ocupado = null; });
@@ -3683,7 +3807,42 @@
   });
   window.addEventListener('online', () => { empurrarSujas().catch(() => {}); });
 
-  window.EduSync = { sincronizar, empurrarSujas, podeRecarregar };
+  // Usado ao apagar a conta: para já qualquer envio/receção (e temporizadores pendentes), para
+  // que nada volte a ser escrito no servidor entretanto.
+  function pausar(){
+    suspenso = true;
+    clearTimeout(temporizador);
+    estado = null;
+  }
+
+  // Apaga desta app TODOS os dados guardados neste aparelho (dados das crianças, definições,
+  // PINs, chave da IA, metadados de sincronização e cópias de segurança).
+  function limparLocal(){
+    aplicando = true;
+    try{
+      const ks = [];
+      for(let i = 0; i < ls.length; i++){
+        const k = ls.key(i);
+        if(k && (k.indexOf('mundoDoEduardo_') === 0 || k.indexOf('edukids_') === 0)) ks.push(k);
+      }
+      ks.forEach(k => { try{ apagarRaw(k); }catch(e){} });
+    }finally{ aplicando = false; }
+  }
+
+  // Mantém os dados locais mas esquece a ligação à conta apagada (metadados e sessão offline).
+  function esquecerConta(){
+    aplicando = true;
+    try{
+      const ks = [CHAVE_META, 'mundoDoEduardo_sessaoLocal_v1'];
+      for(let i = 0; i < ls.length; i++){
+        const k = ls.key(i);
+        if(k && k.indexOf(PREFIXO_BACKUP) === 0) ks.push(k);
+      }
+      ks.forEach(k => { try{ apagarRaw(k); }catch(e){} });
+    }finally{ aplicando = false; }
+  }
+
+  window.EduSync = { sincronizar, empurrarSujas, podeRecarregar, pausar, limparLocal, esquecerConta };
 })();
 
 </script>
@@ -3692,7 +3851,8 @@
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
     const {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      sendPasswordResetEmail, onAuthStateChanged, signOut
+      sendPasswordResetEmail, onAuthStateChanged, signOut,
+      EmailAuthProvider, reauthenticateWithCredential, deleteUser
     } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js");
     const {
       getFirestore, doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs, writeBatch
@@ -3754,6 +3914,46 @@
         entrar: (email, senha) => signInWithEmailAndPassword(auth, email, senha),
         recuperarSenha: (email) => sendPasswordResetEmail(auth, email),
         sair: () => signOut(auth),
+        // Pedido pelo Firebase antes de qualquer operação sensível (aqui, apagar a conta) se
+        // a sessão não for "recente". Sem isto, apagarContaEDados falha com auth/requires-recent-login.
+        reautenticar: (senha) => reauthenticateWithCredential(
+          auth.currentUser,
+          EmailAuthProvider.credential(auth.currentUser.email, senha)
+        ),
+        // ===== RGPD: exportar e apagar =====
+        // Junta tudo o que esta conta tem guardado no Firebase (perfil, dados sincronizados,
+        // lista de colaboradores) num único objeto, para a pessoa poder guardar uma cópia.
+        exportarTudoDaConta: async (uid) => {
+          const [perfilSnap, dadosSnap, colabSnap] = await Promise.all([
+            getDoc(doc(db, "perfis", uid)),
+            getDocs(collection(db, "perfis", uid, "dados")),
+            getDocs(collection(db, "perfis", uid, "colaboradores")),
+          ]);
+          const dados = {}; dadosSnap.forEach(d => { const x = d.data(); dados[x.chave] = x.valor; });
+          const colaboradores = []; colabSnap.forEach(d => colaboradores.push(d.data()));
+          return {
+            perfil: perfilSnap.exists() ? perfilSnap.data() : null,
+            dadosSincronizados: dados,
+            colaboradores,
+          };
+        },
+        // Apaga TODOS os dados desta conta no Firebase (perfil, dados sincronizados,
+        // colaboradores ligados) e depois a própria conta de autenticação. Não apaga o
+        // acesso que esta conta possa ter como COLABORADORA no perfil de outra pessoa
+        // (isso são registos do lado do dono; sai desse acesso o dono, removendo-a).
+        apagarContaEDados: async (uid) => {
+          const [dadosSnap, colabSnap] = await Promise.all([
+            getDocs(collection(db, "perfis", uid, "dados")),
+            getDocs(collection(db, "perfis", uid, "colaboradores")),
+          ]);
+          const batch = writeBatch(db);
+          dadosSnap.forEach(d => batch.delete(d.ref));
+          colabSnap.forEach(d => batch.delete(d.ref));
+          batch.delete(doc(db, "perfis", uid, "partilhado", "dados"));
+          batch.delete(doc(db, "perfis", uid));
+          await batch.commit();
+          await deleteUser(auth.currentUser);
+        },
         guardarPerfil: (uid, dados) => setDoc(doc(db, "perfis", uid), dados, { merge: true }),
         lerPerfil: async (uid) => {
           const snap = await getDoc(doc(db, "perfis", uid));
@@ -3924,7 +4124,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.52.0';
+window.APP_VERSION = '1.56.0';
 
 /* ======================= DADOS ======================= */
 
@@ -3949,6 +4149,34 @@ let variacoesRotinaSemana = {
   2: { nomeDia: "Terça-feira", nota: "Dia de natação depois da escola", blocoExtra: {hora:"17:00", icone:"🏊", t:"Natação", d:"Trazer o saco da piscina"} },
 };
 
+// Mapa curricular do ensino básico português (Decreto-Lei 55/2018, matrizes-base por
+// ciclo): para cada disciplina da app, o ano mínimo em que passa a existir oficialmente
+// no currículo nacional, e — quando muda de nome ao longo dos ciclos — qual o título a
+// mostrar em cada fase. "Estudo do Meio" cobre Geografia+Ciências só até ao 4º ano (1º
+// ciclo); a partir do 5º ano tornam-se disciplinas próprias (Ciências Naturais; História
+// e Geografia de Portugal). Inglês começa no 3º ano; Espanhol (2ª língua estrangeira)
+// só é comum a partir do 7º ano, por isso o anoMin reflete isso em vez de ficar sempre
+// visível como as restantes.
+const CURRICULO_DISCIPLINAS = {
+  matematica: { anoMin: 1, titulos: { 1: 'Matemática' } },
+  portugues:  { anoMin: 1, titulos: { 1: 'Português' } },
+  geografia:  { anoMin: 1, titulos: { 1: 'Estudo do Meio', 5: 'História e Geografia de Portugal' } },
+  ciencias:   { anoMin: 1, titulos: { 1: 'Estudo do Meio', 5: 'Ciências Naturais' } },
+  ingles:     { anoMin: 3, titulos: { 3: 'Inglês' } },
+  espanhol:   { anoMin: 7, titulos: { 7: 'Espanhol' } },
+};
+
+// Devolve o título correto da disciplina para o ano dado (o mais específico já atingido),
+// ou o título por omissão (anoMin) se o ano ainda não tiver sido definido pela família.
+function tituloDisciplinaParaAno(chave, ano){
+  const curriculo = CURRICULO_DISCIPLINAS[chave];
+  if(!curriculo) return null;
+  const anosComTitulo = Object.keys(curriculo.titulos).map(Number).sort((a,b) => b - a);
+  const anoEfetivo = ano || curriculo.anoMin;
+  const anoTitulo = anosComTitulo.find(a => a <= anoEfetivo) || curriculo.anoMin;
+  return curriculo.titulos[anoTitulo];
+}
+
 const escolaItens = [
   {icone:"➗", cor:"#E4EEF0", t:"Matemática — Frações", d:"Ficha de treino", tipo:"quiz", dados:"matematica"},
   {icone:"📗", cor:"#E7F1E8", t:"Português — Leitura", d:"Ler o texto e responder", tipo:"quiz", dados:"portugues"},
@@ -3957,6 +4185,55 @@ const escolaItens = [
   {icone:"🇬🇧", cor:"#E4EEF0", t:"Inglês — Vocabulário", d:"Palavras e frases simples", tipo:"quiz", dados:"ingles"},
   {icone:"🇪🇸", cor:"#FBEFDD", t:"Espanhol — Vocabulário", d:"Palavras e frases simples", tipo:"quiz", dados:"espanhol"},
 ];
+
+// Subtítulo específico da atividade de cada disciplina (a parte depois do "—" em
+// escolaItens.t), guardado à parte do nome curricular da disciplina para os podermos
+// recombinar sem duplicar texto quando o nome muda por ciclo (ver tituloDisciplinaParaAno).
+const SUBTITULO_ATIVIDADE_ESCOLA = {
+  matematica: 'Frações', portugues: 'Leitura', geografia: 'Distritos e Capitais',
+  ciencias: 'O Sistema Solar', ingles: 'Vocabulário', espanhol: 'Vocabulário',
+};
+
+// Devolve os pares {it, indiceOriginal} das disciplinas a mostrar no menu Escola,
+// filtrados e com os títulos ajustados ao ano escolar real da criança e às preferências
+// manuais dos pais (ver disciplinasAtivasManual). O índice original (posição em
+// escolaItens) é preservado em cada par para abrirEscola(i) continuar a abrir a
+// disciplina certa mesmo depois de filtrar — mesmo padrão já usado em jogosItens
+// (ver renderListaJogosPorCategoria). Regra de decisão por disciplina:
+//   1. Se os pais já decidiram manualmente (true/false) — essa escolha vence sempre.
+//   2. Caso contrário, mostra-se se o ano da criança já atingiu o anoMin curricular.
+//   3. Sem ano definido no perfil, mostra-se tudo (comportamento anterior, sem filtrar).
+function escolaItensParaExibir(){
+  const dados = obterDadosQuestionarioEduardo();
+  const anoNum = dados && dados.anoEscolar ? parseInt(String(dados.anoEscolar).match(/\d+/)?.[0], 10) : null;
+  return escolaItens
+    .map((it, indiceOriginal) => ({it, indiceOriginal}))
+    .filter(({it}) => {
+      const curriculo = CURRICULO_DISCIPLINAS[it.dados];
+      if(!curriculo) return true; // disciplinas sem mapa curricular (ex: futuras) ficam sempre visíveis
+      if(disciplinasAtivasManual[it.dados] !== undefined) return disciplinasAtivasManual[it.dados];
+      if(anoNum === null) return true;
+      return anoNum >= curriculo.anoMin;
+    })
+    .map(({it, indiceOriginal}) => {
+      const tituloCurricular = anoNum !== null ? tituloDisciplinaParaAno(it.dados, anoNum) : null;
+      const subtitulo = SUBTITULO_ATIVIDADE_ESCOLA[it.dados];
+      const itAjustado = tituloCurricular ? { ...it, t: subtitulo ? `${tituloCurricular} — ${subtitulo}` : tituloCurricular } : it;
+      return {it: itAjustado, indiceOriginal};
+    });
+}
+
+// Mostra o menu Escola já filtrado e com os títulos adequados ao ano escolar (ver
+// escolaItensParaExibir). Segue o mesmo padrão de índice preservado usado em
+// renderListaJogosPorCategoria, para abrirEscola(i) continuar a abrir a disciplina certa.
+function renderListaEscola(){
+  const id = 'lista-escola';
+  acoesLista[id] = abrirEscola;
+  const cont = document.getElementById(id);
+  const pares = escolaItensParaExibir();
+  cont.innerHTML = pares.map(({it, indiceOriginal}) => gerarHtmlItemLista(it, indiceOriginal, id)).join('');
+  ligarEventosItensLista(id);
+}
 
 // Histórias sociais aprovadas pelo pai/cuidador (geradas com IA e revistas, ou escritas à
 // mão) — guardadas à parte e persistidas, como o banco de perguntas. Começa com um exemplo
@@ -4030,6 +4307,9 @@ let sequenciasNivelConteudo = 1;
 let sequenciasErrouNestaRonda = false, sequenciasTeveErro = false;
 let sequenciasRondasDificeisSeguidas = 0;
 let sequenciasIndiceAlvoAtual = -1;
+// Modo Dupla: alterna a vez a cada RONDA — mesmo padrão já usado nos outros jogos.
+let sequenciasModoDupla = false;
+let sequenciasVezDaMae = false;
 
 function gerarHtmlSequencias(){
   const nivel = obterNivelAtual('sequencias');
@@ -4037,6 +4317,8 @@ function gerarHtmlSequencias(){
   return `
     <div class="painel">
       <div class="nivel-jogo">Nível ${nomeNivel} — o que vem a seguir?</div>
+      <div id="alternador-sequencias"></div>
+      <div id="indicador-vez-sequencias"></div>
       <div class="pedido-caracteristicas" id="pista-sequencias" style="font-size:34px;letter-spacing:6px;"></div>
       <button class="btn-pagina" id="btn-ouvir-sequencias" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-sequencias"></div>
@@ -4053,6 +4335,7 @@ function iniciarJogoSequencias(){
   sequenciasRondaAtual = 0;
   sequenciasTeveErro = false;
   sequenciasRondasDificeisSeguidas = 0;
+  sequenciasVezDaMae = false;
   proximaRondaSequencias();
 }
 
@@ -4079,7 +4362,43 @@ function proximaRondaSequencias(){
     </div>
   `).join('');
 
+  const contAlternador = document.getElementById('alternador-sequencias');
+  if(contAlternador){
+    contAlternador.innerHTML = sequenciasRondaAtual === 0 ? `
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${sequenciasModoDupla ? '' : 'ativo'}" id="btn-sequencias-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${sequenciasModoDupla ? 'ativo' : ''}" id="btn-sequencias-dupla">${iconeDupla()} A Dois</button>
+      </div>
+    ` : '';
+    const btnSozinho = document.getElementById('btn-sequencias-sozinho');
+    const btnDupla = document.getElementById('btn-sequencias-dupla');
+    if(btnSozinho && btnDupla){
+      btnSozinho.addEventListener('click', ()=>{
+        sequenciasModoDupla = false;
+        btnSozinho.classList.add('ativo');
+        btnDupla.classList.remove('ativo');
+        renderIndicadorVezSequencias();
+      });
+      btnDupla.addEventListener('click', ()=>{
+        sequenciasModoDupla = true;
+        sequenciasVezDaMae = false;
+        btnDupla.classList.add('ativo');
+        btnSozinho.classList.remove('ativo');
+        renderIndicadorVezSequencias();
+      });
+    }
+  }
+  renderIndicadorVezSequencias();
+
   configurarBotaoOuvirSequencias();
+}
+
+function renderIndicadorVezSequencias(){
+  const cont = document.getElementById('indicador-vez-sequencias');
+  if(!cont) return;
+  cont.innerHTML = sequenciasModoDupla
+    ? `<div class="vez-modo-dupla ${sequenciasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${sequenciasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    : '';
 }
 
 function configurarBotaoOuvirSequencias(){
@@ -4103,22 +4422,33 @@ function responderSequencias(i){
   document.querySelectorAll('#grelha-sequencias .forma-caract').forEach(el => el.style.pointerEvents = 'none');
   const el = document.getElementById('opcao-sequencias-'+i);
   const correto = i === sequenciasIndiceAlvoAtual;
+  const quemRespondeu = sequenciasModoDupla ? (sequenciasVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
+  const estado = document.getElementById('estado-sequencias');
   if(correto){
     el.classList.add('certa');
     tocarSomAcerto();
     vibrar([15,40,60]);
+    if(estado && sequenciasModoDupla){
+      estado.textContent = quemRespondeu + ': acertou!';
+      estado.style.color = 'var(--petroleo)';
+    }
   } else {
     el.classList.add('errada');
     sequenciasErrouNestaRonda = true;
     sequenciasTeveErro = true;
     tocarSomErro();
     vibrar([25,80,25]);
+    if(estado && sequenciasModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     setTimeout(()=>{
       document.querySelectorAll('#grelha-sequencias .forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
     }, 400);
     return;
   }
   sequenciasRondaAtual++;
+  if(sequenciasModoDupla) sequenciasVezDaMae = !sequenciasVezDaMae;
   sequenciasRondasDificeisSeguidas = sequenciasErrouNestaRonda ? sequenciasRondasDificeisSeguidas + 1 : 0;
   const eraAUltimaRonda = sequenciasRondaAtual >= sequenciasTotalRondas;
   if(sequenciasRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
@@ -4142,7 +4472,9 @@ function concluirJogoSequencias(){
   const nomeNivel = NIVEIS_SEQUENCIAS[sequenciasNivelAtual]?.nome || 'Fácil';
   darEstrela(
     sequenciasTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
-    'Completaste o Jogo das Sequências — nível ' + nomeNivel,
+    sequenciasModoDupla
+      ? 'Completaram juntos o Jogo das Sequências — nível ' + nomeNivel
+      : 'Completaste o Jogo das Sequências — nível ' + nomeNivel,
     (!sequenciasTeveErro && sequenciasNivelAtual === 3) ? 2 : 1
   );
 }
@@ -4732,6 +5064,11 @@ let emocoesRostoNivelConteudo = 1;
 let emocoesRostoErrouNestaRonda = false, emocoesRostoTeveErro = false;
 let emocoesRostoRondasDificeisSeguidas = 0;
 let emocoesRostoIndiceAlvoAtual = -1;
+// Modo Dupla: mesma lógica do jogo "O Que Dirias?" — alterna a vez a cada RONDA, não por
+// acerto. Reconhecer emoções é uma competência social que se pratica melhor em interação
+// real do que sozinho, e a resposta pode abrir conversa ("porque achas que ele está triste?").
+let emocoesRostoModoDupla = false;
+let emocoesRostoVezDaMae = false;
 
 function gerarHtmlEmocoesRosto(){
   const nivel = obterNivelAtual('emocoesrosto');
@@ -4739,6 +5076,8 @@ function gerarHtmlEmocoesRosto(){
   return `
     <div class="painel">
       <div class="nivel-jogo">Nível ${nomeNivel} — como é que esta pessoa se sente?</div>
+      <div id="alternador-emocoesrosto"></div>
+      <div id="indicador-vez-emocoesrosto"></div>
       <div class="pedido-caracteristicas" id="pista-emocoesrosto" style="font-size:17px;line-height:1.5;padding:0 8px;"></div>
       <button class="btn-pagina" id="btn-ouvir-emocoesrosto" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-emocoesrosto"></div>
@@ -4755,6 +5094,7 @@ function iniciarJogoEmocoesRosto(){
   emocoesRostoRondaAtual = 0;
   emocoesRostoTeveErro = false;
   emocoesRostoRondasDificeisSeguidas = 0;
+  emocoesRostoVezDaMae = false;
   proximaRondaEmocoesRosto();
 }
 
@@ -4786,7 +5126,43 @@ function proximaRondaEmocoesRosto(){
     </div>
   `).join('');
 
+  const contAlternador = document.getElementById('alternador-emocoesrosto');
+  if(contAlternador){
+    contAlternador.innerHTML = emocoesRostoRondaAtual === 0 ? `
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${emocoesRostoModoDupla ? '' : 'ativo'}" id="btn-emocoesrosto-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${emocoesRostoModoDupla ? 'ativo' : ''}" id="btn-emocoesrosto-dupla">${iconeDupla()} A Dois</button>
+      </div>
+    ` : '';
+    const btnSozinho = document.getElementById('btn-emocoesrosto-sozinho');
+    const btnDupla = document.getElementById('btn-emocoesrosto-dupla');
+    if(btnSozinho && btnDupla){
+      btnSozinho.addEventListener('click', ()=>{
+        emocoesRostoModoDupla = false;
+        btnSozinho.classList.add('ativo');
+        btnDupla.classList.remove('ativo');
+        renderIndicadorVezEmocoesRosto();
+      });
+      btnDupla.addEventListener('click', ()=>{
+        emocoesRostoModoDupla = true;
+        emocoesRostoVezDaMae = false;
+        btnDupla.classList.add('ativo');
+        btnSozinho.classList.remove('ativo');
+        renderIndicadorVezEmocoesRosto();
+      });
+    }
+  }
+  renderIndicadorVezEmocoesRosto();
+
   configurarBotaoOuvirEmocoesRosto(par);
+}
+
+function renderIndicadorVezEmocoesRosto(){
+  const cont = document.getElementById('indicador-vez-emocoesrosto');
+  if(!cont) return;
+  cont.innerHTML = emocoesRostoModoDupla
+    ? `<div class="vez-modo-dupla ${emocoesRostoVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${emocoesRostoVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    : '';
 }
 
 function configurarBotaoOuvirEmocoesRosto(par){
@@ -4810,16 +5186,26 @@ function responderEmocoesRosto(i){
   document.querySelectorAll('#grelha-emocoesrosto .forma-caract').forEach(el => el.style.pointerEvents = 'none');
   const el = document.getElementById('opcao-emocoesrosto-'+i);
   const correto = i === emocoesRostoIndiceAlvoAtual;
+  const quemRespondeu = emocoesRostoModoDupla ? (emocoesRostoVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
+  const estado = document.getElementById('estado-emocoesrosto');
   if(correto){
     el.classList.add('certa');
     tocarSomAcerto();
     vibrar([15,40,60]);
+    if(estado && emocoesRostoModoDupla){
+      estado.textContent = quemRespondeu + ': acertou!';
+      estado.style.color = 'var(--petroleo)';
+    }
   } else {
     el.classList.add('errada');
     emocoesRostoErrouNestaRonda = true;
     emocoesRostoTeveErro = true;
     tocarSomErro();
     vibrar([25,80,25]);
+    if(estado && emocoesRostoModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     setTimeout(()=>{
       document.querySelectorAll('#grelha-emocoesrosto .forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
     }, 400);
@@ -4833,6 +5219,7 @@ function responderEmocoesRosto(i){
   if(emocoesRostoErrouNestaRonda) registoPistaPorMateria['emocoesrosto'].comPista += 1;
   registarUsoPerguntaHoje(emocoesRostoErrouNestaRonda, 'emocoesrosto');
   emocoesRostoRondaAtual++;
+  if(emocoesRostoModoDupla) emocoesRostoVezDaMae = !emocoesRostoVezDaMae;
   emocoesRostoRondasDificeisSeguidas = emocoesRostoErrouNestaRonda ? emocoesRostoRondasDificeisSeguidas + 1 : 0;
   const eraAUltimaRonda = emocoesRostoRondaAtual >= emocoesRostoTotalRondas;
   if(emocoesRostoRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
@@ -4856,7 +5243,9 @@ function concluirJogoEmocoesRosto(){
   const nomeNivel = NIVEIS_EMOCOES_ROSTO[emocoesRostoNivelAtual]?.nome || 'Fácil';
   darEstrela(
     emocoesRostoTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
-    'Completaste o Jogo Como se Sente? — nível ' + nomeNivel,
+    emocoesRostoModoDupla
+      ? 'Completaram juntos o Jogo Como se Sente? — nível ' + nomeNivel
+      : 'Completaste o Jogo Como se Sente? — nível ' + nomeNivel,
     (!emocoesRostoTeveErro && emocoesRostoNivelAtual === 3) ? 2 : 1
   );
 }
@@ -4901,6 +5290,12 @@ let queDiriasNivelConteudo = 1;
 let queDiriasErrouNestaRonda = false, queDiriasTeveErro = false;
 let queDiriasRondasDificeisSeguidas = 0;
 let queDiriasIndiceAlvoAtual = -1;
+// Modo Dupla: alterna a vez a cada RONDA (não por acerto) — mesmo padrão do Quiz. Faz
+// especial sentido aqui: este jogo é sobre teoria da mente/competência social, e a
+// resposta pode gerar conversa real entre o Eduardo e a mãe ("porque achas que ela ficou
+// triste?"), o que é praticamente o próprio objetivo terapêutico do jogo, não um extra.
+let queDiriasModoDupla = false;
+let queDiriasVezDaMae = false;
 
 function gerarHtmlQueDirias(){
   const nivel = obterNivelAtual('quedirias');
@@ -4908,6 +5303,8 @@ function gerarHtmlQueDirias(){
   return `
     <div class="painel">
       <div class="nivel-jogo">Nível ${nomeNivel} — o que dirias nesta situação?</div>
+      <div id="alternador-quedirias"></div>
+      <div id="indicador-vez-quedirias"></div>
       <div class="pedido-caracteristicas" id="pista-quedirias" style="font-size:17px;line-height:1.5;padding:0 8px;"></div>
       <button class="btn-pagina" id="btn-ouvir-quedirias" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-quedirias" style="grid-template-columns:1fr;"></div>
@@ -4924,6 +5321,7 @@ function iniciarJogoQueDirias(){
   queDiriasRondaAtual = 0;
   queDiriasTeveErro = false;
   queDiriasRondasDificeisSeguidas = 0;
+  queDiriasVezDaMae = false;
   proximaRondaQueDirias();
 }
 
@@ -4955,7 +5353,43 @@ function proximaRondaQueDirias(){
     </div>
   `).join('');
 
+  const contAlternador = document.getElementById('alternador-quedirias');
+  if(contAlternador){
+    contAlternador.innerHTML = queDiriasRondaAtual === 0 ? `
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${queDiriasModoDupla ? '' : 'ativo'}" id="btn-quedirias-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${queDiriasModoDupla ? 'ativo' : ''}" id="btn-quedirias-dupla">${iconeDupla()} A Dois</button>
+      </div>
+    ` : '';
+    const btnSozinho = document.getElementById('btn-quedirias-sozinho');
+    const btnDupla = document.getElementById('btn-quedirias-dupla');
+    if(btnSozinho && btnDupla){
+      btnSozinho.addEventListener('click', ()=>{
+        queDiriasModoDupla = false;
+        btnSozinho.classList.add('ativo');
+        btnDupla.classList.remove('ativo');
+        renderIndicadorVezQueDirias();
+      });
+      btnDupla.addEventListener('click', ()=>{
+        queDiriasModoDupla = true;
+        queDiriasVezDaMae = false;
+        btnDupla.classList.add('ativo');
+        btnSozinho.classList.remove('ativo');
+        renderIndicadorVezQueDirias();
+      });
+    }
+  }
+  renderIndicadorVezQueDirias();
+
   configurarBotaoOuvirQueDirias(par);
+}
+
+function renderIndicadorVezQueDirias(){
+  const cont = document.getElementById('indicador-vez-quedirias');
+  if(!cont) return;
+  cont.innerHTML = queDiriasModoDupla
+    ? `<div class="vez-modo-dupla ${queDiriasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${queDiriasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    : '';
 }
 
 function configurarBotaoOuvirQueDirias(par){
@@ -4979,16 +5413,26 @@ function responderQueDirias(i){
   document.querySelectorAll('#grelha-quedirias .forma-caract').forEach(el => el.style.pointerEvents = 'none');
   const el = document.getElementById('opcao-quedirias-'+i);
   const correto = i === queDiriasIndiceAlvoAtual;
+  const quemRespondeu = queDiriasModoDupla ? (queDiriasVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
+  const estado = document.getElementById('estado-quedirias');
   if(correto){
     el.classList.add('certa');
     tocarSomAcerto();
     vibrar([15,40,60]);
+    if(estado && queDiriasModoDupla){
+      estado.textContent = quemRespondeu + ': acertou!';
+      estado.style.color = 'var(--petroleo)';
+    }
   } else {
     el.classList.add('errada');
     queDiriasErrouNestaRonda = true;
     queDiriasTeveErro = true;
     tocarSomErro();
     vibrar([25,80,25]);
+    if(estado && queDiriasModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     setTimeout(()=>{
       document.querySelectorAll('#grelha-quedirias .forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
     }, 400);
@@ -5001,6 +5445,7 @@ function responderQueDirias(i){
   if(queDiriasErrouNestaRonda) registoPistaPorMateria['quedirias'].comPista += 1;
   registarUsoPerguntaHoje(queDiriasErrouNestaRonda, 'quedirias');
   queDiriasRondaAtual++;
+  if(queDiriasModoDupla) queDiriasVezDaMae = !queDiriasVezDaMae;
   queDiriasRondasDificeisSeguidas = queDiriasErrouNestaRonda ? queDiriasRondasDificeisSeguidas + 1 : 0;
   const eraAUltimaRonda = queDiriasRondaAtual >= queDiriasTotalRondas;
   if(queDiriasRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
@@ -5024,7 +5469,9 @@ function concluirJogoQueDirias(){
   const nomeNivel = NIVEIS_O_QUE_DIRIAS[queDiriasNivelAtual]?.nome || 'Fácil';
   darEstrela(
     queDiriasTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
-    'Completaste o Jogo O Que Dirias? — nível ' + nomeNivel,
+    queDiriasModoDupla
+      ? 'Completaram juntos o Jogo O Que Dirias? — nível ' + nomeNivel
+      : 'Completaste o Jogo O Que Dirias? — nível ' + nomeNivel,
     (!queDiriasTeveErro && queDiriasNivelAtual === 3) ? 2 : 1
   );
 }
@@ -5083,6 +5530,60 @@ const CORES_PECA_JUNTAR_LIMPAR = {
 const NOMES_COR_JUNTAR_LIMPAR = {
   '🔴':'as vermelhas', '🔵':'as azuis', '🟢':'as verdes', '🟡':'as amarelas', '🟣':'as roxas',
 };
+
+// O que se mostra em CADA PEÇA da grelha, por cor lógica — separado da cor em si (que
+// continua a ser '🔴','🔵', etc. em tiposDePeca, juntarLimparGrelha, e em toda a lógica
+// de agrupar/comparar/cor-alvo). Só esta tradução visual muda; a instrução no topo
+// ("Limpa as vermelhas 🔴") e as bolinhas do frasco continuam a usar a bola de cor lisa
+// (ver NOMES_COR_JUNTAR_LIMPAR e CORES_PECA_JUNTAR_LIMPAR acima), para a instrução
+// continuar clara e não obrigar a decorar "a fruta X é a cor Y" para perceber o objetivo.
+// Trocar de tema (frutas, animais, etc.) é só mudar este mapa — nada mais no jogo depende
+// da aparência da peça.
+const TEMAS_VISUAIS_JUNTAR_LIMPAR = {
+  bolas:   { '🔴':'🔴', '🔵':'🔵', '🟢':'🟢', '🟡':'🟡', '🟣':'🟣' },
+  frutas:  { '🔴':'🍎', '🔵':'🫐', '🟢':'🍏', '🟡':'🍋', '🟣':'🍇' },
+  animais: { '🔴':'🦀', '🔵':'🐳', '🟢':'🐸', '🟡':'🐥', '🟣':'🦄' },
+};
+// Tema atualmente em uso — trocável nas Definições (ver seletor de tema mais abaixo).
+let juntarLimparTemaVisual = 'frutas';
+// A chave de armazenamento usa chaveCrianca(), que só fica disponível mais abaixo no
+// ficheiro (onde CRIANCA_ID_HERDADA é declarada) — por isso NÃO se calcula aqui em cima
+// como as outras "CHAVE_*" deste ficheiro costumam fazer. Chamar chaveCrianca() já na
+// carga do script, antes de CRIANCA_ID_HERDADA existir, rebenta com "Cannot access
+// 'CRIANCA_ID_HERDADA' before initialization" e trava a inicialização da app inteira —
+// foi exatamente isto que aconteceu quando esta linha ainda dizia
+// "const CHAVE_TEMA_VISUAL_JUNTAR_LIMPAR = chaveCrianca(...)" aqui em cima. Em vez
+// disso, calcula-se a chave só quando é mesmo preciso (dentro das duas funções abaixo),
+// altura em que chaveCrianca() já está definida havia muito.
+function chaveTemaVisualJuntarLimpar(){
+  return chaveCrianca('mundoDoEduardo_temaVisualJuntarLimpar_v1');
+}
+
+function carregarTemaVisualJuntarLimpar(){
+  try{
+    const guardado = localStorage.getItem(chaveTemaVisualJuntarLimpar());
+    if(guardado && TEMAS_VISUAIS_JUNTAR_LIMPAR[guardado]) juntarLimparTemaVisual = guardado;
+  }catch(e){ /* mantém o valor por omissão (frutas) */ }
+  const select = document.getElementById('select-tema-juntar-limpar');
+  if(select) select.value = juntarLimparTemaVisual;
+}
+
+function guardarTemaVisualJuntarLimpar(tema){
+  if(!TEMAS_VISUAIS_JUNTAR_LIMPAR[tema]) return;
+  juntarLimparTemaVisual = tema;
+  try{ localStorage.setItem(chaveTemaVisualJuntarLimpar(), tema); }
+  catch(e){ /* não é crítico: só afeta a próxima vez que o jogo abrir */ }
+  // Se o jogo já estiver aberto neste preciso momento, redesenha a grelha já com o
+  // novo tema — sem isto, a troca só se notaria na próxima vez que o jogo abrisse.
+  if(document.getElementById('grelha-juntar-limpar') && juntarLimparGrelha.length > 0){
+    renderGrelhaJuntarLimpar(false);
+  }
+}
+
+function emojiVisualPeca(corLogica){
+  const tema = TEMAS_VISUAIS_JUNTAR_LIMPAR[juntarLimparTemaVisual] || TEMAS_VISUAIS_JUNTAR_LIMPAR.bolas;
+  return tema[corLogica] || corLogica;
+}
 
 let juntarLimparNivelAtual = 1;
 let juntarLimparNivelConteudo = 1;
@@ -5144,7 +5645,7 @@ function iniciarJogoJuntarLimpar(){
   juntarLimparAlvo = config.alvoLimpar || 12;
   juntarLimparCorAlvo = config.tiposDePeca[Math.floor(Math.random() * config.tiposDePeca.length)];
   const nivelEl = document.getElementById('nivel-jogo-juntar-limpar');
-  if(nivelEl) nivelEl.textContent = `Nível ${config.nome} — limpa ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'a cor pedida'} ${juntarLimparCorAlvo}`;
+  if(nivelEl) nivelEl.textContent = `Nível ${config.nome} — limpa ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'a cor pedida'} ${juntarLimparCorAlvo} — grupos de ${juntarLimparMinimoGrupo} ou mais`;
   atualizarProgressoJuntarLimpar();
 
   // Gera a grelha aleatoriamente e depois GARANTE que existe pelo menos um grupo
@@ -5389,7 +5890,8 @@ function renderGrelhaJuntarLimpar(comAnimacaoQueda){
         html += `<div class="peca-juntar-limpar vazia" data-linha="${l}" data-coluna="${c}" aria-hidden="true"></div>`;
       } else {
         const classeQueda = (comAnimacaoQueda && !movimentoReduzidoAtivo()) ? ' a-cair' : '';
-        html += `<button class="peca-juntar-limpar${classeQueda}" data-linha="${l}" data-coluna="${c}" aria-label="Peça ${peca}, linha ${l+1}, coluna ${c+1}">${peca}</button>`;
+        const emojiMostrado = emojiVisualPeca(peca);
+        html += `<button class="peca-juntar-limpar${classeQueda}" data-linha="${l}" data-coluna="${c}" aria-label="Peça ${NOMES_COR_JUNTAR_LIMPAR[peca] || peca}, linha ${l+1}, coluna ${c+1}">${emojiMostrado}</button>`;
       }
     }
   }
@@ -5596,8 +6098,13 @@ function aplicarQuedaJuntarLimpar(){
   // sofrem exatamente do mesmo risco de ficar sem nenhum grupo jogável (visto em jogo
   // real: ficou só 1 grupo de 4+ em toda a grelha, mal esse fosse jogado o tabuleiro
   // ficaria travado). A mesma garantia aplicada no início tem de se repetir aqui, depois
-  // de cada queda, não só uma vez no arranque do nível.
+  // de cada queda, não só uma vez no arranque do nível — incluindo a garantia específica
+  // da cor-alvo (ver iniciarJogoJuntarLimpar): sem repetir também essa aqui, uma jogada
+  // podia "gastar" o único grupo válido da cor pedida e não sobrar nenhum outro depois
+  // da queda, deixando o Eduardo sem nenhuma jogada possível dessa cor e sem dica —
+  // exatamente o que se confirmou em jogo real depois de algumas jogadas seguidas.
   garantirGrupoJogavelJuntarLimpar(config.tiposDePeca);
+  garantirGrupoJogavelJuntarLimpar([juntarLimparCorAlvo]);
 }
 
 function concluirJogoJuntarLimpar(){
@@ -7366,7 +7873,11 @@ function carregarEstado(){
     if(typeof estado.modoEscuroAtivo === 'boolean') modoEscuroAtivo = estado.modoEscuroAtivo;
     if(typeof estado.altoContrasteAtivo === 'boolean') altoContrasteAtivo = estado.altoContrasteAtivo;
     if(typeof estado.mostrarTempoEsperar === 'boolean') mostrarTempoEsperar = estado.mostrarTempoEsperar;
-    // Compatibilidade com o antigo interruptor on/off (versões anteriores da app)
+    // Compatibilidade com o antigo interruptor on/off (versões anteriores da app, antes
+    // do slider de volume existir) — nunca é escrita por guardarEstado() nesta versão,
+    // só lida aqui para um backup/estado antigo importado continuar a funcionar. A leitura
+    // de volumeSomApp (chave atual) vem sempre a seguir, para poder sobrepor-se a este
+    // valor caso o estado já tenha as duas chaves por algum motivo.
     if(typeof estado.somAppLigado === 'boolean') volumeSomApp = estado.somAppLigado ? 1 : 0;
     if(typeof estado.volumeSomApp === 'number') volumeSomApp = Math.min(1, Math.max(0, estado.volumeSomApp));
     if(estado.registoCalmaPorBloco && typeof estado.registoCalmaPorBloco === 'object'){
@@ -7909,6 +8420,7 @@ function irPara(ecra){
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-'+ecra).classList.add('ativo');
   if(ecra === 'loja-recompensas') renderLojaRecompensas();
+  if(ecra === 'inicio') renderMensagemObjetivoEduardo();
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
   const btn = document.querySelector('.nav-btn[data-nav="'+ecra+'"]');
   if(btn) btn.classList.add('ativo');
@@ -9028,7 +9540,7 @@ function mostrarSugestaoVideoCaa(textoFrase){
 function renderFraseCaa(){
   const cont = document.getElementById('frase-caa');
   if(fraseCaaAtual.length === 0){
-    cont.innerHTML = '<span class="frase-caa-vazia" id="frase-caa-vazia">Toca numa imagem para começar…</span>';
+    cont.innerHTML = '<span class="frase-caa-vazia">Toca numa imagem para começar…</span>';
     return;
   }
   cont.innerHTML = fraseCaaAtual.map(p => `
@@ -9269,7 +9781,10 @@ const PARES_AFINIDADE_QUIZ = {
 // um relacionado), em vez de o levar logo para a 1ª pergunta. Reforça motivação
 // intrínseca ao dar controlo sobre o "o quê", não só sobre o "como responder".
 function abrirEscolhaQuiz(it, origem){
-  const todosOsItens = [...escolaItens, ...jogosItens];
+  // Usa só as disciplinas atualmente visíveis (filtradas por ano/preferência dos pais),
+  // para nunca sugerir como "2ª opção" uma disciplina que os pais desativaram ou que
+  // ainda não é curricularmente adequada ao ano da criança (ver escolaItensParaExibir).
+  const todosOsItens = [...escolaItensParaExibir().map(p => p.it), ...jogosItens];
   const chaveParceira = PARES_AFINIDADE_QUIZ[it.dados];
   const itemParceiro = chaveParceira ? todosOsItens.find(x => x.tipo === 'quiz' && x.dados === chaveParceira) : null;
 
@@ -9659,8 +10174,8 @@ const CORES_PINTURA = ['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7','#2E3D3
 function gerarPintura(){
   return `<p class="desc">Escolhe uma cor e desenha livremente com o dedo.</p>
     <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;" id="paleta-pintura">
-      ${CORES_PINTURA.map((c,i)=>`<div class="cor-pintura${i===0?' cor-ativa':''}" data-cor="${c}" style="width:38px;height:38px;border-radius:50%;background:${c};box-shadow:var(--sombra);cursor:pointer;" role="button" tabindex="0" aria-label="Cor"></div>`).join('')}
-      <div class="cor-pintura cor-borracha" data-cor="borracha" style="width:38px;height:38px;border-radius:50%;background:var(--areia-clara);box-shadow:var(--sombra);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;" role="button" tabindex="0" aria-label="Borracha">🧽</div>
+      ${CORES_PINTURA.map((c,i)=>`<div class="cor-pintura${i===0?' cor-ativa':''}" data-cor="${c}" style="width:44px;height:44px;border-radius:50%;background:${c};box-shadow:var(--sombra);cursor:pointer;" role="button" tabindex="0" aria-label="Cor"></div>`).join('')}
+      <div class="cor-pintura cor-borracha" data-cor="borracha" style="width:44px;height:44px;border-radius:50%;background:var(--areia-clara);box-shadow:var(--sombra);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;" role="button" tabindex="0" aria-label="Borracha">🧽</div>
     </div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px;">
       <span style="font-size:12px;color:var(--texto-suave);align-self:center;">Espessura:</span>
@@ -10118,7 +10633,7 @@ function renderQuiz(){
     if(existeProximoNivel && obterNivelAtual(quizChave) <= nivelDaSessao){
       nivelDesbloqueado[quizChave] = proximoNivel;
       // Atualiza a etiqueta de nível na lista de origem (Escola ou Jogos), para refletir o progresso
-      renderLista('lista-escola', escolaItens, abrirEscola);
+      renderListaEscola();
       renderListaJogosPorCategoria();
     }
     // Só verifica o avanço de ano escolar quando não há mais nível de dificuldade para
@@ -10165,7 +10680,7 @@ function renderQuiz(){
   const alternadorInicial = quizIndex === 0 ? `
     <div class="alternador-modo-dupla">
       <button class="btn-modo-dupla ${quizModoDupla ? '' : 'ativo'}" id="btn-quiz-sozinho">${iconeCrianca()} Sozinho</button>
-      <button class="btn-modo-dupla ${quizModoDupla ? 'ativo' : ''}" id="btn-quiz-dupla">${iconeDupla()} Jogar com a mãe</button>
+      <button class="btn-modo-dupla ${quizModoDupla ? 'ativo' : ''}" id="btn-quiz-dupla">${iconeDupla()} A Dois</button>
     </div>
   ` : '';
   const indicadorVez = quizModoDupla
@@ -10223,13 +10738,16 @@ const OFERECER_CAA_APOS_N_DIFICEIS = 2;
 // várias perguntas seguidas difíceis — não é um erro isolado, é um padrão dentro da
 // mesma sessão que pode ser sinal de frustração a acumular-se. "Continuar o jogo" está
 // sempre disponível e não obriga a nada; é só mais uma via aberta, nunca uma exigência.
-// Versão genérica de oferecerCaaAposDificuldade — para jogos que não precisem de lógica
-// própria de "sair"/"continuar" (como o quiz, que atualiza quizIndex, ou a memória, que
-// tem regras de dupla). Guarda e repõe o HTML tal como está no momento da chamada — por
-// isso deve ser chamada DEPOIS de o jogo já ter avançado para o próximo estado (ronda
-// seguinte gerada, ecrã de fim mostrado, etc.), nunca antes, para "Continuar o jogo"
-// devolver o Eduardo a algo por jogar, não ao que acabou de terminar.
-function oferecerCaaAposDificuldadeGenerico(){
+// Versão única e reaproveitável para todos os jogos — antes existia uma cópia à parte
+// só para o quiz (oferecerCaaAposDificuldade), unificada aqui através dos parâmetros
+// aoAbrirCaa/aoContinuar. Por omissão guarda e repõe o HTML tal como está no momento da
+// chamada (correto para jogos como Sequências e Puzzle de Encaixe, que já avançaram
+// para o próximo estado antes de chamar esta função). Quando o jogo precisa de um
+// comportamento diferente ao continuar — como o quiz, que deve AVANÇAR para a pergunta
+// seguinte em vez de restaurar a pergunta atual já respondida — passa aoContinuar.
+// aoAbrirCaa (opcional): função extra a correr antes de abrir o quadro CAA — usada pelo
+// quiz para desligar quizEmCurso, evitando o aviso de "ainda não terminaste" ao voltar.
+function oferecerCaaAposDificuldadeGenerico(aoAbrirCaa, aoContinuar){
   const cont = document.getElementById('conteudo-detalhe');
   const htmlJogoEmCurso = cont.innerHTML;
   cont.innerHTML = `
@@ -10241,32 +10759,12 @@ function oferecerCaaAposDificuldadeGenerico(){
       <button class="btn-secundario" id="btn-continuar-apos-dificuldade" style="margin-top:10px;">Continuar o jogo</button>
     </div>
   `;
-  document.getElementById('btn-caa-apos-dificuldade').addEventListener('click', abrirCaa);
-  document.getElementById('btn-continuar-apos-dificuldade').addEventListener('click', ()=>{
-    cont.innerHTML = htmlJogoEmCurso;
-  });
-}
-
-function oferecerCaaAposDificuldade(){
-  quizPerguntasDificeisSeguidas = 0; // não pergunta de novo já na pergunta seguinte
-  const cont = document.getElementById('conteudo-detalhe');
-  cont.innerHTML = `
-    <div class="painel">
-      <div class="icone-grande" style="background:var(--salva-clara)">💬</div>
-      <h2>Tudo bem se isto está difícil</h2>
-      <p class="desc">Se quiseres dizer como te sentes ou pedir alguma coisa, o quadro está ali.</p>
-      <button class="btn-primario" id="btn-caa-apos-dificuldade">💬 Abrir o quadro</button>
-      <button class="btn-secundario" id="btn-continuar-apos-dificuldade" style="margin-top:10px;">Continuar o jogo</button>
-    </div>
-  `;
   document.getElementById('btn-caa-apos-dificuldade').addEventListener('click', ()=>{
-    quizEmCurso = false; // sair para o CAA conta como sair do quiz, evita o aviso de "ainda não terminaste" ao voltar
+    if(aoAbrirCaa) aoAbrirCaa();
     abrirCaa();
   });
   document.getElementById('btn-continuar-apos-dificuldade').addEventListener('click', ()=>{
-    quizIndex++;
-    if(quizModoDupla) quizVezDaMae = !quizVezDaMae;
-    renderQuiz();
+    if(aoContinuar){ aoContinuar(); } else { cont.innerHTML = htmlJogoEmCurso; }
   });
 }
 
@@ -10372,7 +10870,17 @@ function responderQuiz(i){
     registarUsoPergunta(quizChave, quizTentativasNaPergunta > 0);
   }
   if(quizPerguntasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS){
-    setTimeout(oferecerCaaAposDificuldade, 1400);
+    quizPerguntasDificeisSeguidas = 0; // não pergunta de novo já na pergunta seguinte
+    setTimeout(()=>{
+      oferecerCaaAposDificuldadeGenerico(
+        ()=>{ quizEmCurso = false; }, // sair para o CAA conta como sair do quiz, evita o aviso de "ainda não terminaste" ao voltar
+        ()=>{ // "Continuar o jogo": avança para a pergunta seguinte, não restaura a atual (já respondida)
+          quizIndex++;
+          if(quizModoDupla) quizVezDaMae = !quizVezDaMae;
+          renderQuiz();
+        }
+      );
+    }, 1400);
   } else {
     setTimeout(()=>{
       quizIndex++;
@@ -10404,7 +10912,7 @@ function gerarHtmlMemoria(){
     <div class="painel">
       <div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${memModoDupla ? '' : 'ativo'}" id="btn-memoria-sozinho">${iconeCrianca()} Sozinho</button>
-        <button class="btn-modo-dupla ${memModoDupla ? 'ativo' : ''}" id="btn-memoria-dupla">${iconeDupla()} Jogar com a mãe</button>
+        <button class="btn-modo-dupla ${memModoDupla ? 'ativo' : ''}" id="btn-memoria-dupla">${iconeDupla()} A Dois</button>
       </div>
       <div class="estado-jogo" id="estado-memoria">Nível ${nomeNivel} — encontra todos os pares</div>
       <div class="vez-modo-dupla" id="vez-modo-dupla" style="display:none;"></div>
@@ -10645,6 +11153,9 @@ let caractNivelConteudo = 1;
 let caractRondasDificeisSeguidas = 0;
 let caractAlvoAtual = null;
 let caractTextoPedidoAtual = '';
+// Modo Dupla: alterna a vez a cada RONDA — mesmo padrão já usado nos outros jogos.
+let caractModoDupla = false;
+let caractVezDaMae = false;
 
 function gerarHtmlCaracteristicas(){
   const nivel = obterNivelAtual('caracteristicas');
@@ -10652,6 +11163,8 @@ function gerarHtmlCaracteristicas(){
   return `
     <div class="painel">
       <div class="nivel-jogo">Nível ${nomeNivel} — toca na forma certa</div>
+      <div id="alternador-caracteristicas"></div>
+      <div id="indicador-vez-caracteristicas"></div>
       <div class="pedido-caracteristicas" id="pedido-caracteristicas">A preparar...</div>
       <button class="btn-pagina" id="btn-ouvir-caracteristicas" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-caracteristicas"></div>
@@ -10683,6 +11196,7 @@ function iniciarJogoCaracteristicas(){
   caractRondaAtual = 0;
   caractTeveErro = false;
   caractRondasDificeisSeguidas = 0;
+  caractVezDaMae = false;
   proximaRondaCaracteristicas();
 }
 
@@ -10753,6 +11267,42 @@ function proximaRondaCaracteristicas(){
     </div>
   `;
   }).join('');
+
+  const contAlternador = document.getElementById('alternador-caracteristicas');
+  if(contAlternador){
+    contAlternador.innerHTML = caractRondaAtual === 0 ? `
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${caractModoDupla ? '' : 'ativo'}" id="btn-caracteristicas-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${caractModoDupla ? 'ativo' : ''}" id="btn-caracteristicas-dupla">${iconeDupla()} A Dois</button>
+      </div>
+    ` : '';
+    const btnSozinho = document.getElementById('btn-caracteristicas-sozinho');
+    const btnDupla = document.getElementById('btn-caracteristicas-dupla');
+    if(btnSozinho && btnDupla){
+      btnSozinho.addEventListener('click', ()=>{
+        caractModoDupla = false;
+        btnSozinho.classList.add('ativo');
+        btnDupla.classList.remove('ativo');
+        renderIndicadorVezCaracteristicas();
+      });
+      btnDupla.addEventListener('click', ()=>{
+        caractModoDupla = true;
+        caractVezDaMae = false;
+        btnDupla.classList.add('ativo');
+        btnSozinho.classList.remove('ativo');
+        renderIndicadorVezCaracteristicas();
+      });
+    }
+  }
+  renderIndicadorVezCaracteristicas();
+}
+
+function renderIndicadorVezCaracteristicas(){
+  const cont = document.getElementById('indicador-vez-caracteristicas');
+  if(!cont) return;
+  cont.innerHTML = caractModoDupla
+    ? `<div class="vez-modo-dupla ${caractVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${caractVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    : '';
 }
 
 // Liga (ou volta a ligar, a cada nova ronda) o botão que lê o pedido em voz alta —
@@ -10783,6 +11333,7 @@ function responderCaracteristicas(i, correto){
   document.querySelectorAll('.forma-caract').forEach(el => el.style.pointerEvents = 'none');
   const el = document.getElementById('forma-caract-'+i);
   const estado = document.getElementById('estado-caracteristicas');
+  const quemRespondeu = caractModoDupla ? (caractVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
   if(correto){
     el.classList.add('certa');
     tocarSomAcerto();
@@ -10791,7 +11342,7 @@ function responderCaracteristicas(i, correto){
     // para a ronda seguinte depois de a fala terminar, para não a cortar a meio.
     const elogio = elogioRespostaCertaAoAcaso();
     if(estado){
-      estado.textContent = elogio.texto;
+      estado.textContent = caractModoDupla ? quemRespondeu + ': ' + elogio.texto : elogio.texto;
       estado.style.color = 'var(--petroleo)';
     }
     avancarRondaCaracteristicasAposElogio(elogio.fala);
@@ -10806,6 +11357,10 @@ function responderCaracteristicas(i, correto){
     // que continua visível para ele tentar de novo) — não revela a resposta certa,
     // mantém o prompt fading: dá 2ª hipótese eliminando só a opção errada.
     narrar('Tenta outra vez.');
+    if(estado && caractModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     setTimeout(()=>{
       document.querySelectorAll('.forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
     }, 400);
@@ -10819,6 +11374,7 @@ function responderCaracteristicas(i, correto){
 function avancarRondaCaracteristicasAposElogio(textoFalado){
   narrar(textoFalado, ()=>{
     caractRondaAtual++;
+    if(caractModoDupla) caractVezDaMae = !caractVezDaMae;
     // Atualiza o contador de dificuldade seguida no momento em que a ronda termina (acerto):
     // se esta ronda teve algum erro pelo meio, conta como "difícil"; se foi limpa, reinicia.
     caractRondasDificeisSeguidas = caractErrouNestaRonda ? caractRondasDificeisSeguidas + 1 : 0;
@@ -10877,7 +11433,9 @@ function concluirJogoCaracteristicas(){
   const nomeNivel = NIVEIS_CARACTERISTICAS[caractNivelAtual]?.nome || 'Fácil';
   darEstrela(
     caractTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
-    'Completaste o Jogo de Atenção — nível ' + nomeNivel,
+    caractModoDupla
+      ? 'Completaram juntos o Jogo de Atenção — nível ' + nomeNivel
+      : 'Completaste o Jogo de Atenção — nível ' + nomeNivel,
     (!caractTeveErro && caractNivelAtual === 3) ? 2 : 1
   );
 }
@@ -10901,6 +11459,9 @@ let diferenteNivelConteudo = 1;
 let diferenteErrouNestaRonda = false, diferenteTeveErro = false;
 let diferenteRondasDificeisSeguidas = 0;
 let diferenteIndiceAlvoAtual = -1;
+// Modo Dupla: alterna a vez a cada RONDA — mesmo padrão já usado nos outros jogos.
+let diferenteModoDupla = false;
+let diferenteVezDaMae = false;
 
 function gerarHtmlDiferente(){
   const nivel = obterNivelAtual('diferente');
@@ -10908,6 +11469,8 @@ function gerarHtmlDiferente(){
   return `
     <div class="painel">
       <div class="nivel-jogo">Nível ${nomeNivel} — toca na forma que é diferente das outras</div>
+      <div id="alternador-diferente"></div>
+      <div id="indicador-vez-diferente"></div>
       <button class="btn-pagina" id="btn-ouvir-diferente" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-diferente"></div>
       <div class="estado-jogo" id="estado-diferente"></div>
@@ -10923,6 +11486,7 @@ function iniciarJogoDiferente(){
   diferenteRondaAtual = 0;
   diferenteTeveErro = false;
   diferenteRondasDificeisSeguidas = 0;
+  diferenteVezDaMae = false;
   proximaRondaDiferente();
 }
 
@@ -10988,7 +11552,43 @@ function proximaRondaDiferente(){
   `;
   }).join('');
 
+  const contAlternador = document.getElementById('alternador-diferente');
+  if(contAlternador){
+    contAlternador.innerHTML = diferenteRondaAtual === 0 ? `
+      <div class="alternador-modo-dupla">
+        <button class="btn-modo-dupla ${diferenteModoDupla ? '' : 'ativo'}" id="btn-diferente-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${diferenteModoDupla ? 'ativo' : ''}" id="btn-diferente-dupla">${iconeDupla()} A Dois</button>
+      </div>
+    ` : '';
+    const btnSozinho = document.getElementById('btn-diferente-sozinho');
+    const btnDupla = document.getElementById('btn-diferente-dupla');
+    if(btnSozinho && btnDupla){
+      btnSozinho.addEventListener('click', ()=>{
+        diferenteModoDupla = false;
+        btnSozinho.classList.add('ativo');
+        btnDupla.classList.remove('ativo');
+        renderIndicadorVezDiferente();
+      });
+      btnDupla.addEventListener('click', ()=>{
+        diferenteModoDupla = true;
+        diferenteVezDaMae = false;
+        btnDupla.classList.add('ativo');
+        btnSozinho.classList.remove('ativo');
+        renderIndicadorVezDiferente();
+      });
+    }
+  }
+  renderIndicadorVezDiferente();
+
   configurarBotaoOuvirDiferente();
+}
+
+function renderIndicadorVezDiferente(){
+  const cont = document.getElementById('indicador-vez-diferente');
+  if(!cont) return;
+  cont.innerHTML = diferenteModoDupla
+    ? `<div class="vez-modo-dupla ${diferenteVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${diferenteVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    : '';
 }
 
 function configurarBotaoOuvirDiferente(){
@@ -11013,13 +11613,14 @@ function responderDiferente(i){
   const el = document.getElementById('forma-dif-'+i);
   const estado = document.getElementById('estado-diferente');
   const correto = i === diferenteIndiceAlvoAtual;
+  const quemRespondeu = diferenteModoDupla ? (diferenteVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
   if(correto){
     el.classList.add('certa');
     tocarSomAcerto();
     vibrar([15,40,60]);
     const elogio = elogioRespostaCertaAoAcaso();
     if(estado){
-      estado.textContent = elogio.texto;
+      estado.textContent = diferenteModoDupla ? quemRespondeu + ': ' + elogio.texto : elogio.texto;
       estado.style.color = 'var(--petroleo)';
     }
     avancarRondaDiferenteAposElogio(elogio.fala);
@@ -11031,6 +11632,10 @@ function responderDiferente(i){
     vibrar([25,80,25]);
     // Prompt fading: não revela qual é a certa, só elimina esta opção — dá 2ª hipótese
     narrar('Tenta outra vez.');
+    if(estado && diferenteModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     setTimeout(()=>{
       document.querySelectorAll('#grelha-diferente .forma-caract').forEach(e => { if(e !== el) e.style.pointerEvents = ''; });
     }, 400);
@@ -11040,6 +11645,7 @@ function responderDiferente(i){
 function avancarRondaDiferenteAposElogio(textoFalado){
   narrar(textoFalado, ()=>{
     diferenteRondaAtual++;
+    if(diferenteModoDupla) diferenteVezDaMae = !diferenteVezDaMae;
     diferenteRondasDificeisSeguidas = diferenteErrouNestaRonda ? diferenteRondasDificeisSeguidas + 1 : 0;
     const eraAUltimaRonda = diferenteRondaAtual >= diferenteTotalRondas;
     if(diferenteRondasDificeisSeguidas >= OFERECER_CAA_APOS_N_DIFICEIS && !eraAUltimaRonda){
@@ -11065,7 +11671,9 @@ function concluirJogoDiferente(){
   const nomeNivel = NIVEIS_DIFERENTE[diferenteNivelAtual]?.nome || 'Fácil';
   darEstrela(
     diferenteTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
-    'Completaste o Jogo O Diferente — nível ' + nomeNivel,
+    diferenteModoDupla
+      ? 'Completaram juntos o Jogo O Diferente — nível ' + nomeNivel
+      : 'Completaste o Jogo O Diferente — nível ' + nomeNivel,
     (!diferenteTeveErro && diferenteNivelAtual === 3) ? 2 : 1
   );
 }
@@ -12670,6 +13278,8 @@ function abrirModalPerfil(){
 function fecharModalPerfil(){
   document.getElementById('overlay-perfil').classList.remove('mostrar');
   renderResumoPerfilCrianca();
+  renderListaDisciplinasConfig();
+  renderListaEscola(); // o ano pode ter mudado — atualiza também o menu Escola já aberto
   renderSeletorCriancas();
 }
 
@@ -13041,6 +13651,42 @@ function renderResumoPerfilCrianca(){
   }
 }
 
+// Mostra a lista completa de disciplinas (não só as visíveis) com um interruptor por
+// disciplina, para os pais poderem ajustar manualmente a sugestão automática do ano
+// escolar (ver escolaItensParaExibir e CURRICULO_DISCIPLINAS). O estado inicial de cada
+// interruptor reflete: a escolha manual já guardada, ou — na ausência dela — se o ano
+// atual do perfil já atinge o anoMin curricular dessa disciplina.
+function renderListaDisciplinasConfig(){
+  const cont = document.getElementById('lista-disciplinas-config');
+  if(!cont) return;
+  const dados = obterDadosQuestionarioEduardo();
+  const anoNum = dados && dados.anoEscolar ? parseInt(String(dados.anoEscolar).match(/\d+/)?.[0], 10) : null;
+  cont.innerHTML = escolaItens.map(it => {
+    const chave = it.dados;
+    const curriculo = CURRICULO_DISCIPLINAS[chave];
+    const sugestaoAno = curriculo ? (anoNum === null || anoNum >= curriculo.anoMin) : true;
+    const ativa = disciplinasAtivasManual[chave] !== undefined ? disciplinasAtivasManual[chave] : sugestaoAno;
+    const tituloAtual = curriculo ? tituloDisciplinaParaAno(chave, anoNum) : it.t;
+    const notaCurricular = curriculo && curriculo.anoMin > 1 ? `A partir do ${curriculo.anoMin}º ano` : '';
+    return `
+      <label class="linha-definicao" style="cursor:pointer;">
+        <div class="txt-def">
+          <div class="t">${it.icone} ${escaparHtml(tituloAtual)}</div>
+          ${notaCurricular ? `<div class="d">${notaCurricular}</div>` : ''}
+        </div>
+        <input type="checkbox" data-disciplina-toggle="${chave}" class="checkbox-reset" ${ativa ? 'checked' : ''}>
+      </label>
+    `;
+  }).join('');
+  cont.querySelectorAll('[data-disciplina-toggle]').forEach(input => {
+    input.addEventListener('change', () => {
+      disciplinasAtivasManual[input.dataset.disciplinaToggle] = input.checked;
+      guardarDisciplinasAtivasManual();
+      renderListaEscola(); // reflete de imediato no menu Escola
+    });
+  });
+}
+
 function mostrarAjudaEsqueciPin(){
   document.getElementById('overlay-ajuda-pin').classList.add('mostrar');
 }
@@ -13129,6 +13775,7 @@ function abrirConfigSemPin(){
   aplicarAbaConfigAtiva();
   renderSeletorCriancas();
   renderResumoPerfilCrianca();
+  renderListaDisciplinasConfig();
   const interruptor = document.getElementById('interruptor-efeitos-calmos');
   if(interruptor) interruptor.classList.toggle('ligado', efeitosCalmosAtivo);
   const interruptorModoEscuro = document.getElementById('interruptor-modo-escuro');
@@ -13225,6 +13872,8 @@ const dicasParaPais = [
 ];
 
 function renderEvolucaoParental(){
+  renderSeletorObjetivoAtivo();
+  renderCartaoObjetivoAtivo();
   renderResumoParental();
   renderToggleGraficoTarefas();
   renderGraficoTarefasSemana();
@@ -13538,6 +14187,158 @@ const ROTULO_COMPORTAMENTO_ALVO = {
   pediu_calma: { icone: '🌿', nome: 'Usou o Modo Calma' },
   emocao_registada: { icone: '🙂', nome: 'Registou uma emoção' },
 };
+
+/* ======================= OBJETIVO ATIVO =======================
+   A app já mede e mostra muitos dados (comportamentos-alvo, uso de pista, rotina), mas
+   até aqui de forma só retrospetiva — nenhum sinaliza "é NISTO que estamos a trabalhar
+   agora". Em ABA, um plano de intervenção trabalha sempre um objetivo concreto de cada
+   vez, revisto periodicamente — não é só recolha de dados passiva. Este sistema deixa o
+   cuidador escolher UM foco ativo (nunca vários ao mesmo tempo — mais claro e mais fiel
+   à prática real), e calcula o progresso desse foco específico a partir de dados que a
+   app já regista (nenhum dado novo por captar, só uma forma de os destacar).
+   Cada objetivo compara a semana atual com a anterior, porque uma tendência ao longo do
+   tempo é o que interessa em ABA — um número absoluto isolado não diz se está a melhorar. */
+const OBJETIVOS_DISPONIVEIS = {
+  caa: {
+    icone: '💬', nome: 'Comunicar mais pelo quadro CAA',
+    descricao: 'Usar o quadro CAA para pedir, comentar ou responder, por iniciativa própria.',
+    calcularProgresso: () => calcularProgressoComportamento('caa_espontaneo'),
+  },
+  pedir_ajuda: {
+    icone: '🌿', nome: 'Pedir ajuda em vez de desistir',
+    descricao: 'Usar o Modo Calma para se regular, em vez de ficar frustrado sozinho.',
+    calcularProgresso: () => calcularProgressoComportamento('pediu_calma'),
+  },
+  menos_pistas: {
+    icone: '🎯', nome: 'Precisar de menos pistas',
+    descricao: 'Responder às perguntas dos jogos e fichas sem precisar da 2ª hipótese.',
+    calcularProgresso: () => calcularProgressoMenosPistas(),
+  },
+  rotina_completa: {
+    icone: '📋', nome: 'Completar a rotina do dia',
+    descricao: 'Terminar todos os blocos da rotina diária até ao fim do dia.',
+    calcularProgresso: () => calcularProgressoRotina(),
+  },
+};
+
+const CHAVE_OBJETIVO_ATIVO = chaveCrianca('mundoDoEduardo_objetivoAtivo_v1');
+let objetivoAtivoChave = null; // null = nenhum objetivo escolhido ainda
+
+function carregarObjetivoAtivo(){
+  try{
+    const guardado = localStorage.getItem(CHAVE_OBJETIVO_ATIVO);
+    if(guardado && OBJETIVOS_DISPONIVEIS[guardado]) objetivoAtivoChave = guardado;
+  }catch(e){ /* mantém null */ }
+}
+
+function definirObjetivoAtivo(chave){
+  if(chave && !OBJETIVOS_DISPONIVEIS[chave]) return;
+  objetivoAtivoChave = chave || null;
+  try{
+    if(objetivoAtivoChave) localStorage.setItem(CHAVE_OBJETIVO_ATIVO, objetivoAtivoChave);
+    else localStorage.removeItem(CHAVE_OBJETIVO_ATIVO);
+  }catch(e){ /* não é crítico: só afeta a próxima sessão */ }
+  renderSeletorObjetivoAtivo();
+  renderCartaoObjetivoAtivo();
+}
+
+// Soma um comportamento-alvo (ver registarComportamentoHoje) nos últimos 7 dias vs. nos
+// 7 dias anteriores a esses — a mesma janela usada no resto do relatório parental.
+function calcularProgressoComportamento(tipo){
+  const dias14 = obterUltimosDias(14);
+  const semanaAtual = dias14.slice(7);
+  const semanaAnterior = dias14.slice(0, 7);
+  const somar = dias => dias.reduce((soma,d)=> soma + ((d.comportamentos && d.comportamentos[tipo]) || 0), 0);
+  return { atual: somar(semanaAtual), anterior: somar(semanaAnterior), unidade: 'vezes', direcaoBoa: 'subir' };
+}
+
+// "Menos pistas" é o único objetivo em que MENOS é melhor — por isso guarda a
+// percentagem de perguntas COM pista (quanto mais baixa, melhor), ao contrário dos
+// outros 3, onde mais ocorrências é o sinal positivo.
+function calcularProgressoMenosPistas(){
+  const dias14 = obterUltimosDias(14);
+  const semanaAtual = dias14.slice(7);
+  const semanaAnterior = dias14.slice(0, 7);
+  const pct = dias => {
+    const total = dias.reduce((s,d)=> s + (d.perguntasTotal || 0), 0);
+    const comPista = dias.reduce((s,d)=> s + (d.perguntasComPista || 0), 0);
+    return total > 0 ? Math.round(100 * comPista / total) : null;
+  };
+  return { atual: pct(semanaAtual), anterior: pct(semanaAnterior), unidade: '% com pista', direcaoBoa: 'descer' };
+}
+
+function calcularProgressoRotina(){
+  const dias14 = obterUltimosDias(14);
+  const semanaAtual = dias14.slice(7);
+  const semanaAnterior = dias14.slice(0, 7);
+  const diasCompletos = dias => dias.filter(d => d.tarefasTotal > 0 && d.tarefasFeitas === d.tarefasTotal).length;
+  return { atual: diasCompletos(semanaAtual), anterior: diasCompletos(semanaAnterior), unidade: 'dias completos', direcaoBoa: 'subir' };
+}
+
+// Mensagem discreta e só positiva para o próprio Eduardo, no ecrã Início — nunca mostra
+// "falta melhorar" nem números/percentagens (isso é para a área dos pais, não para ele);
+// só aparece quando já há uma melhoria real esta semana, como reforço do que já foi
+// conseguido, nunca como cobrança do que ainda não foi.
+function renderMensagemObjetivoEduardo(){
+  const cont = document.getElementById('mensagem-objetivo-eduardo');
+  if(!cont) return;
+  if(!objetivoAtivoChave){ cont.style.display = 'none'; return; }
+  const obj = OBJETIVOS_DISPONIVEIS[objetivoAtivoChave];
+  const prog = obj.calcularProgresso();
+  if(prog.atual === null || prog.anterior === null){ cont.style.display = 'none'; return; }
+  const melhorou = prog.direcaoBoa === 'subir' ? prog.atual > prog.anterior : prog.atual < prog.anterior;
+  if(!melhorou){ cont.style.display = 'none'; return; }
+  cont.style.display = 'block';
+  cont.innerHTML = `
+    <div style="background:var(--salva-clara);border-radius:14px;padding:14px 16px;margin-top:14px;text-align:center;">
+      <span style="font-size:22px;">${obj.icone}</span>
+      <p style="margin:6px 0 0;font-size:13.5px;color:var(--petroleo);font-weight:700;">Esta semana foste ainda melhor a: ${obj.nome.toLowerCase()}!</p>
+    </div>
+  `;
+}
+
+function renderSeletorObjetivoAtivo(){
+  const sel = document.getElementById('seletor-objetivo-ativo');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Nenhum objetivo escolhido</option>' +
+    Object.entries(OBJETIVOS_DISPONIVEIS).map(([chave, obj]) =>
+      `<option value="${chave}">${obj.icone} ${obj.nome}</option>`
+    ).join('');
+  sel.value = objetivoAtivoChave || '';
+}
+
+// Mostra o progresso do objetivo escolhido, comparando a semana atual com a anterior —
+// em linguagem simples ("melhorou", "igual", "ainda sem dados"), nunca só um número cru,
+// porque o que importa ao cuidador é a direção da tendência, não a estatística exata.
+function renderCartaoObjetivoAtivo(){
+  const cont = document.getElementById('cartao-progresso-objetivo-ativo');
+  if(!cont) return;
+  if(!objetivoAtivoChave){
+    cont.innerHTML = '<p style="font-size:13px;color:var(--texto-suave);margin:0;">Escolhe um objetivo acima para veres o progresso aqui.</p>';
+    return;
+  }
+  const obj = OBJETIVOS_DISPONIVEIS[objetivoAtivoChave];
+  const prog = obj.calcularProgresso();
+  const semDadosSuficientes = prog.atual === null || prog.anterior === null;
+  let linhaTendencia;
+  if(semDadosSuficientes){
+    linhaTendencia = '<span style="color:var(--texto-suave);">Ainda sem dados suficientes desta semana para comparar.</span>';
+  } else {
+    const melhorou = prog.direcaoBoa === 'subir' ? prog.atual > prog.anterior : prog.atual < prog.anterior;
+    const igual = prog.atual === prog.anterior;
+    const corTendencia = igual ? 'var(--texto-suave)' : (melhorou ? 'var(--salva)' : 'var(--coral-suave)');
+    const textoTendencia = igual ? 'Igual à semana passada' : (melhorou ? '↑ Melhor que a semana passada' : '↓ Menos que a semana passada');
+    linhaTendencia = `<span style="color:${corTendencia};font-weight:700;">${textoTendencia}</span>`;
+  }
+  cont.innerHTML = `
+    <div style="background:var(--areia-clara);border-radius:12px;padding:14px;">
+      <div style="font-weight:700;margin-bottom:4px;">${obj.icone} ${obj.nome}</div>
+      <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">${obj.descricao}</p>
+      <div style="font-size:20px;font-weight:700;color:var(--petroleo);">${prog.atual === null ? '—' : prog.atual} <span style="font-size:13px;font-weight:400;color:var(--texto-suave);">${prog.unidade || ''}</span></div>
+      <div style="margin-top:6px;">${linhaTendencia}</div>
+    </div>
+  `;
+}
 
 // Mostra, para cada comportamento-alvo, quantas vezes por dia em média aconteceu nos
 // últimos 7 dias — frequência diária, não só uma contagem total desde sempre (essa já
@@ -13910,14 +14711,11 @@ function renderGraficoTarefasSemana(){
   `;
 }
 
-// Agrupa o histórico diário em semanas (últimas 12), mostrando a % média de conclusão
-// da rotina por semana — uma vista mais estável do que dia-a-dia, útil para ver se a
-// tendência ao longo de meses é de melhoria, estabilidade ou dificuldade sustentada.
-// Só aparece a partir de 2 semanas com dados (1 semana isolada não é "tendência").
-function renderTendenciaLonga(){
-  const cartao = document.getElementById('cartao-tendencia-longa');
-  const cont = document.getElementById('grafico-tendencia-longa');
-  if(!cartao || !cont) return;
+// Agrega o histórico diário em semanas (últimas 12), com a % média de conclusão da
+// rotina por semana — partilhado entre o gráfico no ecrã (renderTendenciaLonga) e o
+// gráfico equivalente no PDF (gerarRelatorioPDF), para os dois usarem sempre exatamente
+// os mesmos números e nunca divergirem por terem lógicas de agregação copiadas à parte.
+function calcularTendenciaSemanal(){
   const dias84 = obterUltimosDias(84); // 12 semanas
   const semanas = [];
   for(let i = 0; i < 12; i++){
@@ -13928,6 +14726,18 @@ function renderTendenciaLonga(){
       : null; // null = sem dados nesta semana, distinto de 0%
     semanas.push({ inicio: bloco[0].data, fracaoMedia, comDados: comDados.length });
   }
+  return semanas;
+}
+
+// Agrupa o histórico diário em semanas (últimas 12), mostrando a % média de conclusão
+// da rotina por semana — uma vista mais estável do que dia-a-dia, útil para ver se a
+// tendência ao longo de meses é de melhoria, estabilidade ou dificuldade sustentada.
+// Só aparece a partir de 2 semanas com dados (1 semana isolada não é "tendência").
+function renderTendenciaLonga(){
+  const cartao = document.getElementById('cartao-tendencia-longa');
+  const cont = document.getElementById('grafico-tendencia-longa');
+  if(!cartao || !cont) return;
+  const semanas = calcularTendenciaSemanal();
   const semanasComDados = semanas.filter(s => s.fracaoMedia !== null);
   if(semanasComDados.length < 2){
     cartao.style.display = 'none';
@@ -13989,18 +14799,22 @@ function renderDicasParaPais(){
 // chamadas repetidas à API no mesmo dia (ver gerarDicaParaPaisIA).
 const CHAVE_CACHE_DICA_IA = chaveCrianca('mundoDoEduardo_cacheDicaIA_v1');
 
-function montarResumoUtilizacaoParaIA(){
-  const ultimos7 = obterUltimosDias(7);
-  const mediaConclusao = ultimos7.length
-    ? Math.round(100 * ultimos7.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimos7.length)
+// dias: tamanho da janela de tempo a resumir. Por omissão 7 (usado pela dica diária,
+// que faz sentido falar de "esta semana"); o relatório em PDF passa 30, para um retrato
+// mais estável do que 1 semana isolada — ver chamada em gerarRelatorioPDF.
+function montarResumoUtilizacaoParaIA(dias){
+  dias = dias || 7;
+  const ultimosNDias = obterUltimosDias(dias);
+  const mediaConclusao = ultimosNDias.length
+    ? Math.round(100 * ultimosNDias.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimosNDias.length)
     : 0;
-  const diasCompletos = ultimos7.filter(d => d.tarefasTotal > 0 && d.tarefasFeitas === d.tarefasTotal).length;
-  // Sessões de aprendizagem (quiz/escola) concluídas nos últimos 7 dias — sinal distinto
-  // da conclusão da rotina diária. Um Eduardo pode estar a aprender bem (fichas concluídas,
-  // estrelas ganhas) mesmo em semanas em que a rotina do dia não é seguida até ao fim —
+  const diasCompletos = ultimosNDias.filter(d => d.tarefasTotal > 0 && d.tarefasFeitas === d.tarefasTotal).length;
+  // Sessões de aprendizagem (quiz/escola) concluídas no período — sinal distinto da
+  // conclusão da rotina diária. Um Eduardo pode estar a aprender bem (fichas concluídas,
+  // estrelas ganhas) mesmo em períodos em que a rotina do dia não é seguida até ao fim —
   // são coisas diferentes e é importante que o relatório não as misture, para os pais não
   // lerem "baixo uso" como falta de motivação geral quando o problema pode ser só a rotina.
-  const fichasEscolaSemana = ultimos7.reduce((soma,d)=> soma + (d.fichasEscola || 0), 0);
+  const fichasEscolaPeriodo = ultimosNDias.reduce((soma,d)=> soma + (d.fichasEscola || 0), 0);
   const niveis = Object.keys(NOMES_MATERIA_PARENTAL).map(chave =>
     `${NOMES_MATERIA_PARENTAL[chave]}: nível ${NOMES_NIVEL_PARENTAL[obterNivelAtual(chave)]}`
   ).join('; ');
@@ -14057,11 +14871,31 @@ function montarResumoUtilizacaoParaIA(){
     .filter(([,v]) => v.blocoExtra && v.blocoExtra.t)
     .map(([dia,v]) => `${NOMES_DIAS_SEMANA[dia]}: ${v.blocoExtra.t}${v.blocoExtra.hora ? ' às ' + v.blocoExtra.hora : ''}`);
   const variacoesTexto = diasComVariacao.length ? diasComVariacao.join('; ') : 'sem variações definidas';
+  // Independência vs. necessidade de pista, por matéria — ver registarUsoPista (linha
+  // ~10429). Este é, em ABA, o dado mais informativo de progresso real de aquisição de
+  // competência: "nível" (Fácil/Médio/Difícil) mede a DIFICULDADE do que está a tentar,
+  // mas não diz se consegue fazê-lo sozinho ou só com ajuda — são eixos diferentes. Uma
+  // criança pode estar num nível Difícil e precisar de pista com frequência (ainda a
+  // consolidar), ou num nível Fácil já 100% independente (candidata a subir de nível).
+  // Mesmo limiar (3 respostas) já usado nos cartões de Evolução, para não tirar
+  // conclusões de 1 ou 2 respostas isoladas.
+  const MIN_RESPOSTAS_PISTA_RESUMO = 3;
+  const materiasComDadosPista = Object.keys(registoPistaPorMateria)
+    .filter(c => registoPistaPorMateria[c] && registoPistaPorMateria[c].perguntas >= MIN_RESPOSTAS_PISTA_RESUMO);
+  const pistaTexto = materiasComDadosPista.length
+    ? materiasComDadosPista.map(chave => {
+        const r = registoPistaPorMateria[chave];
+        const pctIndependente = Math.round(100 * (r.perguntas - r.comPista) / r.perguntas);
+        const nome = NOMES_MATERIA_PARENTAL[chave] || chave;
+        return `${nome}: ${pctIndependente}% das respostas sem qualquer pista (${r.perguntas} respostas no total)`;
+      }).join('; ')
+    : 'sem dados suficientes ainda (menos de 3 respostas em qualquer matéria)';
   const partes = [
     `Streak atual de dias com a rotina 100% completa: ${streakDias} (melhor sequência de sempre: ${recordeStreakDias}).`,
-    `[SINAL 1 — ROTINA DIÁRIA] Últimos 7 dias: rotina concluída em média ${mediaConclusao}%, com ${diasCompletos} dia(s) completo(s).`,
+    `[SINAL 1 — ROTINA DIÁRIA] Últimos ${dias} dias: rotina concluída em média ${mediaConclusao}%, com ${diasCompletos} dia(s) completo(s).`,
     `Dias da semana com uma tarefa extra na rotina (ex: terapia, atividade fixa): ${variacoesTexto}.`,
-    `[SINAL 2 — APRENDIZAGEM] Sessões de quiz/escola concluídas nos últimos 7 dias: ${fichasEscolaSemana}. Nível atual por matéria: ${niveis}.`,
+    `[SINAL 2 — APRENDIZAGEM] Sessões de quiz/escola concluídas nos últimos ${dias} dias: ${fichasEscolaPeriodo} (isto mede só atividade RECENTE, não o conhecimento já adquirido). Nível atual por matéria — reflete o progresso acumulado desde sempre, não apenas este período, por isso pode continuar alto mesmo em períodos sem sessões novas: ${niveis}.`,
+    `[SINAL 3 — INDEPENDÊNCIA] Percentagem de respostas dadas SEM pista/ajuda, por matéria (quanto mais alta, mais independente; é um sinal DIFERENTE do nível de dificuldade — ver instruções): ${pistaTexto}.`,
     `Estrelas ao todo (soma de rotina + aprendizagem, não separável no histórico): ${estrelas}.`,
     `Sessões terminadas até ao fim mesmo com erros (persistência): ${contadorQuizzesConcluidos}.`,
     `Modo Calma usado ${contadorUsosCalma} vez(es) ao todo; momentos mais associados: ${calmaTexto}.`,
@@ -14087,70 +14921,195 @@ function escaparHtml(texto){
 }
 
 function construirPromptDicaIA(resumo){
-  return `És um consultor de apoio a pais de uma criança autista, com formação em ABA (Applied Behavior Analysis). ` +
-    `Com base nestes dados reais de utilização de uma app de rotina e aprendizagem, escreve UMA dica curta, prática e específica ` +
-    `para os pais — baseada nos dados, não genérica. Português de Portugal, tom calmo e sem jargão técnico desnecessário. ` +
-    `Máximo 3 frases. Não repitas os números em bruto, interpreta-os. Não faças diagnósticos nem uses linguagem clínica alarmista. ` +
-    `Se os dados sugerirem um padrão (ex: dificuldade numa matéria, uso do modo Calma associado a um contexto), foca a dica nisso. ` +
-    `Se os dados forem positivos, celebra isso e sugere um pequeno próximo passo. Termina sempre a lembrar que isto não substitui ` +
-    `avaliação de um profissional.\n\nDados: ${resumo}`;
+  return `Contexto: esta app (EduKids) é usada por pais/cuidadores de crianças autistas para acompanhar rotina diária e ` +
+    `aprendizagem escolar em casa, dentro de um enquadramento de apoio educativo e de bem-estar. Os dados abaixo são ` +
+    `estatísticas de utilização da app (contagens, percentagens, níveis de jogos) e notas descritivas escritas pelo ` +
+    `próprio cuidador para dar contexto — não descrevem qualquer situação de risco ou dano à criança.\n\n` +
+    `Tarefa: és um consultor de apoio a pais, com formação em ABA (Applied Behavior Analysis). Com base nestes dados, ` +
+    `escreve UMA dica curta, prática e específica para os pais — baseada nos dados, não genérica. Português de Portugal, ` +
+    `tom calmo e sem jargão técnico desnecessário. Máximo 3 frases. Não repitas os números em bruto, interpreta-os. Não ` +
+    `faças diagnósticos nem uses linguagem clínica alarmista. Se os dados sugerirem um padrão (ex: dificuldade numa ` +
+    `matéria, uso do modo Calma associado a um contexto), foca a dica nisso. Se os dados forem positivos, celebra isso e ` +
+    `sugere um pequeno próximo passo. Termina sempre a lembrar que isto não substitui avaliação de um profissional.\n\n` +
+    `Dados de utilização da app: ${resumo}`;
 }
 
 // Prompt para o relatório completo em PDF — mais extenso do que a "dica" curta, pedido
 // em secções fixas para ser fácil de colocar no PDF de forma organizada e previsível.
+//
+// O parágrafo de "Contexto" no início, e a barreira "--- FIM DOS DADOS ---" a fechar os
+// dados, existem por uma razão concreta: o Gemini tem um filtro de segurança NÃO
+// configurável (PROHIBITED_CONTENT) que existe para bloquear conteúdo relacionado com
+// abuso infantil — e não pode ser ajustado por safetySettings (isso só afeta os filtros
+// configuráveis, como SAFETY). Os dados desta app incluem texto livre escrito pelos
+// pais no questionário (campo "dificuldades", "notas sensoriais") — frases legítimas
+// sobre comportamentos (ex: "morde-se quando frustrado") podem, fora de contexto, ser
+// lidas por um classificador automático da mesma forma que um relato de dano real. O
+// parágrafo de contexto e a barreira de fecho não contornam nenhuma proteção real —
+// apenas dão ao classificador o enquadramento (app de apoio, dados reportados pelo
+// próprio cuidador para acompanhamento) que a app já tem mas que não estava a chegar
+// ao modelo de forma explícita.
 function construirPromptRelatorioIA(resumo){
-  return `És um consultor de apoio a pais de uma criança autista, com formação em ABA (Applied Behavior Analysis). ` +
-    `Com base nestes dados reais de utilização de uma app de rotina e aprendizagem, escreve um relatório breve para os pais ` +
-    `partilharem, se quiserem, com um terapeuta ou professor. Português de Portugal, tom calmo, claro e sem jargão técnico ` +
-    `desnecessário. Interpreta os números, não te limites a repeti-los. Não faças diagnósticos nem uses linguagem clínica ` +
-    `alarmista — descreve padrões de comportamento observados, não conclusões clínicas.\n\n` +
-    `IMPORTANTE — dois sinais distintos: os dados marcados [SINAL 1 — ROTINA DIÁRIA] medem se a criança segue a sequência ` +
-    `de tarefas do dia (horários, transições). Os dados marcados [SINAL 2 — APRENDIZAGEM] medem o interesse e progresso nos ` +
-    `quizzes/atividades escolares. NUNCA misturas estes dois sinais numa única leitura — são independentes. Em particular, ` +
-    `se a conclusão da rotina for baixa MAS houver sessões de aprendizagem concluídas ou progresso de nível, deixa isso claro ` +
-    `explicitamente (ex: "apesar da baixa conclusão da rotina, o Eduardo continua a interagir e a aprender bem nas ` +
-    `atividades") — não deixes o leitor concluir que a criança está desmotivada em geral quando só a rotina estruturada é ` +
-    `que está a ser um desafio. Se os dois sinais forem ambos baixos, também o dizes claramente, sem suavizar.\n\n` +
+  return `Contexto: esta app (EduKids) é usada por pais/cuidadores de crianças autistas para acompanhar rotina diária e ` +
+    `aprendizagem escolar em casa, dentro de um enquadramento de apoio educativo e de bem-estar. Os dados abaixo são ` +
+    `estatísticas de utilização da app (contagens, percentagens, níveis de jogos) e notas descritivas escritas pelo ` +
+    `próprio cuidador para dar contexto ao acompanhamento — não descrevem qualquer situação de risco ou dano à criança.\n\n` +
+    `Tarefa: és um consultor de apoio a pais, com formação em ABA (Applied Behavior Analysis). Isto significa, na ` +
+    `prática, que a tua leitura dos dados segue os princípios abaixo — não é só um "tom" a adotar, é como interpretas ` +
+    `os números:\n` +
+    `1) Distingues sempre DIFICULDADE (o nível atingido) de INDEPENDÊNCIA (precisar ou não de pista) — são eixos ` +
+    `diferentes: uma criança pode estar num nível Difícil e ainda depender de pista com frequência (competência em ` +
+    `consolidação, não dominada), ou estar num nível Fácil já 100% independente (pronta para subir de nível). Nunca ` +
+    `tratas "nível alto" como sinónimo de "já não precisa de ajuda".\n` +
+    `2) Lês o Modo Calma como um ciclo Antecedente → Comportamento → Consequência: o antecedente é o que acontece antes ` +
+    `(bloco da rotina, altura do dia, motivo dito pela criança); o comportamento é usar o Modo Calma; a consequência é ` +
+    `o que acontece a seguir (voltar sozinho à tarefa vs. precisar de ajuda de um adulto). Uma criança que volta sozinha ` +
+    `na maioria das vezes está a autorregular-se com sucesso — isso é um ponto forte, não um problema a resolver.\n` +
+    `3) Quando sugeres um próximo passo, prefere estratégias com base no que os dados mostram (ex: se a independência ` +
+    `numa matéria for baixa mas o nível já for alto, sugere reduzir gradualmente a pista nessa matéria — "esvanecimento ` +
+    `de pista" — em vez de simplesmente "praticar mais").\n\n` +
+    `IMPORTANTE — três sinais distintos, nunca misturados numa única leitura: os dados marcados [SINAL 1 — ROTINA ` +
+    `DIÁRIA] medem se a criança segue a sequência de tarefas do dia (horários, transições). Os marcados [SINAL 2 — ` +
+    `APRENDIZAGEM] medem o interesse e progresso nos quizzes/atividades escolares. Os marcados [SINAL 3 — ` +
+    `INDEPENDÊNCIA] medem se as respostas certas vêm sozinhas ou com ajuda — são o indicador mais direto de aquisição ` +
+    `real de competência, distinto dos outros dois. Se a conclusão da rotina for baixa MAS houver sessões de ` +
+    `aprendizagem concluídas ou progresso de nível, deixa isso claro explicitamente (ex: "apesar da baixa conclusão da ` +
+    `rotina, o Eduardo continua a interagir e a aprender bem nas atividades") — não deixes o leitor concluir que a ` +
+    `criança está desmotivada em geral quando só a rotina estruturada é que está a ser um desafio. Se os três sinais ` +
+    `forem todos baixos, também o dizes claramente, sem suavizar.\n\n` +
+    `IMPORTANTE — nível de matéria vs. atividade recente: dentro do SINAL 2, "sessões concluídas nos últimos 7 dias" e ` +
+    `"nível atual por matéria" NÃO são a mesma coisa e NÃO podes tratá-los como se fossem. O nível é conhecimento já ` +
+    `acumulado (pode ser de semanas ou meses atrás); sessões concluídas é só atividade desta semana específica. Se ` +
+    `houver 0 (ou poucas) sessões concluídas esta semana MAS os níveis por matéria forem Médio/Difícil, isso significa ` +
+    `que a criança já aprendeu bastante — NÃO escrevas frases como "não conseguiu completar" ou "sugere falta de ` +
+    `interesse na aprendizagem" nesse caso, porque os níveis provam o contrário. A leitura correta é algo como "não ` +
+    `houve sessões novas esta semana, mas o nível já alcançado (Médio/Difícil) mostra que a aprendizagem tem ` +
+    `progredido bem ao longo do tempo" — trata a ausência de sessões recentes como uma pausa pontual, não como um ` +
+    `sinal de dificuldade, a menos que os PRÓPRIOS níveis também sejam baixos (Fácil em quase tudo).\n\n` +
     `Estrutura a resposta EXATAMENTE nestas 4 secções, cada uma com este título exato em maiúsculas seguido de dois pontos, ` +
     `sem markdown, sem asteriscos, texto corrido em parágrafos curtos:\n` +
     `RESUMO GERAL: (2-3 frases sobre o panorama geral desta semana/período, distinguindo rotina de aprendizagem se os sinais divergirem)\n` +
-    `PONTOS FORTES: (o que está a correr bem, com base nos dados)\n` +
-    `PONTOS DE ATENÇÃO: (padrões que vale a pena os pais/terapeuta olharem com mais cuidado, se os houver — se não houver nenhum digno de nota, diz isso claramente em vez de forçar um)\n` +
-    `SUGESTÃO PRÁTICA: (1-2 próximos passos concretos e realistas)\n\n` +
+    `PONTOS FORTES: (o que está a correr bem, com base nos dados — inclui explicitamente onde a criança já responde ` +
+    `com independência, se os dados do SINAL 3 mostrarem isso)\n` +
+    `PONTOS DE ATENÇÃO: (padrões que vale a pena os pais/terapeuta olharem com mais cuidado, se os houver — inclui ` +
+    `matérias onde a dependência de pista continua alta apesar do nível já ser Médio/Difícil, se for o caso; se não ` +
+    `houver nenhum padrão digno de nota, diz isso claramente em vez de forçar um)\n` +
+    `SUGESTÃO PRÁTICA: (1-2 próximos passos concretos e realistas, de preferência ligados a um dado específico — ex: ` +
+    `esvanecimento de pista numa matéria concreta, ou manter o que já está a funcionar no Modo Calma)\n\n` +
     `Termina sempre, fora das secções, com uma frase a lembrar que isto é um resumo de utilização de uma app, não uma ` +
-    `avaliação clínica, e não substitui o acompanhamento de um profissional.\n\nDados: ${resumo}`;
+    `avaliação clínica, e não substitui o acompanhamento de um profissional.\n\n` +
+    `Dados de utilização da app: ${resumo}\n--- FIM DOS DADOS ---`;
 }
 
 async function gerarDicaComGemini(chaveApi, prompt, maxOutputTokens){
-  const resposta = await fetchComTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent?key=${encodeURIComponent(chaveApi)}`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      // O Gemini 2.5 Flash gasta tokens de "pensamento" interno que contam para o
-      // mesmo maxOutputTokens — em tarefas não-triviais isso pode consumir quase todo
-      // o orçamento antes de escrever uma palavra visível, cortando a resposta a meio
-      // (finishReason "MAX_TOKENS" com texto vazio ou truncado). Como esta tarefa é só
-      // reformatar dados já fornecidos segundo instruções claras, não precisa de
-      // raciocínio profundo — desativa-se o "thinking" para o output ir todo para o
-      // texto que realmente interessa.
-      generationConfig: { temperature: 0.7, maxOutputTokens: maxOutputTokens || 400, thinkingConfig: { thinkingBudget: 0 } },
-    }),
-  });
-  if(!resposta.ok){
-    const corpoErro = await resposta.text().catch(()=> '');
-    throw new Error(mensagemErroAmigavel('Gemini', resposta.status, corpoErro));
+  // Uma única tentativa ao Gemini — extraído para dentro da função para poder ser
+  // chamado 2 vezes (ver mais abaixo): falhas "sem motivo devolvido pela API" costumam
+  // ser instabilidade momentânea do próprio serviço, não um problema com o prompt, e
+  // resolvem-se sozinhas ao tentar de novo — sem incomodar quem está a gerar o relatório
+  // com um erro que, na prática, quase sempre desaparece só por repetir o pedido.
+  async function umaTentativa(){
+    const resposta = await fetchComTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO_GEMINI}:generateContent?key=${encodeURIComponent(chaveApi)}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        // O Gemini 2.5 Flash gasta tokens de "pensamento" interno que contam para o
+        // mesmo maxOutputTokens — em tarefas não-triviais isso pode consumir quase todo
+        // o orçamento antes de escrever uma palavra visível, cortando a resposta a meio
+        // (finishReason "MAX_TOKENS" com texto vazio ou truncado). Como esta tarefa é só
+        // reformatar dados já fornecidos segundo instruções claras, não precisa de
+        // raciocínio profundo — desativa-se o "thinking" para o output ir todo para o
+        // texto que realmente interessa.
+        generationConfig: { temperature: 0.7, maxOutputTokens: maxOutputTokens || 400, thinkingConfig: { thinkingBudget: 0 } },
+        // Sem isto, os prompts desta app (dados de rotina/comportamento de uma CRIANÇA
+        // autista) disparam falsos positivos frequentes do filtro de segurança do Gemini
+        // — o conteúdo é legítimo (números de uso, sem nada explícito), mas a combinação
+        // "criança" + "comportamento" + termos como "Modo Calma" é o género de coisa que
+        // os filtros por omissão marcam com demasiada cautela. Isto é uma opção oficial e
+        // documentada da própria API (ai.google.dev/gemini-api/docs/safety-settings),
+        // não uma forma de contornar segurança real — continua a bloquear conteúdo
+        // genuinamente perigoso (a categoria mais severa, CSAM, nem é configurável e
+        // mantém-se sempre ativa independentemente disto).
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+        ],
+      }),
+    });
+    if(!resposta.ok){
+      const corpoErro = await resposta.text().catch(()=> '');
+      throw new Error(mensagemErroAmigavel('Gemini', resposta.status, corpoErro));
+    }
+    const dados = await resposta.json();
+    // Se o Gemini não devolveu texto, o "porquê" pode estar em dois sítios diferentes,
+    // consoante o bloqueio aconteceu ANTES de gerar (o próprio pedido foi recusado, e
+    // nesse caso "candidates" vem vazio e o motivo só existe em promptFeedback) ou
+    // DEPOIS de começar a gerar (finishReason dentro do candidate, como MAX_TOKENS). O
+    // código só lia o segundo caso — se candidates viesse [], caía sempre na mensagem
+    // genérica "nenhum motivo foi devolvido", mesmo quando a API tinha dito exatamente
+    // porquê, só que noutro campo do JSON. Este erro específico NÃO é repetido pelo
+    // retry (ver chamador): um pedido bloqueado por segurança falha sempre da mesma
+    // forma, tentar de novo não muda nada.
+    const bloqueioDoPedido = dados?.promptFeedback?.blockReason;
+    if(bloqueioDoPedido){
+      const motivosPedido = {
+        SAFETY: 'O pedido foi recusado pelos filtros de segurança do Gemini antes de gerar qualquer resposta.',
+        OTHER: 'O pedido foi recusado pelo Gemini por um motivo não detalhado.',
+        BLOCKED_REASON_UNSPECIFIED: 'O pedido foi recusado pelo Gemini por um motivo não detalhado.',
+      };
+      const erro = new Error(`${motivosPedido[bloqueioDoPedido] || `O Gemini recusou o pedido (motivo: ${bloqueioDoPedido}).`} Tenta novamente ou, se persistir, tenta com o outro fornecedor.`);
+      erro.naoRepetir = true;
+      throw erro;
+    }
+    // Se o Gemini não devolveu texto, o "porquê" está em finishReason — mostra-o em vez de
+    // um erro genérico sempre igual, para se perceber a causa real (limite de tokens,
+    // conteúdo bloqueado por segurança, resposta cortada por repetição, etc.).
+    const motivoParagem = dados?.candidates?.[0]?.finishReason;
+    if(motivoParagem === 'MAX_TOKENS'){
+      const erro = new Error('A resposta da IA foi cortada por ser demasiado longa. Tenta novamente — se persistir, tenta com o outro fornecedor.');
+      erro.naoRepetir = true;
+      throw erro;
+    }
+    const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!texto){
+      const motivosConhecidos = {
+        SAFETY: 'A resposta foi bloqueada pelos filtros de segurança do Gemini.',
+        RECITATION: 'A resposta foi bloqueada por semelhança excessiva com conteúdo existente.',
+        PROHIBITED_CONTENT: 'A resposta foi bloqueada por conteúdo não permitido.',
+        OTHER: 'O Gemini não conseguiu gerar uma resposta por um motivo não especificado.',
+      };
+      const detalhe = motivosConhecidos[motivoParagem];
+      if(detalhe){
+        // Motivo de segurança/conteúdo identificado com clareza: repetir não muda nada.
+        const erro = new Error(`Gemini não devolveu texto na resposta. ${detalhe} Tenta novamente.`);
+        erro.naoRepetir = true;
+        throw erro;
+      }
+      // Sem nenhum motivo identificável — o padrão mais comum é instabilidade
+      // momentânea da API, não um problema com o pedido. Deixa-se repetir (ver chamador).
+      throw new Error('Gemini não devolveu texto na resposta. Nenhum motivo foi devolvido pela API.');
+    }
+    return texto.trim();
   }
-  const dados = await resposta.json();
-  // Se o Gemini cortou a resposta por ter atingido o limite de tokens, o texto vem
-  // incompleto a meio de frase — melhor avisar do que devolver algo cortado sem se notar.
-  const motivoParagem = dados?.candidates?.[0]?.finishReason;
-  if(motivoParagem === 'MAX_TOKENS'){
-    throw new Error('A resposta da IA foi cortada por ser demasiado longa. Tenta novamente — se persistir, tenta com o outro fornecedor.');
+
+  try{
+    return await umaTentativa();
+  }catch(erro){
+    if(erro.naoRepetir) throw erro;
+    // Uma única repetição automática, sem incomodar quem está à espera com um segundo
+    // spinner — se falhar outra vez, aí sim mostra-se o erro (agora já sabendo que não
+    // foi só azar momentâneo).
+    try{
+      return await umaTentativa();
+    }catch(segundoErro){
+      if(segundoErro.naoRepetir || segundoErro.message !== erro.message) throw segundoErro;
+      // Falhou 2 vezes seguidas pela mesma razão pouco clara — acrescenta essa
+      // informação à mensagem, para quem está a ler perceber que já não é coincidência.
+      throw new Error(segundoErro.message.replace(/\.$/, '') + ' (falhou 2 vezes seguidas).');
+    }
   }
-  const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if(!texto) throw new Error('Gemini não devolveu texto na resposta. Tenta novamente.');
-  return texto.trim();
 }
 
 async function gerarDicaComClaude(prompt, maxTokens){
@@ -14205,8 +15164,11 @@ async function gerarDicaParaPaisIA(forcarNova){
     const prompt = construirPromptDicaIA(resumo);
     let texto;
     if(fornecedor === 'gemini'){
+      // Ver comentário equivalente em gerarRelatorioPDF: a chave só fica em localStorage
+      // depois de guardarChaveGemini() correr, o que só acontecia ao gerar perguntas.
+      guardarChaveGemini();
       const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
-      if(!chaveGemini) throw new Error('Precisas de guardar uma chave Gemini na área do gerador de perguntas para usar esta opção.');
+      if(!chaveGemini) throw new Error('Precisas de colar a tua chave Gemini no campo da área "Gerador de perguntas com IA" antes de usar esta opção.');
       texto = await gerarDicaComGemini(chaveGemini, prompt);
     } else {
       texto = await gerarDicaComClaude(prompt);
@@ -14307,22 +15269,42 @@ async function gerarRelatorioPDF(){
   btn.textContent = 'A preparar o relatório...';
 
   try{
-    // 1) Texto da análise, gerado pela IA (mesmo fornecedor já configurado na app)
-    const resumo = montarResumoUtilizacaoParaIA();
+    // 1) Texto da análise, gerado pela IA (mesmo fornecedor já configurado na app).
+    // Isto pode falhar por vários motivos (sem chave, rede, ou o Gemini a bloquear a
+    // resposta pelo filtro PROHIBITED_CONTENT — ver o comentário em
+    // construirPromptRelatorioIA) — nenhum desses motivos deve impedir o relatório de
+    // sair: as tabelas de dados abaixo não dependem da IA. Falhando a análise, o PDF
+    // sai igual, só sem essa secção, com um aviso claro do que aconteceu.
+    const resumo = montarResumoUtilizacaoParaIA(30);
     const prompt = construirPromptRelatorioIA(resumo);
-    let textoRelatorio;
-    if(fornecedor === 'gemini'){
-      const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
-      if(!chaveGemini) throw new Error('Precisas de guardar uma chave Gemini na área do gerador de perguntas para usar esta opção.');
-      textoRelatorio = await gerarDicaComGemini(chaveGemini, prompt, 1600);
-    } else {
-      textoRelatorio = await gerarDicaComClaude(prompt, 1600);
-    }
-    const seccoes = repartirSeccoesRelatorio(textoRelatorio);
-    // Defesa extra: se a IA não seguiu o formato pedido e só saiu 1 secção (ou nenhuma),
-    // o relatório ficaria incompleto sem se notar — melhor avisar e permitir tentar de novo.
-    if(seccoes.length < 2){
-      throw new Error('A IA não devolveu o relatório no formato esperado. Tenta novamente.');
+    let seccoes = [];
+    let avisoAnaliseIA = '';
+    try{
+      let textoRelatorio;
+      if(fornecedor === 'gemini'){
+        // A chave só fica em localStorage depois de guardarChaveGemini() correr — isso já
+        // acontecia sempre que se gerava uma pergunta, mas não quando se ia direto ao
+        // relatório PDF sem antes ter usado o gerador de perguntas. Resultado: a pessoa
+        // colava a chave no campo, via-a lá guardada visualmente, e mesmo assim o relatório
+        // dizia "precisas de guardar uma chave" — porque nunca tinha sido persistida.
+        // Tenta guardar aqui também, antes de ler, exatamente como já acontece no outro fluxo.
+        guardarChaveGemini();
+        const chaveGemini = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim();
+        if(!chaveGemini) throw new Error('Precisas de colar a tua chave Gemini no campo da área "Gerador de perguntas com IA" antes de gerar a análise por IA.');
+        textoRelatorio = await gerarDicaComGemini(chaveGemini, prompt, 1600);
+      } else {
+        textoRelatorio = await gerarDicaComClaude(prompt, 1600);
+      }
+      seccoes = repartirSeccoesRelatorio(textoRelatorio);
+      // Defesa extra: se a IA não seguiu o formato pedido e só saiu 1 secção (ou nenhuma),
+      // trata-se como falha da análise (mesmo caminho do catch abaixo) em vez de gerar
+      // um PDF com uma única secção truncada sem se notar.
+      if(seccoes.length < 2){
+        throw new Error('A IA não devolveu a análise no formato esperado.');
+      }
+    }catch(erroAnaliseIA){
+      seccoes = [];
+      avisoAnaliseIA = mensagemErroDeRede(erroAnaliseIA, fornecedor);
     }
 
     // 2) Biblioteca de geração de PDF, carregada só quando precisa (não pesa a app
@@ -14364,15 +15346,9 @@ async function gerarRelatorioPDF(){
       y += 16;
     }
 
-    // Cabeçalho
-    let nomeEduardo = 'Eduardo';
-    try{
-      const brutoQuestionario = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
-      if(brutoQuestionario){
-        const dadosQuestionario = JSON.parse(brutoQuestionario);
-        if(dadosQuestionario && dadosQuestionario.nome) nomeEduardo = dadosQuestionario.nome;
-      }
-    }catch(e){ /* mantém "Eduardo" por omissão em caso de dados inválidos */ }
+    // Cabeçalho — reaproveita a mesma cadeia de fallback central de obterNomeCrianca()
+    // (questionário → lista de crianças → genérico) em vez de duplicar a lógica.
+    const nomeEduardo = obterNomeCrianca();
     escreverTitulo(`Relatório de utilização — ${nomeEduardo}`, 16);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -14381,29 +15357,103 @@ async function gerarRelatorioPDF(){
     doc.setTextColor(0);
     y += 22;
 
-    // Secções da análise da IA
-    seccoes.forEach(s => {
-      escreverTitulo(s.titulo.charAt(0) + s.titulo.slice(1).toLowerCase(), 12.5);
-      escreverParagrafo(s.texto);
-    });
+    // Secções da análise da IA — se a análise falhou (ver catch acima), mostra um aviso
+    // claro no próprio PDF em vez de simplesmente omitir a secção sem explicação.
+    if(seccoes.length){
+      seccoes.forEach(s => {
+        escreverTitulo(s.titulo.charAt(0) + s.titulo.slice(1).toLowerCase(), 12.5);
+        escreverParagrafo(s.texto);
+      });
+    } else {
+      escreverTitulo('Análise por IA', 12.5);
+      doc.setTextColor(150);
+      escreverParagrafo('Não foi possível gerar a análise escrita desta vez (ver detalhe abaixo). As tabelas de dados que se seguem foram geradas na mesma.', 10);
+      doc.setTextColor(0);
+    }
 
-    // Tabela de dados — últimos 7 dias
+    // Tabela de dados — últimos 30 dias. Era 7 dias até aqui: um instantâneo de 1 semana
+    // não mostra tendência nenhuma, só um retrato pontual — 30 dias dá uma base mais
+    // sólida para "sessões concluídas" e "rotina concluída" refletirem um padrão real,
+    // não só o acaso de uma semana melhor ou pior. DIAS_JANELA_RELATORIO_PDF centraliza
+    // este número: mudar aqui muda a tabela, os rótulos e a tabela de comportamentos-alvo
+    // em conjunto, sem os deixar dessincronizados (ver usos mais abaixo).
+    const DIAS_JANELA_RELATORIO_PDF = 30;
     y += 6;
-    escreverTitulo('Dados dos últimos 7 dias', 13);
-    const ultimos7 = obterUltimosDias(7);
-    const mediaConclusao = ultimos7.length
-      ? Math.round(100 * ultimos7.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimos7.length)
+    escreverTitulo(`Dados dos últimos ${DIAS_JANELA_RELATORIO_PDF} dias`, 13);
+    const ultimosNDias = obterUltimosDias(DIAS_JANELA_RELATORIO_PDF);
+    const mediaConclusao = ultimosNDias.length
+      ? Math.round(100 * ultimosNDias.reduce((soma,d)=> soma + (d.tarefasTotal ? d.tarefasFeitas/d.tarefasTotal : 0), 0) / ultimosNDias.length)
       : 0;
-    const estrelasSemana = ultimos7.reduce((soma,d)=> soma + d.estrelasGanhas, 0);
-    const fichasEscolaSemanaPdf = ultimos7.reduce((soma,d)=> soma + (d.fichasEscola || 0), 0);
+    const estrelasPeriodo = ultimosNDias.reduce((soma,d)=> soma + d.estrelasGanhas, 0);
+    const fichasEscolaPeriodoPdf = ultimosNDias.reduce((soma,d)=> soma + (d.fichasEscola || 0), 0);
     escreverLinhaTabela('Streak atual', `${streakDias} dia(s)`);
     escreverLinhaTabela('Melhor sequência de sempre', `${recordeStreakDias} dia(s)`);
-    escreverLinhaTabela('Rotina concluída (média 7 dias)', `${mediaConclusao}%`);
-    escreverLinhaTabela('Sessões de aprendizagem concluídas (7 dias)', fichasEscolaSemanaPdf);
-    escreverLinhaTabela('Estrelas esta semana', estrelasSemana);
+    escreverLinhaTabela(`Rotina concluída (média ${DIAS_JANELA_RELATORIO_PDF} dias)`, `${mediaConclusao}%`);
+    escreverLinhaTabela(`Sessões de aprendizagem concluídas (${DIAS_JANELA_RELATORIO_PDF} dias)`, fichasEscolaPeriodoPdf);
+    escreverLinhaTabela('Estrelas no período', estrelasPeriodo);
     escreverLinhaTabela('Estrelas ao todo', estrelas);
     escreverLinhaTabela('Modo Calma usado (total)', contadorUsosCalma);
     y += 10;
+
+    // Gráfico de tendência semanal (até 12 semanas) — usa exatamente a mesma agregação
+    // que o gráfico do ecrã "Evolução" (calcularTendenciaSemanal), para nunca mostrar
+    // números diferentes num sítio e no outro. Em ABA, a análise visual da tendência ao
+    // longo de semanas/meses (não só um instantâneo de 7 dias) é o que sustenta decisões
+    // clínicas — por isso este gráfico é o complemento mais importante à tabela acima.
+    // Só desenha com pelo menos 2 semanas com dados; com menos, uma "tendência" de 1
+    // ponto não diz nada, e o PDF fica só com o instantâneo de 7 dias como até aqui.
+    const semanasTendencia = calcularTendenciaSemanal();
+    const semanasComDadosPdf = semanasTendencia.filter(s => s.fracaoMedia !== null);
+    if(semanasComDadosPdf.length >= 2){
+      const alturaGrafico = 90;
+      const larguraBarra = largura / semanasTendencia.length;
+      // Reserva o espaço do TÍTULO + GRÁFICO de uma só vez, antes de escrever seja o que
+      // for — evita o título ficar "pendurado" sozinho no fundo de uma página com o
+      // gráfico todo a saltar para a página seguinte (aconteceu numa versão anterior:
+      // escreverTitulo só reservava espaço para si próprio, o gráfico só verificava o seu
+      // espaço DEPOIS de o título já estar escrito, já tarde para o mover também).
+      const alturaTituloEstimada = 13 + 12; // mesmo cálculo usado dentro de escreverTitulo
+      novaLinhaSeNecessario(alturaTituloEstimada + alturaGrafico + 22);
+      escreverTitulo('Tendência da rotina — últimas 12 semanas', 13);
+      const yBase = y + alturaGrafico;
+
+      // Linha de referência aos 80% — o mesmo limiar que marca uma barra como "completo"
+      // (verde) no ecrã, para o PDF usar o mesmo critério visual de leitura rápida.
+      doc.setDrawColor(200);
+      doc.setLineDash([2, 2], 0);
+      doc.line(margem, yBase - alturaGrafico * 0.8, margem + largura, yBase - alturaGrafico * 0.8);
+      doc.setLineDash([], 0);
+      doc.setFontSize(7.5);
+      doc.setTextColor(160);
+      doc.text('80%', margem + largura + 2, yBase - alturaGrafico * 0.8 + 3);
+
+      semanasTendencia.forEach((s, i) => {
+        const xBarra = margem + i * larguraBarra;
+        if(s.fracaoMedia === null){
+          doc.setFillColor(230, 230, 230); // semana sem dados: barra residual cinzenta
+          doc.rect(xBarra + larguraBarra * 0.15, yBase - 2, larguraBarra * 0.7, 2, 'F');
+        } else {
+          const alturaBarra = Math.max(2, Math.round(s.fracaoMedia * alturaGrafico));
+          if(s.fracaoMedia >= 0.8){ doc.setFillColor(58, 107, 112); }  // petroleo: semana "completa"
+          else { doc.setFillColor(201, 219, 205); }                     // salva-clara: restantes
+          doc.rect(xBarra + larguraBarra * 0.15, yBase - alturaBarra, larguraBarra * 0.7, alturaBarra, 'F');
+        }
+        // Rótulo de data a cada 3 semanas, como no gráfico do ecrã — todas seria demasiado
+        // apertado num gráfico de 12 barras nesta largura. Fora do "if" acima de propósito:
+        // uma semana sem dados também deve mostrar a sua data quando calha nesta posição,
+        // senão o eixo do tempo fica com "buracos" e a leitura da tendência confunde-se
+        // (foi isto que aconteceu antes: só 1 das 4 datas esperadas aparecia no PDF).
+        if(i % 3 === 0){
+          doc.setFontSize(7);
+          doc.setTextColor(120);
+          const dataFormatada = new Date(s.inicio + 'T00:00:00').toLocaleDateString('pt-PT', {day:'2-digit', month:'2-digit'});
+          doc.text(dataFormatada, xBarra + larguraBarra * 0.15, yBase + 9);
+        }
+      });
+      doc.setTextColor(0);
+      y = yBase + 16;
+    }
+    y += 8;
 
     // Tabela — nível por matéria
     escreverTitulo('Nível atual por matéria', 13);
@@ -14426,6 +15476,97 @@ async function gerarRelatorioPDF(){
       y += 10;
     }
 
+    // Comportamentos-alvo (mesma janela de dias do relatório, ver DIAS_JANELA_RELATORIO_PDF
+    // acima): frequência diária de comunicação espontânea pelo CAA, uso do Modo Calma, e
+    // registo de emoções — a métrica mais informativa em ABA para o dia a dia fora dos
+    // jogos, tal como já mostrado no ecrã (ver renderComportamentosAlvo, que usa 7 dias —
+    // aqui usa-se a janela mais longa do relatório, não a mesma constante, de propósito:
+    // um "hoje/esta semana" rápido no ecrã tem outra utilidade que um retrato de 30 dias
+    // no PDF, por isso os dois têm a sua própria janela).
+    const ultimosNDiasParaComportamentos = obterUltimosDias(DIAS_JANELA_RELATORIO_PDF);
+    const totaisComportamentos = {};
+    ultimosNDiasParaComportamentos.forEach(dia => {
+      Object.entries(dia.comportamentos || {}).forEach(([tipo, n]) => {
+        totaisComportamentos[tipo] = (totaisComportamentos[tipo] || 0) + n;
+      });
+    });
+    const ordemComportamentos = ['caa_espontaneo', 'pediu_calma', 'emocao_registada'];
+    const comportamentosComDados = ordemComportamentos.filter(t => totaisComportamentos[t] > 0);
+    if(comportamentosComDados.length){
+      escreverTitulo(`Comportamentos no dia a dia (últimos ${DIAS_JANELA_RELATORIO_PDF} dias)`, 13);
+      comportamentosComDados.forEach(tipo => {
+        const rotulo = ROTULO_COMPORTAMENTO_ALVO[tipo] || { icone:'', nome: tipo };
+        const total = totaisComportamentos[tipo];
+        const mediaDia = (total / DIAS_JANELA_RELATORIO_PDF).toFixed(1);
+        escreverLinhaTabela(rotulo.nome, `${mediaDia}/dia (${total} no total)`);
+      });
+      y += 10;
+    }
+
+    // Evolução da independência por matéria: compara os últimos 7 dias com os 7
+    // anteriores, matéria a matéria — mostra quando uma competência concreta passou a
+    // ser feita sozinha, o indicador mais direto de progresso real (ver
+    // renderEvolucaoIndependenciaPorMateria no ecrã, mesma lógica reaproveitada aqui).
+    const ultimos14ParaEvolucao = obterUltimosDias(14);
+    const periodoRecenteEvolucao = ultimos14ParaEvolucao.slice(7);
+    const periodoAnteriorEvolucao = ultimos14ParaEvolucao.slice(0, 7);
+    const somarPorMateriaPdf = (dias) => {
+      const somas = {};
+      dias.forEach(d => {
+        Object.entries(d.perguntasPorMateria || {}).forEach(([chave, r]) => {
+          if(!somas[chave]) somas[chave] = { total: 0, comPista: 0 };
+          somas[chave].total += r.total || 0;
+          somas[chave].comPista += r.comPista || 0;
+        });
+      });
+      return somas;
+    };
+    const recenteEvolucao = somarPorMateriaPdf(periodoRecenteEvolucao);
+    const anteriorEvolucao = somarPorMateriaPdf(periodoAnteriorEvolucao);
+    const chavesEvolucao = Object.keys(recenteEvolucao).filter(chave =>
+      recenteEvolucao[chave].total >= 3 && anteriorEvolucao[chave] && anteriorEvolucao[chave].total >= 3
+    );
+    if(chavesEvolucao.length){
+      escreverTitulo('Evolução da independência, por matéria', 13);
+      chavesEvolucao.forEach(chave => {
+        const pctRecente = Math.round(100 * recenteEvolucao[chave].comPista / recenteEvolucao[chave].total);
+        const pctAnterior = Math.round(100 * anteriorEvolucao[chave].comPista / anteriorEvolucao[chave].total);
+        const nome = NOMES_MATERIA_PARENTAL[chave] || chave;
+        escreverLinhaTabela(nome, `${pctAnterior}% → ${pctRecente}% com pista`);
+      });
+      y += 10;
+    }
+
+    // Jogos sociais (Como se Sente? / O Que Dirias?): nível atual e % de acerto à
+    // primeira em cada um — mesma leitura já disponível no ecrã (ver renderJogosSociais).
+    const chavesJogosSociais = ['emocoesrosto', 'quedirias'].filter(c => registoPistaPorMateria[c] && registoPistaPorMateria[c].perguntas >= 3);
+    if(chavesJogosSociais.length){
+      escreverTitulo('Competências sociais', 13);
+      chavesJogosSociais.forEach(chave => {
+        const r = registoPistaPorMateria[chave];
+        const nome = NOMES_MATERIA_PARENTAL[chave] || chave;
+        const pct = Math.round(100 * r.comPista / r.perguntas);
+        const nivel = NOMES_NIVEL_PARENTAL[obterNivelAtual(chave)] || 'Fácil';
+        escreverLinhaTabela(nome, `nível ${nivel} · ${pct}% com pista`);
+      });
+      y += 10;
+    }
+
+    // Registo de emoções: últimos registos feitos pela própria criança no Quadro de
+    // Emoções, com o motivo que ela escolheu (quando indicou um) — não é um diagnóstico,
+    // só o que foi partilhado, tal como já indicado no ecrã (ver renderRegistoEmocoes).
+    // Limitado às últimas 10 entradas para não sobrecarregar o relatório com histórico
+    // extenso — quem quiser o detalhe completo continua a vê-lo no próprio ecrã da app.
+    if(registoEmocoes.length){
+      escreverTitulo('Últimos registos de emoções', 13);
+      registoEmocoes.slice(-10).reverse().forEach(r => {
+        const dataFormatada = new Date(r.quando).toLocaleDateString('pt-PT', { day:'2-digit', month:'2-digit' });
+        const texto = r.motivo ? `${r.emocao} — ${r.motivo}` : r.emocao;
+        escreverLinhaTabela(dataFormatada, texto);
+      });
+      y += 10;
+    }
+
     // Rodapé de aviso, na última página
     novaLinhaSeNecessario(40);
     doc.setFont('helvetica', 'italic');
@@ -14435,8 +15576,13 @@ async function gerarRelatorioPDF(){
 
     const nomeFicheiro = `relatorio-mundo-do-eduardo-${dataHojeChave()}.pdf`;
     doc.save(nomeFicheiro);
-    msg.style.color = 'var(--texto-suave)';
-    msg.textContent = '✓ Relatório descarregado.';
+    if(avisoAnaliseIA){
+      msg.style.color = 'var(--coral-suave)';
+      msg.textContent = `✓ Relatório descarregado com as tabelas de dados. A análise por IA não foi incluída: ${avisoAnaliseIA}`;
+    } else {
+      msg.style.color = 'var(--texto-suave)';
+      msg.textContent = '✓ Relatório descarregado.';
+    }
   }catch(e){
     msg.style.color = 'var(--coral-suave)';
     msg.textContent = mensagemErroDeRede(e, fornecedor);
@@ -14571,12 +15717,16 @@ let perguntasGeradasIA = []; // perguntas ainda em revisão, antes de irem para 
 
 function guardarChaveGemini(){
   try{
-    const valor = document.getElementById('ia-chave-gemini').value.trim();
+    const campo = document.getElementById('ia-chave-gemini');
+    if(!campo) return false; // campo inexistente (não devia acontecer, mas por segurança)
+    const valor = campo.value.trim();
     if(valor) localStorage.setItem(CHAVE_GEMINI_API, valor);
+    atualizarEstadoChaveGemini();
     return true;
   }catch(e){
     // Sem acesso ao localStorage: segue sem guardar, mas quem chamou esta função
     // precisa de saber, já que a chave lida a seguir pode ficar desatualizada ou vazia.
+    atualizarEstadoChaveGemini();
     return false;
   }
 }
@@ -14586,6 +15736,26 @@ function carregarChaveGemini(){
     const campo = document.getElementById('ia-chave-gemini');
     if(valor && campo) campo.value = valor;
   }catch(e){ /* sem acesso: campo fica vazio */ }
+  atualizarEstadoChaveGemini();
+}
+
+// Confirmação visível de que a chave está mesmo guardada em localStorage — sem isto, a
+// pessoa não tem forma de saber se colar a chave no campo foi suficiente, ou se ainda
+// falta algum passo (ver bug corrigido: colar sozinho não bastava, era preciso gerar
+// uma pergunta primeiro para a chave ser persistida). Chamada ao carregar a página, ao
+// guardar, e a cada tecla premida no campo, para nunca ficar desatualizada.
+function atualizarEstadoChaveGemini(){
+  const estadoEl = document.getElementById('estado-chave-gemini');
+  if(!estadoEl) return;
+  let chaveGuardada = '';
+  try{ chaveGuardada = (localStorage.getItem(CHAVE_GEMINI_API) || '').trim(); }catch(e){ /* sem acesso */ }
+  if(chaveGuardada){
+    estadoEl.textContent = '✓ Chave guardada neste dispositivo';
+    estadoEl.style.color = 'var(--salva, #4C8C6B)';
+  } else {
+    estadoEl.textContent = 'Ainda sem chave guardada';
+    estadoEl.style.color = 'var(--texto-suave)';
+  }
 }
 
 function alternarBlocoChaveGemini(){
@@ -14598,6 +15768,47 @@ function alternarBlocoChaveGemini(){
 // Guardado à parte da chave da API e do banco de perguntas — respostas da mãe sobre o Eduardo,
 // usadas para dar contexto automático ao gerador de perguntas por IA (junto do campo de contexto manual).
 const CHAVE_QUESTIONARIO_EDUARDO = chaveCrianca('mundoDoEduardo_questionario_v1');
+
+// Lê e devolve o questionário sobre a criança já guardado (ou null se não existir/inválido).
+// Helper central para não repetir o try/catch de leitura do localStorage em cada sítio
+// que precise do ano escolar, idade, etc. — usado em escolaItensParaExibir() e no
+// prompt da IA (descreverNivelEscolarParaPrompt).
+function obterDadosQuestionarioEduardo(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
+    if(!bruto) return null;
+    const dados = JSON.parse(bruto);
+    return (dados && typeof dados === 'object') ? dados : null;
+  }catch(e){ return null; }
+}
+
+// Escolha manual dos pais sobre quais disciplinas mostrar no menu Escola — chave por
+// disciplina (matematica, portugues, geografia, ciencias, ingles, espanhol), valor
+// true/false. Uma disciplina ausente deste objeto usa a sugestão automática do ano
+// escolar (ver escolaItensParaExibir). Persistido à parte do questionário para poder
+// ser gerido no seu próprio ecrã em Configurações, sem reabrir o questionário completo.
+const CHAVE_DISCIPLINAS_MANUAL = chaveCrianca('mundoDoEduardo_disciplinas_manual_v1');
+let disciplinasAtivasManual = {};
+
+function guardarDisciplinasAtivasManual(){
+  try{
+    localStorage.setItem(CHAVE_DISCIPLINAS_MANUAL, JSON.stringify(disciplinasAtivasManual));
+    return true;
+  }catch(e){
+    mostrarAvisoFalhaAoGuardar('A escolha de disciplinas não foi guardada.');
+    return false;
+  }
+}
+
+function carregarDisciplinasAtivasManual(){
+  try{
+    const bruto = localStorage.getItem(CHAVE_DISCIPLINAS_MANUAL);
+    if(!bruto) return;
+    const dados = JSON.parse(bruto);
+    if(dados && typeof dados === 'object') disciplinasAtivasManual = dados;
+  }catch(e){ /* preferências inválidas: usa-se a sugestão automática do ano, sem rebentar a app */ }
+}
+
 
 // Perfil sensorial estruturado por canal, cada um com respostas específicas e observáveis
 // (não perguntas vagas tipo "é sensível ao som?") e separadas em "busca" (procura ativamente
@@ -14805,15 +16016,27 @@ function obterGeneroCrianca(){
   }catch(e){ return 'm'; }
 }
 
-// Lê o nome guardado no questionário (ou "Eduardo" por omissão). Usada em qualquer
-// texto fixo da app que precise do nome da criança — ex: elogios em obterElogiosVariados().
+// Lê o nome da criança ativa, com uma cadeia de fallback em 3 níveis: 1) nome no
+// questionário (mais completo, pode ter sido corrigido manualmente); 2) nome guardado
+// na lista de crianças (definido ao criar o perfil, existe mesmo sem questionário
+// preenchido); 3) rótulo genérico, nunca "Eduardo" — antes disto, uma criança nova
+// sem questionário preenchido herdava sempre o nome "Eduardo" por omissão, mesmo
+// depois de trocar de perfil no seletor. Usada em qualquer texto fixo da app que
+// precise do nome da criança — ex: elogios em obterElogiosVariados(), saudação, PDF.
 function obterNomeCrianca(){
   try{
     const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
-    if(!bruto) return 'Eduardo';
-    const dados = JSON.parse(bruto);
-    return (dados && dados.nome) ? dados.nome : 'Eduardo';
-  }catch(e){ return 'Eduardo'; }
+    if(bruto){
+      const dados = JSON.parse(bruto);
+      if(dados && dados.nome) return dados.nome;
+    }
+  }catch(e){ /* questionário inválido: tenta a lista de crianças a seguir */ }
+  try{
+    const lista = listarCriancas();
+    const ativa = lista.find(c => c.id === idCriancaAtiva());
+    if(ativa && ativa.nome) return ativa.nome;
+  }catch(e){ /* lista indisponível: cai no rótulo genérico abaixo */ }
+  return 'esta criança';
 }
 
 function generoTexto(radical, sufixoMasc, sufixoFem){
@@ -14822,31 +16045,27 @@ function generoTexto(radical, sufixoMasc, sufixoFem){
 }
 
 // Emoji de criança consistente com o género do perfil (👦/👧), usado nos seletores de
-// modo "Sozinho vs Jogar com a mãe" do quiz e do jogo da memória. Sem isto, ficava
+// modo "Sozinho vs A Dois" do quiz e do jogo da memória. Sem isto, ficava
 // sempre 👦 fixo mesmo com um perfil de rapariga configurado.
 function iconeCrianca(){
   return obterGeneroCrianca() === 'f' ? '👧' : '👦';
 }
 
-// Emoji combinado "mãe + criança" para o botão "Jogar com a mãe", com a mesma
-// adaptação de género da criança que iconeCrianca() acima.
+// Emoji neutro de "duas pessoas" para o botão "A Dois" — substituiu o antigo
+// combo "mãe + criança", que presumia uma configuração familiar específica
+// (podia ser o pai, um avô, um irmão mais velho, etc.). Sem dependência de género.
 function iconeDupla(){
-  return obterGeneroCrianca() === 'f' ? '👩\u200d👧' : '👩\u200d👦';
+  return '🧑\u200d🤝\u200d🧑';
 }
 
 function aplicarSaudacaoPersonalizada(){
   const alvo = document.getElementById('saudacao-nome');
   if(!alvo) return;
-  let nome = 'Eduardo';
-  try{
-    const bruto = localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO);
-    if(bruto){
-      const dados = JSON.parse(bruto);
-      if(dados && typeof dados === 'object' && dados.nome){
-        nome = dados.nome;
-      }
-    }
-  }catch(e){ /* mantém o nome por omissão em caso de dados inválidos */ }
+  // Reaproveita a mesma cadeia de fallback central (questionário → lista de crianças
+  // → genérico) em vez de duplicar a lógica com um valor por omissão fixo — era aqui
+  // que a saudação ficava presa em "Olá, Eduardo!" ao trocar para uma criança nova
+  // sem questionário preenchido.
+  const nome = obterNomeCrianca();
   definirTextoSaudacaoNome(`Olá, ${nome}!`);
 }
 
@@ -14891,12 +16110,32 @@ const NOMES_NIVEL_IA = {1:'fácil', 2:'médio', 3:'difícil'};
 // Monta o pedido enviado ao modelo, pedindo explicitamente JSON puro, no mesmo formato
 // já usado no banco de perguntas da app: {p, o:[4 opções], c:índice da correta}.
 // Quando há um documento anexado (PDF/foto da matéria), pede para basear as perguntas nele.
+// Descreve a que ano/idade as perguntas se devem adequar, a partir do perfil — nunca um
+// valor fixo. Sem isto, as perguntas da IA eram sempre pensadas para "12-13 anos", mesmo
+// para uma criança do 1.º ano ou do 9.º ano, o que tornava o conteúdo desadequado à
+// escolaridade real assim que o perfil dela se afastasse dessa idade.
+function descreverNivelEscolarParaPrompt(){
+  const bruto = (() => { try{ return localStorage.getItem(CHAVE_QUESTIONARIO_EDUARDO); }catch(e){ return null; } })();
+  let anoTexto = null, idadeTexto = null;
+  try{
+    const dados = bruto ? JSON.parse(bruto) : null;
+    if(dados && dados.anoEscolar) anoTexto = String(dados.anoEscolar).trim();
+    if(dados && dados.idade) idadeTexto = String(dados.idade).trim();
+  }catch(e){}
+  const anoNum = obterAnoEscolarNumerico(); // usa o ano explícito, ou aproxima pela idade (ver função)
+  if(anoTexto) return `um aluno do ${anoTexto}${idadeTexto ? `, com ${idadeTexto} anos` : ''}`;
+  if(anoNum) return `um aluno de escolaridade equivalente ao ${anoNum}.º ano` + (idadeTexto ? `, com ${idadeTexto} anos` : '');
+  // Sem ano nem idade preenchidos no perfil: mantém uma faixa etária só como último recurso.
+  return 'um aluno de 8-10 anos';
+}
+
 function construirPromptPerguntas(materiaChave, nivel, quantidade, temDocumento, contextoEduardo){
   const nomeMateria = NOMES_MATERIA_IA[materiaChave] || materiaChave;
   const nomeNivel = NOMES_NIVEL_IA[nivel] || 'médio';
   const numOpcoes = (materiaChave === 'vf') ? 2 : 4;
+  const nivelEscolar = descreverNivelEscolarParaPrompt();
   return `Gera ${quantidade} perguntas de escolha múltipla de "${nomeMateria}" em português de Portugal, `
-    + `adequadas a um aluno de 12-13 anos com dificuldades de aprendizagem, nível de dificuldade "${nomeNivel}". `
+    + `adequadas a ${nivelEscolar}, com dificuldades de aprendizagem, nível de dificuldade "${nomeNivel}" para essa escolaridade. `
     + (contextoEduardo ? `Contexto sobre o aluno, a ter em conta ao formular as perguntas (usa isto para tornar os exemplos mais relevantes e motivadores, sem sair do tema da matéria pedida): ${contextoEduardo} ` : '')
     + (temDocumento ? `Baseia as perguntas APENAS no conteúdo do documento em anexo, que é a matéria que o aluno está a estudar neste momento. Não inventes conteúdo que não esteja no documento. ` : '')
     + `Frases curtas e diretas, sem ambiguidade. Cada pergunta deve ter exatamente ${numOpcoes} opções de resposta.`
@@ -15076,6 +16315,15 @@ async function gerarPerguntasComGemini(chaveApi, prompt, documento){
     body: JSON.stringify({
       contents: [{ parts }],
       generationConfig: { temperature: 0.8 },
+      // Mesma razão da chamada em gerarDicaComGemini: os prompts desta app giram à volta
+      // de uma criança autista e os thresholds por omissão do Gemini geram falsos
+      // positivos nesse tipo de conteúdo com alguma frequência, mesmo sem nada impróprio.
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+      ],
     }),
   }, documento ? TIMEOUT_FETCH_IA_DOCUMENTO_MS : TIMEOUT_FETCH_IA_MS);
   if(!resposta.ok){
@@ -15083,8 +16331,32 @@ async function gerarPerguntasComGemini(chaveApi, prompt, documento){
     throw new Error(mensagemErroAmigavel('Gemini', resposta.status, corpoErro));
   }
   const dados = await resposta.json();
+  // Mesmo cuidado de leitura de erro da função gerarDicaComGemini: o motivo de um
+  // bloqueio pode vir em promptFeedback.blockReason (recusado antes de gerar) ou em
+  // candidates[0].finishReason (parou a meio) — sem isto, qualquer um destes casos caía
+  // sempre na mensagem genérica "Tenta novamente", escondendo a causa real.
+  const bloqueioDoPedido = dados?.promptFeedback?.blockReason;
+  if(bloqueioDoPedido){
+    const motivosPedido = {
+      SAFETY: 'O pedido foi recusado pelos filtros de segurança do Gemini antes de gerar qualquer resposta.',
+      OTHER: 'O pedido foi recusado pelo Gemini por um motivo não detalhado.',
+      BLOCKED_REASON_UNSPECIFIED: 'O pedido foi recusado pelo Gemini por um motivo não detalhado.',
+    };
+    throw new Error(`${motivosPedido[bloqueioDoPedido] || `O Gemini recusou o pedido (motivo: ${bloqueioDoPedido}).`} Tenta novamente ou, se persistir, tenta com o outro fornecedor.`);
+  }
+  const motivoParagem = dados?.candidates?.[0]?.finishReason;
   const texto = dados?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if(!texto) throw new Error('Gemini não devolveu texto na resposta. Tenta novamente.');
+  if(!texto){
+    const motivosConhecidos = {
+      SAFETY: 'A resposta foi bloqueada pelos filtros de segurança do Gemini.',
+      RECITATION: 'A resposta foi bloqueada por semelhança excessiva com conteúdo existente.',
+      PROHIBITED_CONTENT: 'A resposta foi bloqueada por conteúdo não permitido.',
+      MAX_TOKENS: 'A resposta da IA foi cortada por ser demasiado longa.',
+      OTHER: 'O Gemini não conseguiu gerar uma resposta por um motivo não especificado.',
+    };
+    const detalhe = motivosConhecidos[motivoParagem];
+    throw new Error(`Gemini não devolveu texto na resposta.${detalhe ? ' ' + detalhe : ''} Tenta novamente${detalhe ? ' ou, se persistir, tenta com o outro fornecedor.' : '.'}`);
+  }
   return extrairJsonDeTexto(texto);
 }
 
@@ -16082,6 +17354,7 @@ const CHAVES_BACKUP = [
   CHAVE_ESTADO, CHAVE_ROTINA, CHAVE_HISTORICO, CHAVE_VIDEOS_REAIS,
   CHAVE_ESCALA_TEXTO, CHAVE_VISTA_ROTINA, CHAVE_QUESTIONARIO_EDUARDO, CHAVE_BANCO_PERGUNTAS,
   CHAVE_HISTORIAS_SOCIAIS, CHAVE_CAA_PERSONALIZADO, CHAVE_FRASES_GUARDADAS_CAA,
+  CHAVE_DISCIPLINAS_MANUAL,
 ];
 
 function exportarBackup(idElementoMsg, prefixoFicheiro, textoSucesso){
@@ -16236,7 +17509,10 @@ carregarVideosReais();
 carregarBancoPerguntasPersonalizado();
 carregarHistoriasSociais();
 carregarEstado();
+carregarObjetivoAtivo();
+renderMensagemObjetivoEduardo();
 carregarNumJogosPorSessao();
+carregarTemaVisualJuntarLimpar();
 (function sincronizarSliderNumJogosSessao(){
   const slider = document.getElementById('slider-num-jogos-sessao');
   const rotulo = document.getElementById('valor-num-jogos-sessao');
@@ -16274,12 +17550,17 @@ document.getElementById('btn-ver-semana').addEventListener('click', ()=>{ render
 document.getElementById('btn-sitio-novo').addEventListener('click', ()=>{ renderSitioNovo(); irPara('sitio-novo'); });
 configurarFormularioAlimentacao();
 document.getElementById('ia-fornecedor').addEventListener('change', alternarBlocoChaveGemini);
+document.getElementById('seletor-objetivo-ativo').addEventListener('change', (e) => {
+  definirObjetivoAtivo(e.target.value || null);
+});
 document.getElementById('btn-gerar-ia').addEventListener('click', gerarPerguntasIA);
 document.getElementById('btn-adicionar-ia').addEventListener('click', adicionarPerguntasIAaoBanco);
 document.getElementById('ia-ficheiro').addEventListener('change', atualizarNomeFicheiroIA);
 document.getElementById('btn-remover-ficheiro-ia').addEventListener('click', removerFicheiroIA);
+document.getElementById('ia-chave-gemini').addEventListener('input', guardarChaveGemini);
 carregarChaveGemini();
 carregarQuestionarioEduardo();
+carregarDisciplinasAtivasManual();
 aplicarSaudacaoPersonalizada();
 document.getElementById('btn-guardar-questionario').addEventListener('click', guardarQuestionarioEduardo);
 document.getElementById('btn-abrir-editar-perfil').addEventListener('click', abrirModalPerfil);
@@ -16295,7 +17576,7 @@ document.getElementById('btn-recusar-sugestao-calmos').addEventListener('click',
   document.getElementById('overlay-sugestao-calmos').classList.remove('mostrar');
 });
 alternarBlocoChaveGemini();
-renderLista('lista-escola', escolaItens, abrirEscola);
+renderListaEscola();
 renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
 renderListaJogosPorCategoria();
 renderLista('lista-videos', videosItens, abrirVideo);
@@ -16331,6 +17612,73 @@ function terminarSessao(){
       if(btn) btn.disabled = false;
     });
 }
+// ===== Exportar os dados da conta (RGPD) =====
+async function exportarDadosConta(){
+  const btn = document.getElementById('btn-exportar-conta');
+  const msg = document.getElementById('msg-exportar-conta');
+  if(!window.utilizadorAtual || window.utilizadorAtual.semConta || !window.firebaseAuthApi || !window.firebaseAuthApi.exportarTudoDaConta){
+    if(msg){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Só é possível exportar com uma conta ligada à internet.'; }
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'A preparar…';
+  if(msg){ msg.style.color = 'var(--texto-suave)'; msg.textContent = ''; }
+  try{
+    const uid = window.utilizadorAtual.uid;
+    const pacote = await window.firebaseAuthApi.exportarTudoDaConta(uid);
+    pacote.exportadoEm = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `edukids-dados-da-conta-${dataHojeChave()}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if(msg) msg.textContent = '✓ Ficheiro descarregado com tudo o que a tua conta tem guardado.';
+  }catch(e){
+    console.error('Erro ao exportar dados da conta:', e);
+    if(msg){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Não foi possível exportar. Tenta novamente.'; }
+  }finally{
+    btn.disabled = false; btn.textContent = '⬇️ Exportar os meus dados';
+  }
+}
+document.getElementById('btn-exportar-conta').addEventListener('click', exportarDadosConta);
+
+// ===== Apagar conta e dados (RGPD) =====
+// Pede a palavra-passe (o Firebase exige uma sessão "recente" para apagar a conta) e duas
+// confirmações claras antes de destruir tudo, porque a ação não tem forma de recuar.
+async function apagarContaEDados(){
+  const msg = document.getElementById('msg-apagar-conta');
+  if(!window.utilizadorAtual || window.utilizadorAtual.semConta || !window.firebaseAuthApi || !window.firebaseAuthApi.apagarContaEDados){
+    if(msg){ msg.style.color = 'var(--coral-suave)'; msg.textContent = 'Só é possível apagar uma conta ligada à internet.'; }
+    return;
+  }
+  const senha = window.prompt('Para apagar a conta em definitivo, confirma a tua palavra-passe:');
+  if(!senha) return;
+  if(!window.confirm('Isto apaga PARA SEMPRE o perfil, a rotina, as estrelas, o histórico, o CAA e remove o acesso de quem estiver ligado por convite. Não há como recuperar depois. Continuar?')) return;
+
+  const btn = document.getElementById('btn-apagar-conta');
+  btn.disabled = true; btn.textContent = 'A apagar…';
+  if(msg){ msg.style.color = 'var(--texto-suave)'; msg.textContent = ''; }
+  try{
+    await window.firebaseAuthApi.reautenticar(senha);
+    if(window.EduSync) window.EduSync.pausar();
+    const uid = window.utilizadorAtual.uid;
+    await window.firebaseAuthApi.apagarContaEDados(uid);
+    if(window.EduSync) window.EduSync.limparLocal();
+    try{ localStorage.removeItem('mundoDoEduardo_sessaoLocal_v1'); }catch(e){}
+    // onAuthStateChanged trata da transição para o ecrã de onboarding.
+  }catch(e){
+    console.error('Erro ao apagar conta:', e);
+    if(msg){
+      msg.style.color = 'var(--coral-suave)';
+      msg.textContent = (e && e.code === 'auth/wrong-password')
+        ? 'Palavra-passe incorreta.'
+        : 'Não foi possível apagar a conta. Tenta novamente.';
+    }
+    btn.disabled = false; btn.textContent = '🗑️ Apagar conta e dados';
+  }
+}
+document.getElementById('btn-apagar-conta').addEventListener('click', apagarContaEDados);
+
 document.getElementById('btn-terminar-sessao').addEventListener('click', terminarSessao);
 
 </script>
