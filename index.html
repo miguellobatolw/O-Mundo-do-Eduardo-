@@ -79,6 +79,12 @@
     font-family:'Atkinson', 'Verdana', sans-serif;
     color:var(--texto);
     overflow:hidden;
+    /* Em ecrãs largos de secretária, centra a "moldura" da app em vez de a deixar
+       ocupar a janela toda — ver a regra de largura em #app, que é onde a app
+       decide o quanto se estica. Sem afetar telemóvel/tablet, onde a janela nunca
+       chega ao limite definido ali. */
+    display:flex;
+    justify-content:center;
   }
 
   @font-face{
@@ -89,11 +95,20 @@
   #app{
     position:relative;
     width:100%;
+    /* A app foi pensada para toque num ecrã de criança (telemóvel/tablet), não para
+       ecrãs de secretária muito largos — acima deste limite, esticar mais só piora a
+       leitura (linhas de texto enormes) e o toque (botões desproporcionados), sem
+       ganho nenhum. Em qualquer ecrã até este limite, o comportamento fica
+       exatamente igual a antes (100% da largura disponível). */
+    max-width:640px;
     height:100vh;
     height:100dvh;
     display:flex;
     flex-direction:column;
     zoom:var(--escala-texto, 1); /* ajustado via JS: botão A- / A+ no cabeçalho */
+    /* Sombra subtil só visível quando há espaço de fundo à volta (ecrã largo) —
+       ajuda a "moldura" da app a destacar-se do fundo em vez de se confundir com ele. */
+    box-shadow:0 0 40px rgba(0,0,0,0.08);
   }
 
   /* ===== Topo ===== */
@@ -1176,7 +1191,13 @@
 
   /* ===== Reforço positivo (overlay) ===== */
   .overlay-yay{
-    position:fixed; inset:0;
+    position:fixed; top:0; bottom:0;
+    /* Estes overlays vivem fora de #app no HTML (são irmãos dele, não filhos), por
+       isso "inset:0" cobria sempre a janela toda em vez de só a moldura da app —
+       invisível em telemóvel/tablet, mas em ecrã de secretária largo isto cobria
+       também o fundo à volta da app centrada. left/right com auto e o mesmo
+       max-width de #app alinha estes overlays exatamente com a moldura. */
+    left:0; right:0; max-width:640px; margin:0 auto;
     background:rgba(58,107,112,0.92);
     display:none;
     align-items:center; justify-content:center;
@@ -1233,7 +1254,8 @@
 
   /* ===== Modal de Perfil da criança (editar dados do questionário) ===== */
   .overlay-perfil{
-    position:fixed; inset:0;
+    position:fixed; top:0; bottom:0;
+    left:0; right:0; max-width:640px; margin:0 auto;
     background:rgba(46,61,62,0.72);
     display:none;
     align-items:flex-start; justify-content:center;
@@ -1253,7 +1275,8 @@
 
 
   .overlay-pin{
-    position:fixed; inset:0;
+    position:fixed; top:0; bottom:0;
+    left:0; right:0; max-width:640px; margin:0 auto;
     background:rgba(46,61,62,0.72);
     display:none;
     align-items:center; justify-content:center;
@@ -1263,7 +1286,11 @@
   .overlay-pin.mostrar{ display:flex; }
   .toast-aviso-guardar{
     position:fixed;
-    left:16px; right:16px; bottom:16px;
+    /* Mesma correção dos overlays acima: sem isto, em ecrã largo o toast ficava
+       colado às bordas reais da janela em vez de às bordas da moldura da app. */
+    left:max(16px, calc(50% - 320px + 16px));
+    right:max(16px, calc(50% - 320px + 16px));
+    bottom:16px;
     background:var(--coral-suave); color:#fff;
     padding:14px 16px;
     border-radius:14px;
@@ -1301,7 +1328,8 @@
 
   /* ===== Modo calma ===== */
   .overlay-calma{
-    position:fixed; inset:0;
+    position:fixed; top:0; bottom:0;
+    left:0; right:0; max-width:640px; margin:0 auto;
     background:linear-gradient(160deg,#2C4A4D,#3A6B70 60%,#5C8C90);
     display:none;
     align-items:center; justify-content:center;
@@ -1768,10 +1796,28 @@
   .aviso-transicao .icone-aviso{ font-size:20px; flex-shrink:0; }
   .aviso-transicao strong{ color:var(--petroleo); }
 
+  .cartao-mudanca-notada{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:var(--areia-clara);
+    border:2px solid var(--salva-clara);
+    border-radius:var(--raio);
+    padding:12px 14px;
+    margin-bottom:10px;
+    font-size:13px;
+    line-height:1.4;
+    color:var(--texto);
+  }
+  .cartao-mudanca-notada .icone{ font-size:20px; flex-shrink:0; }
+  .cartao-mudanca-notada .texto{ flex:1; }
+
   /* ===== Quadro CAA (comunicação) ===== */
   .botao-caa-flutuante{
     position:fixed;
-    right:16px;
+    /* Mesma correção do toast acima — mantém o botão junto ao canto da moldura da
+       app, não da janela, em ecrã largo. */
+    right:max(16px, calc(50% - 320px + 16px));
     bottom:86px;
     width:58px; height:58px;
     border-radius:50%;
@@ -2010,7 +2056,8 @@
 
   /* ===== Onboarding / Login (conta na nuvem, Firebase) ===== */
   #onboarding{
-    position:fixed; inset:0;
+    position:fixed; top:0; bottom:0;
+    left:0; right:0; max-width:640px; margin:0 auto;
     background:var(--fundo);
     z-index:200;
     display:flex;
@@ -2672,6 +2719,10 @@
         </select>
         <div id="cartao-progresso-objetivo-ativo"></div>
       </div>
+
+      <!-- Avisos discretos quando um padrão muda de forma notada (ver detetarMudancasNotadas).
+           Fica vazio e escondido (display:none) quando não há nada a assinalar. -->
+      <div id="mudancas-notadas" style="display:none;margin-bottom:14px;"></div>
 
       <div class="grelha-resumo-parental" id="grelha-resumo-parental"></div>
 
@@ -4148,7 +4199,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.56.1';
+window.APP_VERSION = '1.57.2';
 
 /* ======================= DADOS ======================= */
 
@@ -4450,7 +4501,7 @@ function responderSequencias(i){
   const estado = document.getElementById('estado-sequencias');
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    sequenciasErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     if(estado && sequenciasModoDupla){
       estado.textContent = quemRespondeu + ': acertou!';
@@ -4765,19 +4816,60 @@ let classificarErrouNestaRonda = false, classificarTeveErro = false;
 let classificarRondasDificeisSeguidas = 0;
 let classificarItensRestantes = [];
 let classificarItemSelecionado = -1;
+// Modo "A Dois" — aqui a alternância acontece a cada ITEM classificado, não a cada
+// ronda como nos outros jogos, porque uma "ronda" de Classificar não é uma pergunta
+// única: é uma caixa de vários itens esvaziada um a um, e cada item já é a sua própria
+// decisão discreta (ver responderClassificar).
+let classificarModoDupla = false, classificarVezDoAdulto = false;
 
 function gerarHtmlClassificar(){
   const nivel = obterNivelAtual('classificar');
   const nomeNivel = NIVEIS_CLASSIFICAR[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
+      <div class="alternador-modo-dupla" id="alternador-classificar">
+        <button class="btn-modo-dupla ${classificarModoDupla ? '' : 'ativo'}" id="btn-classificar-sozinho">${iconeCrianca()} Sozinho</button>
+        <button class="btn-modo-dupla ${classificarModoDupla ? 'ativo' : ''}" id="btn-classificar-dupla">${iconeDupla()} A Dois</button>
+      </div>
       <div class="nivel-jogo">Nível ${nomeNivel} — toca num item e depois na caixa certa</div>
+      <div class="vez-modo-dupla" id="vez-classificar" style="display:none;"></div>
       <button class="btn-pagina" id="btn-ouvir-classificar" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-classificar" style="margin-bottom:10px;"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="caixas-classificar"></div>
       <div class="estado-jogo" id="estado-classificar"></div>
     </div>
   `;
+}
+
+// Liga os botões Sozinho/A Dois — mesmo padrão de configurarAlternadorEmocoesRosto:
+// o alternador só existe uma vez no HTML estático deste jogo.
+function configurarAlternadorClassificar(){
+  const btnSozinho = document.getElementById('btn-classificar-sozinho');
+  const btnDupla = document.getElementById('btn-classificar-dupla');
+  if(!btnSozinho || !btnDupla) return;
+  btnSozinho.addEventListener('click', ()=>{
+    classificarModoDupla = false;
+    btnSozinho.classList.add('ativo'); btnDupla.classList.remove('ativo');
+    atualizarIndicadorVezClassificar();
+  });
+  btnDupla.addEventListener('click', ()=>{
+    classificarModoDupla = true;
+    classificarVezDoAdulto = false;
+    btnDupla.classList.add('ativo'); btnSozinho.classList.remove('ativo');
+    atualizarIndicadorVezClassificar();
+  });
+}
+
+function atualizarIndicadorVezClassificar(){
+  const el = document.getElementById('vez-classificar');
+  if(!el) return;
+  if(!classificarModoDupla){
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  el.textContent = classificarVezDoAdulto ? '🧑 Vez do adulto' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()}`;
+  el.className = 'vez-modo-dupla ' + (classificarVezDoAdulto ? 'vez-mae' : 'vez-eduardo');
 }
 
 function iniciarJogoClassificar(){
@@ -4788,6 +4880,9 @@ function iniciarJogoClassificar(){
   classificarRondaAtual = 0;
   classificarTeveErro = false;
   classificarRondasDificeisSeguidas = 0;
+  classificarModoDupla = false;
+  classificarVezDoAdulto = false;
+  configurarAlternadorClassificar();
   proximaRondaClassificar();
 }
 
@@ -4800,6 +4895,7 @@ function proximaRondaClassificar(){
   classificarItemSelecionado = -1;
   const estadoAnterior = document.getElementById('estado-classificar');
   if(estadoAnterior) estadoAnterior.textContent = '';
+  atualizarIndicadorVezClassificar();
 
   const config = NIVEIS_CLASSIFICAR[classificarNivelConteudo] || NIVEIS_CLASSIFICAR[1];
   const ronda = config.rondas[classificarRondaAtual];
@@ -4855,12 +4951,24 @@ function responderClassificar(grupo){
   const item = classificarItensRestantes[classificarItemSelecionado];
   if(!item) return;
   const correto = item.grupo === grupo;
+  const estado = document.getElementById('estado-classificar');
+  const quemRespondeu = classificarModoDupla ? (classificarVezDoAdulto ? 'O adulto' : obterNomeCrianca()) : '';
   if(correto){
-    tocarSomAcerto();
+    classificarErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     classificarItensRestantes.splice(classificarItemSelecionado, 1);
     classificarItemSelecionado = -1;
     renderItensClassificar();
+    if(estado && classificarModoDupla){
+      estado.textContent = quemRespondeu + ': acertou!';
+      estado.style.color = 'var(--petroleo)';
+    }
+    // Alterna a vez a cada item classificado com sucesso — cada item já é a sua
+    // própria decisão discreta (ver comentário em classificarModoDupla acima).
+    if(classificarModoDupla){
+      classificarVezDoAdulto = !classificarVezDoAdulto;
+      atualizarIndicadorVezClassificar();
+    }
     if(classificarItensRestantes.length === 0){
       classificarRondaAtual++;
       classificarRondasDificeisSeguidas = classificarErrouNestaRonda ? classificarRondasDificeisSeguidas + 1 : 0;
@@ -4879,6 +4987,10 @@ function responderClassificar(grupo){
     classificarTeveErro = true;
     tocarSomErro();
     vibrar([25,80,25]);
+    if(estado && classificarModoDupla){
+      estado.textContent = quemRespondeu + ': tenta outra vez.';
+      estado.style.color = 'var(--coral-suave)';
+    }
     // Não remove o item nem avança — apenas desmarca a seleção, para tentar de novo.
     classificarItemSelecionado = -1;
     renderItensClassificar();
@@ -4894,8 +5006,11 @@ function concluirJogoClassificar(){
     renderLista('lista-atividades', atividadesItens.concat(historiasSociais), abrirAtividadeOuHistoria);
   }
   const nomeNivel = NIVEIS_CLASSIFICAR[classificarNivelAtual]?.nome || 'Fácil';
+  const tituloFinal = classificarTeveErro
+    ? (classificarModoDupla ? 'Boa equipa!' : 'Muito bem!')
+    : (classificarModoDupla ? 'Boa equipa!' : 'Excelente trabalho!');
   darEstrela(
-    classificarTeveErro ? 'Muito bem!' : 'Excelente trabalho!',
+    tituloFinal,
     'Completaste o Jogo de Classificar — nível ' + nomeNivel,
     (!classificarTeveErro && classificarNivelAtual === 3) ? 2 : 1
   );
@@ -5010,7 +5125,7 @@ function responderOpostos(i){
   const correto = i === opostosIndiceAlvoAtual;
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    opostosErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
   } else {
     el.classList.add('errada');
@@ -5214,7 +5329,7 @@ function responderEmocoesRosto(i){
   const estado = document.getElementById('estado-emocoesrosto');
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    emocoesRostoErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     if(estado && emocoesRostoModoDupla){
       estado.textContent = quemRespondeu + ': acertou!';
@@ -5441,7 +5556,7 @@ function responderQueDirias(i){
   const estado = document.getElementById('estado-quedirias');
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    queDiriasErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     if(estado && queDiriasModoDupla){
       estado.textContent = quemRespondeu + ': acertou!';
@@ -7788,6 +7903,22 @@ function obterUltimosDias(n){
   return dias;
 }
 
+// Variante de obterUltimosDias que permite olhar para uma janela mais antiga, terminando
+// "deslocamento" dias atrás em vez de hoje — usada para comparar duas janelas de 7 dias
+// consecutivas (ver detetarMudancasNotadas). Ex: obterJanelaDias(7, 7) devolve os 7 dias
+// anteriores aos últimos 7 (dias -14 a -8), para comparar com obterUltimosDias(7) (dias -6 a hoje).
+function obterJanelaDias(n, deslocamento){
+  const dias = [];
+  for(let i = n - 1; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i - deslocamento);
+    const chave = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const registo = historicoDiario[chave] || {tarefasFeitas:0, tarefasTotal:0, estrelasGanhas:0, fichasEscola:0, perguntasTotal:0, perguntasComPista:0};
+    dias.push({ data: chave, diaSemana: d.toLocaleDateString('pt-PT', {weekday:'short'}), ...registo });
+  }
+  return dias;
+}
+
 /* ======================= PERSISTÊNCIA (localStorage) ======================= */
 const CHAVE_ESTADO = chaveCrianca('mundoDoEduardo_estado_v1');
 
@@ -8384,6 +8515,23 @@ function tocarSomAcerto(){
     oscEco.stop(agora + 0.48);
   }catch(e){}
 }
+// Variante mais discreta de tocarSomAcerto(), para quando o acerto vem depois de um erro
+// ou de uma pista na MESMA ronda. Continua claramente positiva (nunca deve soar a
+// "penalização"), mas sem o brilho extra do acerto à primeira — reforça sonoramente a
+// distinção pedagógica que a app já regista internamente (registoPistaPorMateria), sem
+// tornar o "quase" desagradável, o que desmotivaria em vez de ajudar.
+function tocarSomAcertoComPista(){
+  if(volumeSomApp <= 0) return;
+  try{
+    const ctx = obterAudioCtx();
+    const agora = ctx.currentTime;
+    const v = (efeitosCalmosAtivo ? 0.6 : 1) * volumeSomApp;
+    // Dois tons só, sem arpejo de três nem eco — "bem, conseguiste" simples e calmo,
+    // em vez do "plim" cheio de tocarSomAcerto().
+    tocarTom(ctx, 659.3, agora, 0.14, 0.10*v, 'sine');        // Mi5
+    tocarTom(ctx, 784.0, agora + 0.09, 0.22, 0.11*v, 'sine'); // Sol5 — sustido, mas sem eco
+  }catch(e){}
+}
 function tocarSomErro(){
   if(volumeSomApp <= 0) return;
   try{
@@ -8739,12 +8887,14 @@ function prepararSitioNovo(){
 function renderChecklistSitioNovo(){
   const cont = document.getElementById('conteudo-sitio-novo');
   const d = dadosSitioNovo;
+  // Escapa cada campo (texto escrito livremente pelos pais) antes de o inserir —
+  // mesmo cuidado já aplicado a outros campos de texto livre na app.
   const frases = [
-    { icone: '📍', texto: `Vamos a ${d.local}.` },
+    { icone: '📍', texto: `Vamos a ${escaparHtml(d.local)}.` },
   ];
-  if(d.pessoas) frases.push({ icone: '👥', texto: `Lá vamos encontrar ${d.pessoas}.` });
-  if(d.duracao) frases.push({ icone: '⏱️', texto: `Vamos ficar ${d.duracao}.` });
-  if(d.avisoExtra) frases.push({ icone: 'ℹ️', texto: d.avisoExtra });
+  if(d.pessoas) frases.push({ icone: '👥', texto: `Lá vamos encontrar ${escaparHtml(d.pessoas)}.` });
+  if(d.duracao) frases.push({ icone: '⏱️', texto: `Vamos ficar ${escaparHtml(d.duracao)}.` });
+  if(d.avisoExtra) frases.push({ icone: 'ℹ️', texto: escaparHtml(d.avisoExtra) });
   frases.push({ icone: '🏠', texto: 'Depois, voltamos para casa.' });
 
   cont.innerHTML = `
@@ -10796,7 +10946,10 @@ function responderQuiz(i){
   pararNarracao();
   const q = quizAtual[quizIndex];
   const feedback = document.getElementById('feedback-quiz');
-  const quemRespondeu = quizModoDupla ? (quizVezDaMae ? 'A mãe' : 'O Eduardo') : '';
+  // Usa o nome real da criança ativa (com fallback central), em vez de "O Eduardo"
+  // fixo — ver obterNomeCrianca(). "A mãe" mantém-se genérico porque o modo dupla
+  // não distingue qual adulto está a jogar, só que não é a criança a vez.
+  const quemRespondeu = quizModoDupla ? (quizVezDaMae ? 'A mãe' : obterNomeCrianca()) : '';
   // Só regista latência na 1ª tentativa da pergunta — depois de uma pista, o tempo
   // seguinte mede outra coisa (releitura/correção), não hesitação inicial.
   if(quizTentativasNaPergunta === 0){
@@ -10874,7 +11027,7 @@ function responderQuiz(i){
       const textoFalado = quizModoDupla ? quemRespondeu + ': ' + textoFaladoBase : textoFaladoBase;
       feedback.textContent = textoEcra;
       feedback.style.color = 'var(--petroleo)';
-      tocarSomAcerto();
+      tocarSomAcertoComPista();
       vibrar([15,40,60]);
       registarUsoPergunta(quizChave, quizTentativasNaPergunta > 0);
       // Só avança para a pergunta seguinte depois de a frase de elogio acabar de ser
@@ -11360,7 +11513,7 @@ function responderCaracteristicas(i, correto){
   const quemRespondeu = caractModoDupla ? (caractVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    caractErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     // Mesmo padrão do quiz: elogio variado no ecrã + narração com ênfase, e só avança
     // para a ronda seguinte depois de a fala terminar, para não a cortar a meio.
@@ -11640,7 +11793,7 @@ function responderDiferente(i){
   const quemRespondeu = diferenteModoDupla ? (diferenteVezDaMae ? 'A mãe' : `${obterNomeCrianca()}`) : '';
   if(correto){
     el.classList.add('certa');
-    tocarSomAcerto();
+    diferenteErrouNestaRonda ? tocarSomAcertoComPista() : tocarSomAcerto();
     vibrar([15,40,60]);
     const elogio = elogioRespostaCertaAoAcaso();
     if(estado){
@@ -13860,7 +14013,7 @@ function verificarPendentesConfig(){
   aviso.innerHTML = `
     <div class="aviso-transicao" role="status" style="cursor:pointer;" id="btn-ir-pendente">
       <span class="icone-aviso">⏳</span>
-      <span>Tens ${lista} por rever antes de chegar ao Eduardo. Toca aqui para continuar.</span>
+      <span>Tens ${lista} por rever antes de chegar ${obterGeneroCrianca() === 'f' ? 'à' : 'ao'} ${escaparHtml(obterNomeCrianca())}. Toca aqui para continuar.</span>
     </div>
   `;
   document.getElementById('btn-ir-pendente').addEventListener('click', ()=>{
@@ -13898,6 +14051,7 @@ const dicasParaPais = [
 function renderEvolucaoParental(){
   renderSeletorObjetivoAtivo();
   renderCartaoObjetivoAtivo();
+  renderMudancasNotadas();
   renderResumoParental();
   renderToggleGraficoTarefas();
   renderGraficoTarefasSemana();
@@ -14666,6 +14820,93 @@ function renderEficaciaVideos(){
     </div>
   `).join('');
 }
+
+// ======================= MUDANÇAS NOTADAS (avisos discretos e sem alarmismo) =======================
+// Compara os últimos 7 dias com os 7 dias imediatamente anteriores, para sinalizar aos
+// pais — de forma discreta, sem rótulo clínico nenhum — quando um padrão muda de forma
+// que vale a pena olhar de perto. Dois sinais, escolhidos por serem os mais informativos
+// e menos ruidosos dos dados já recolhidos:
+//   1. Uso do Modo Calma bem acima do habitual (pode significar mais dias difíceis)
+//   2. Queda de acerto numa matéria que já estava no nível mais difícil (consolidada)
+// Limiares pensados para evitar falsos alarmes com pouca amostra ou ruído normal:
+// exige um mínimo de dados em AMBAS as janelas, e uma variação clara (não só 1 ponto
+// percentual). Nunca nomeia uma condição nem sugere causa — só descreve o padrão
+// observado, e sugere olhar para o gráfico correspondente.
+function detetarMudancasNotadas(){
+  const avisos = [];
+
+  // --- Sinal 1: Modo Calma acima do habitual ---
+  const semanaAtualCalma = obterUltimosDias(7);
+  const semanaAnteriorCalma = obterJanelaDias(7, 7);
+  const somaCalma = dias => dias.reduce((soma,d) => soma + ((d.comportamentos && d.comportamentos.pediu_calma) || 0), 0);
+  const usosAtuais = somaCalma(semanaAtualCalma);
+  const usosAnteriores = somaCalma(semanaAnteriorCalma);
+  // Só alerta com pelo menos 3 usos na semana anterior (uma base mínima para "habitual"
+  // fazer sentido) e um aumento de pelo menos o dobro E de pelo menos +3 usos em absoluto.
+  if(usosAnteriores >= 3 && usosAtuais >= usosAnteriores * 2 && (usosAtuais - usosAnteriores) >= 3){
+    avisos.push({
+      icone: '🌿',
+      texto: `O Modo Calma foi usado mais vezes esta semana (${usosAtuais}) do que na semana anterior (${usosAnteriores}). Pode valer a pena olhar para os contextos em "Modo Calma — quando acontece" abaixo.`,
+    });
+  }
+
+  // --- Sinal 2: queda de acerto numa matéria já consolidada (nível 3 = difícil) ---
+  const semanaAtualPistas = obterUltimosDias(7);
+  const semanaAnteriorPistas = obterJanelaDias(7, 7);
+  const taxaPistaPorMateria = dias => {
+    const totais = {};
+    dias.forEach(d => {
+      if(!d.perguntasPorMateria) return;
+      Object.entries(d.perguntasPorMateria).forEach(([materia, dados]) => {
+        if(!totais[materia]) totais[materia] = {total:0, comPista:0};
+        totais[materia].total += dados.total;
+        totais[materia].comPista += dados.comPista;
+      });
+    });
+    return totais;
+  };
+  const totaisAtuais = taxaPistaPorMateria(semanaAtualPistas);
+  const totaisAnteriores = taxaPistaPorMateria(semanaAnteriorPistas);
+  Object.keys(totaisAtuais).forEach(materia => {
+    if((nivelDesbloqueado[materia] || 1) < 3) return; // só matérias já no nível mais difícil
+    const atual = totaisAtuais[materia];
+    const anterior = totaisAnteriores[materia];
+    // Exige um mínimo de 5 perguntas em cada janela, para a percentagem não saltar
+    // com base em 1 ou 2 respostas isoladas.
+    if(!anterior || atual.total < 5 || anterior.total < 5) return;
+    const taxaAtual = atual.comPista / atual.total;
+    const taxaAnterior = anterior.comPista / anterior.total;
+    // Só alerta com uma subida clara (pelo menos +25 pontos percentuais) na necessidade de pista.
+    if(taxaAtual - taxaAnterior >= 0.25){
+      const nomeMateria = NOMES_MATERIA_PARENTAL[materia] || materia;
+      avisos.push({
+        icone: '📉',
+        texto: `Em "${nomeMateria}", ${Math.round(taxaAtual*100)}% das perguntas desta semana precisaram de pista, mais do que na semana anterior (${Math.round(taxaAnterior*100)}%). Pode valer a pena rever esta matéria com calma, sem pressa de avançar.`,
+      });
+    }
+  });
+
+  return avisos;
+}
+
+function renderMudancasNotadas(){
+  const cont = document.getElementById('mudancas-notadas');
+  if(!cont) return;
+  const avisos = detetarMudancasNotadas();
+  if(avisos.length === 0){
+    cont.innerHTML = '';
+    cont.style.display = 'none';
+    return;
+  }
+  cont.style.display = 'block';
+  cont.innerHTML = avisos.map(a => `
+    <div class="cartao-mudanca-notada">
+      <span class="icone">${a.icone}</span>
+      <span class="texto">${escaparHtml(a.texto)}</span>
+    </div>
+  `).join('');
+}
+
 
 function renderResumoParental(){
   const cont = document.getElementById('grelha-resumo-parental');
@@ -16728,7 +16969,11 @@ function carregarHistoriasSociais(){
 // usada no gerador de perguntas) — não duplica nenhuma chamada de API nova.
 function construirPromptHistoriaSocial(situacao, quantidade, contextoEduardo){
   const contexto = contextoEduardo ? ` Contexto sobre a criança: ${contextoEduardo}` : '';
-  return `Escreve uma história social curta, em português de Portugal, para preparar uma criança autista de 13 anos ` +
+  // Usa o ano escolar/idade real do perfil (mesma função já usada no gerador de
+  // perguntas), em vez de um valor fixo — evita gerar histórias sempre pensadas
+  // para "13 anos" mesmo quando o perfil é de uma criança bem mais nova ou mais velha.
+  const perfilEtario = descreverNivelEscolarParaPrompt();
+  return `Escreve uma história social curta, em português de Portugal, para preparar uma criança autista (${perfilEtario}) ` +
     `para esta situação: "${situacao}".${contexto} ` +
     `Segue os princípios de histórias sociais (Carol Gray): frases descritivas e curtas, tom calmo, sem alarmismo, ` +
     `linguagem literal e concreta (evita expressões figuradas), 1ª pessoa ("eu"), foco no que vai acontecer e no que ` +
@@ -16780,7 +17025,7 @@ async function gerarHistoriaSocialIA(){
     historiaGeradaIA = { situacao, paginas };
     renderRevisaoHistoria();
     btnAdicionar.style.display = 'block';
-    msg.textContent = `${paginas.length} página(s) geradas. Revê, edita se quiseres, e aprova antes de mostrar ao Eduardo.`;
+    msg.textContent = `${paginas.length} página(s) geradas. Revê, edita se quiseres, e aprova antes de mostrar ${obterGeneroCrianca() === 'f' ? 'à' : 'ao'} ${obterNomeCrianca()}.`;
   }catch(erro){
     msg.textContent = mensagemErroDeRede(erro, fornecedor);
   }finally{
@@ -16847,7 +17092,7 @@ function adicionarHistoriaSocialAoBanco(){
   document.getElementById('historia-situacao').value = '';
   vibrar([40,60,40]);
   if(guardadoOk){
-    msg.textContent = '✓ História adicionada às Atividades do Eduardo.';
+    msg.textContent = `✓ História adicionada às Atividades d${obterGeneroCrianca() === 'f' ? 'a' : 'o'} ${obterNomeCrianca()}.`;
   } else {
     msg.textContent = 'História adicionada, mas não foi possível guardar — pode perder-se ao fechar a app.';
     msg.style.color = 'var(--coral-suave)';
@@ -16868,7 +17113,10 @@ const decisoesPlano = { caa: true, rotina: true, historia: true }; // true = ace
 
 function construirPromptPlano(objetivo, contextoEduardo){
   const contexto = contextoEduardo ? ` Contexto sobre a criança: ${contextoEduardo}` : '';
-  return `Um pai/cuidador de uma criança autista de 13 anos com dificuldade de aprendizagem descreveu este ` +
+  // Mesma correção do prompt de histórias sociais: usa o perfil etário real em vez
+  // de "13 anos" fixo (ver descreverNivelEscolarParaPrompt).
+  const perfilEtario = descreverNivelEscolarParaPrompt();
+  return `Um pai/cuidador de uma criança autista (${perfilEtario}) com dificuldade de aprendizagem descreveu este ` +
     `objetivo: "${objetivo}".${contexto} ` +
     `Sugere três coisas relacionadas com este objetivo, em português de Portugal, linguagem simples e literal: ` +
     `1) Até 6 pictogramas de comunicação (CAA) úteis para este objetivo — palavras curtas e concretas (ex: "quero", "mais", "ajuda"), cada um com um emoji representativo. ` +
