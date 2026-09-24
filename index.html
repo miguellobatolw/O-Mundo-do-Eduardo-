@@ -627,6 +627,12 @@
     grid-template-columns:repeat(4,1fr);
     gap:10px;
     margin:6px 0 18px;
+    /* Mesma correção do Juntar e Limpar: sem limite de largura, num tablet as 4
+       colunas esticam-se muito e o emoji de font-size fixo (ver .carta) fica
+       perdido dentro de cartas enormes. */
+    max-width:480px;
+    margin-left:auto;
+    margin-right:auto;
   }
 
   /* ===== Jogo de Atenção (integração de características: cor + forma + tamanho) ===== */
@@ -640,6 +646,11 @@
     grid-template-columns:repeat(3,1fr);
     gap:14px;
     margin-bottom:18px;
+    /* Mesma correção do Juntar e Limpar e da Memória — limite de largura para as 3
+       colunas não esticarem em excesso num tablet. */
+    max-width:480px;
+    margin-left:auto;
+    margin-right:auto;
   }
   .forma-caract{
     aspect-ratio:1; border-radius:18px;
@@ -663,6 +674,13 @@
        scroll da página, e o arrasto do jogo nunca chega a funcionar — a mesma regra já
        usada no Puzzle de Encaixe, que também depende de arrastar o dedo livremente. */
     touch-action:none;
+    /* Em ecrãs largos (tablet), sem isto a grelha "repeat(N, 1fr)" estica-se até à
+       largura toda do painel — as peças ficam quadrados enormes com o emoji, que tinha
+       tamanho fixo em px, perdido e minúsculo lá dentro. Limitar a largura da grelha e
+       centrá-la mantém peças num tamanho confortável em qualquer ecrã. */
+    max-width:480px;
+    margin-left:auto;
+    margin-right:auto;
   }
   .peca-juntar-limpar{
     aspect-ratio:1;
@@ -671,7 +689,10 @@
     background:var(--branco);
     box-shadow:var(--sombra);
     display:flex; align-items:center; justify-content:center;
-    font-size:20px;
+    /* Proporcional ao tamanho real da peça (que varia com o nº de colunas e a largura
+       do ecrã), em vez de um valor fixo em px — assim o emoji acompanha o crescimento
+       do quadrado em vez de ficar diminuto dentro dele num tablet. */
+    font-size:min(9vw, 42px);
     cursor:pointer;
     padding:0;
     transition:transform .1s ease;
@@ -788,7 +809,10 @@
     background:var(--petroleo);
     border-radius:14px;
     display:flex;align-items:center;justify-content:center;
-    font-size:26px;
+    /* Proporcional ao tamanho real da carta (que varia com a largura do ecrã e o
+       limite de largura da grelha), em vez de um valor fixo — ver correção
+       equivalente em .peca-juntar-limpar. */
+    font-size:min(9vw, 46px);
     cursor:pointer;
     color:transparent;
     box-shadow:var(--sombra);
@@ -3503,12 +3527,7 @@
     'mundoDoEduardo_estado_v1', 'mundoDoEduardo_historico_v1', 'mundoDoEduardo_rotina_v1',
     'mundoDoEduardo_questionario_v1', 'mundoDoEduardo_historiasSociais_v1',
     'mundoDoEduardo_frasesGuardadasCaa_v1', 'mundoDoEduardo_caaPersonalizado_v1',
-    'mundoDoEduardo_bancoPerguntas_v1', 'mundoDoEduardo_videosReais_v1',
-    // Adicionadas na auditoria: são escolhas reais (quais disciplinas mostrar, qual o
-    // objetivo em foco), não preferências de ecrã — sem isto, o pai ligava/desligava uma
-    // disciplina ou mudava o objetivo ativo no telemóvel dele e o terapeuta continuava a
-    // ver a escolha antiga no aparelho dele.
-    'mundoDoEduardo_disciplinas_manual_v1', 'mundoDoEduardo_objetivoAtivo_v1',
+    'mundoDoEduardo_bancoPerguntas_v1', 'mundoDoEduardo_videosReais_v1'
   ];
   const CHAVE_LISTA = 'mundoDoEduardo_listaCriancas_v1';
   const CHAVE_ATIVA = 'mundoDoEduardo_criancaAtivaId_v1';
@@ -4129,7 +4148,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.56.0';
+window.APP_VERSION = '1.56.1';
 
 /* ======================= DADOS ======================= */
 
