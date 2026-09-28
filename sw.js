@@ -3,7 +3,7 @@
    do GitHub Pages (network-first), e uma versão nova de sw.js ativa-se logo (skipWaiting).
    Mudar qualquer byte deste ficheiro (por exemplo, a VERSAO) faz o telemóvel instalar a
    atualização na próxima vez que a app abrir. */
-const VERSAO = 'edukids-2026-09-21-1';
+const VERSAO = 'edukids-2026-09-28-6';
 const CACHE = VERSAO;
 const ESPERA_REDE_MS = 5000; // sem resposta em 5 s, usa a cópia guardada (rede lenta/fraca)
 
