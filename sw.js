@@ -3,7 +3,7 @@
    do GitHub Pages (network-first), e uma versão nova de sw.js ativa-se logo (skipWaiting).
    Mudar qualquer byte deste ficheiro (por exemplo, a VERSAO) faz o telemóvel instalar a
    atualização na próxima vez que a app abrir. */
-const VERSAO = 'edukids-2026-09-28-7';
+const VERSAO = 'edukids-2026-09-29-1'; // app v1.57.52
 const CACHE = VERSAO;
 const ESPERA_REDE_MS = 5000; // sem resposta em 5 s, usa a cópia guardada (rede lenta/fraca)
 
@@ -45,20 +45,22 @@ async function redePrimeiro(pedido, chaveCache){
     return resposta;
   }catch(erro){
     const guardada = await cache.match(chaveCache || pedido.url, { ignoreSearch: true })
-                  || await cache.match('./', { ignoreSearch: true });
+                  || (pedido.mode === 'navigate' ? await cache.match('./', { ignoreSearch: true }) : null);
     if(guardada) return guardada;
     return fetch(pedidoFresco); // nada guardado: tenta a rede sem limite de tempo
   }
 }
 
 // Guardado primeiro e atualizado em segundo plano (módulos Firebase e jsPDF, que vêm de CDN).
-async function guardadoEAtualiza(pedido){
+async function guardadoEAtualiza(pedido, evento){
   const cache = await caches.open(CACHE);
   const guardada = await cache.match(pedido);
   const emRede = fetch(pedido).then((r) => {
-    if(r && r.ok) cache.put(pedido, r.clone()).catch(() => {});
+    if(r && r.ok) return cache.put(pedido, r.clone()).then(() => r, () => r);
     return r;
   }).catch(() => guardada || Response.error());
+  // waitUntil: o browser não termina o service worker antes de a cópia nova ficar guardada.
+  if(evento && guardada) evento.waitUntil(emRede.catch(() => {}));
   return guardada || emRede;
 }
 
@@ -75,13 +77,13 @@ self.addEventListener('fetch', (evento) => {
   }
   // Módulos do Firebase (CDN da Google): cópia local + atualização em segundo plano.
   if(url.hostname === 'www.gstatic.com' && url.pathname.indexOf('/firebasejs/') === 0){
-    evento.respondWith(guardadoEAtualiza(pedido));
+    evento.respondWith(guardadoEAtualiza(pedido, evento));
     return;
   }
   // jsPDF (relatório em PDF) e as dependências dele: ficam guardados na primeira exportação
   // feita com rede, e a partir daí a exportação de PDF também funciona offline.
   if(url.hostname === 'cdn.jsdelivr.net' && url.pathname.indexOf('/npm/') === 0){
-    evento.respondWith(guardadoEAtualiza(pedido));
+    evento.respondWith(guardadoEAtualiza(pedido, evento));
     return;
   }
   // Tudo o resto (Firestore, autenticação, IA…) passa direto, sem cache.
