@@ -118,6 +118,9 @@
     background:var(--areia-clara);
     padding:18px 20px 14px;
     display:flex;
+    flex-wrap:wrap;              /* v1.57.31: sem espaço, os botões passam para uma 2.ª linha em vez de saírem do ecrã */
+    row-gap:8px;
+    column-gap:10px;
     align-items:center;
     justify-content:space-between;
     border-bottom:2px solid var(--salva-clara);
@@ -126,6 +129,29 @@
     display:flex;
     align-items:center;
     gap:12px;
+    flex:1 1 210px;              /* v1.57.31: pede pelo menos ~210 px; se não couber ao lado dos botões, estes descem */
+    min-width:0;
+  }
+.saudacao-texto{ min-width:0; }
+.header-acoes{
+    display:flex;
+    flex-wrap:wrap;              /* último recurso (ecrã minúsculo + texto no tamanho máximo) */
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+    margin-left:auto;
+  }
+.header-acoes .btn-calma{ white-space:nowrap; }
+.header-extras{ display:none; align-items:center; gap:10px; }
+.header-extras.aberto{ display:flex; }
+.btn-mais-header{
+    width:40px; height:40px; border-radius:50%; border:none;
+    background:var(--salva-clara); color:var(--texto-suave);
+    font-size:22px; font-weight:800; line-height:1; cursor:pointer;
+  }
+@media (max-width:360px){
+    header{ padding-left:14px; padding-right:14px; }
+    .header-acoes{ gap:6px; }
   }
   .avatar{
     width:52px;height:52px;
@@ -264,7 +290,7 @@
   main{
     flex:1;
     overflow-y:auto;
-    padding:18px 18px 100px;
+    padding:18px 18px 150px;
     -webkit-overflow-scrolling:touch;
   }
   .ecra{ display:none; animation:surgir .35s ease; }
@@ -351,6 +377,17 @@
   }
   .cartao span.nome{ font-weight:700; font-size:15px; color:var(--texto); }
   .cartao span.legenda{ font-size:11.5px; color:var(--texto-suave); }
+  /* Início simplificado: só ícone e nome; a legenda só fica nas estrelas (mostra o total). */
+  #ecra-inicio .cartao:not(.c-conquistas) span.legenda{ display:none; }
+  #ecra-inicio .cartao{ padding:26px 14px; }
+  #ecra-inicio .cartao span.nome{ font-size:17px; }
+  .btn-mais-inicio{
+    display:block; width:100%; margin:16px 0 4px; padding:14px;
+    border-radius:16px; border:2px dashed var(--salva-clara); background:transparent;
+    color:var(--texto-suave); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;
+  }
+  .grelha-mais-inicio{ margin-top:12px; }
+  .grelha-mais-inicio[hidden]{ display:none; }
 
   .c-rotina .icone{ background:#E7EFE9; }
   .c-atividades .icone{ background:#FBEFDD; }
@@ -590,21 +627,37 @@
     flex-wrap:wrap;
     align-items:center;
     justify-content:center;
-    gap:4px;
-    padding:20px 4px;
+    /* Tamanhos proporcionais à largura útil da app (que tem máx. 640px): no telemóvel
+       ficam no mínimo, no tablet crescem até ao máximo. Mascote e nós escalam juntos. */
+    --tam-no:clamp(52px, calc(min(100vw, 640px) * .13), 84px);
+    --tam-mascote:calc(var(--tam-no) * 1.5);
+    gap:calc(var(--tam-mascote) * .9) 4px;
+    padding:calc(var(--tam-mascote) + 6px) 4px 20px;
+    position:relative;
   }
+  .mascote-percurso{
+    position:absolute; left:0; top:0; width:var(--tam-mascote); height:var(--tam-mascote);
+    pointer-events:none; z-index:3; transform-origin:50% 100%; will-change:transform;
+  }
+  .mascote-percurso video{ width:100%; height:100%; object-fit:contain; display:block; }
+  .mascote-percurso.emoji{ font-size:calc(var(--tam-mascote) * .76); line-height:var(--tam-mascote); text-align:center; }
+  .no-sessao.meta .no-sessao-icone{ border-color:#E8C468; background:#FFF6DC; filter:drop-shadow(0 0 8px rgba(232,196,104,.7)); }
+  .no-sessao.meta.atual .no-sessao-icone{ border-color:#E8C468; }
+  .no-sessao.meta .no-sessao-nome{ font-weight:700; color:var(--petroleo); }
+  .no-sessao-icone.pop{ animation:noPop .55s ease-out; }
+  @keyframes noPop{ 0%{transform:scale(1);} 60%{transform:scale(1.4);} 100%{transform:scale(1.15);} }
   .no-sessao{
     display:flex;
     flex-direction:column;
     align-items:center;
-    width:76px;
+    width:calc(var(--tam-no) + 24px);
     gap:4px;
   }
   .no-sessao-icone{
-    width:52px; height:52px;
+    width:var(--tam-no); height:var(--tam-no);
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:24px;
+    font-size:calc(var(--tam-no) * .46);
     background:var(--branco);
     border:3px solid var(--salva-clara);
     box-shadow:var(--sombra);
@@ -622,7 +675,7 @@
     opacity:.55;
   }
   .no-sessao-nome{
-    font-size:10.5px;
+    font-size:clamp(10.5px, calc(var(--tam-no) * .21), 17px);
     text-align:center;
     color:var(--texto-suave);
     line-height:1.2;
@@ -632,7 +685,7 @@
     font-weight:700;
   }
   .no-sessao-ligacao{
-    width:16px; height:3px;
+    width:calc(var(--tam-no) * .3); height:3px;
     background:var(--salva-clara);
     border-radius:2px;
     flex-shrink:0;
@@ -887,6 +940,25 @@
     text-align:center;
     margin:0 0 10px;
   }
+  /* Dentro do canvas o aviso é uma sobreposição: não ocupa espaço no fluxo da página, por
+     isso o canvas já não se desloca quando ele aparece a meio de um traço (antes o aviso
+     ficava acima do canvas e empurrava-o para baixo, mesmo debaixo do dedo). Também não
+     apanha toques (pointer-events:none), para nunca atrapalhar o desenho. */
+  .canvas-tracado-wrap .aviso-novo-tracado{
+    position:absolute;
+    top:6px; left:50%;
+    transform:translateX(-50%);
+    z-index:5;
+    margin:0;
+    padding:5px 12px;
+    width:max-content;
+    max-width:calc(100% - 16px);
+    font-size:12px;
+    line-height:1.25;
+    pointer-events:none;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+    opacity:.96;
+  }
 
   /* ===== Traça a Letra ===== */
   .canvas-tracado-wrap{
@@ -984,9 +1056,28 @@
     font-weight:700;
     cursor:pointer;
   }
+  /* ✓ verde ao lado do nome do grupo já concluído (ver gruposTracadoConcluidos). */
+  .grupo-feito{
+    display:inline-block; margin-left:6px;
+    width:18px; height:18px; border-radius:50%;
+    background:#4C9A6A; color:#fff;
+    font-size:12px; font-weight:900; line-height:18px; text-align:center;
+    vertical-align:middle;
+  }
   .btn-tema-tracado:active{
     background:var(--salva-clara);
   }
+  .menu-tracado-abas{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .btn-aba-tracado{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:14px 6px; border-radius:16px; border:2px solid var(--salva-clara);
+    background:var(--branco); color:var(--texto); font-family:inherit;
+    font-size:15px; font-weight:800; cursor:pointer;
+  }
+  .btn-aba-tracado .ic{ font-size:26px; }
+  .btn-aba-tracado.ativo{ background:var(--petroleo); color:#fff; border-color:var(--petroleo); }
+  .painel-tracado{ margin-bottom:12px; }
+  .painel-tracado[hidden]{ display:none; }
 
   /* ===== Quiz ===== */
   .pergunta{ font-size:16px; font-weight:700; margin-bottom:16px; line-height:1.4; }
@@ -1072,6 +1163,15 @@
     flex-shrink:0;
   }
 
+  /* v1.57.49 — "AGORA" / "A SEGUIR" na rotina + barra de tempo até à próxima atividade */
+  .chip-rotina{
+    display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.6px;
+    padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align:middle;
+  }
+  .chip-rotina.agora{ background:var(--petroleo); color:var(--branco); }
+  .chip-rotina.seguir{ background:var(--salva-clara); color:var(--petroleo); }
+  .barra-tempo-bloco{ height:6px; background:var(--salva-clara); border-radius:99px; margin-top:8px; overflow:hidden; }
+  .barra-tempo-bloco > div{ height:100%; background:var(--petroleo); border-radius:99px; }
   /* ===== Temporizador visual (sem números a contar) ===== */
   .temporizador-visual{
     position:relative;
@@ -1297,9 +1397,22 @@
   /* Vídeo da mascote a celebrar, mostrado no lugar do emoji de estrela; ao
      terminar (evento 'onended' inline) esconde-se e mostra o emoji como
      remate visual, sem deixar um vazio quando o vídeo já não está a mexer. */
+  #aviso-pausa-breve{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:88px; z-index:60;
+    background:var(--petroleo); color:var(--branco); font-size:13px; font-weight:700;
+    padding:8px 16px; border-radius:99px; box-shadow:0 4px 14px rgba(0,0,0,.2);
+    pointer-events:none; max-width:90%; text-align:center;
+  }
   .overlay-yay .emoji-video{
     width:120px; height:auto; margin-bottom:14px; border-radius:12px;
   }
+  #yay-faixa-tema{ font-size:26px; letter-spacing:6px; margin:-4px 0 10px; text-align:center; }
+  .bloco-tema-reforco{ margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+  .bloco-tema-reforco select, .bloco-tema-reforco input{
+    width:100%; padding:10px; border-radius:12px; border:2px solid var(--salva-clara);
+    font-size:15px; background:var(--branco); color:var(--texto); font-family:inherit;
+  }
+  #previa-tema-reforco{ font-size:26px; letter-spacing:6px; min-height:34px; }
   .overlay-yay .emoji-mascote{ width:120px; height:auto; font-size:0; }
   .overlay-yay .emoji-mascote{ margin-bottom:14px; border-radius:24px; }
   .overlay-yay h2{ margin:0 0 6px; font-size:22px; }
@@ -1417,11 +1530,11 @@
     0%,100%{ transform:scale(0.75); }
     50%{ transform:scale(1.15); }
   }
-  .overlay-calma p{ font-size:14px; opacity:.85; max-width:280px; line-height:1.6; margin-bottom:26px;}
+  .overlay-calma p{ font-size:16px; opacity:.85; max-width:280px; line-height:1.6; margin-bottom:26px;}
   .overlay-calma button{
     background:white; color:var(--petroleo);
-    border:none; padding:13px 24px; border-radius:100px;
-    font-size:14px; font-weight:800; cursor:pointer;
+    border:none; padding:16px 32px; border-radius:100px;
+    font-size:16px; font-weight:800; cursor:pointer;
   }
 
   /* Segundo passo do Modo Calma: pergunta leve sobre o que aconteceu a seguir (fecha o ciclo ABC) */
@@ -1435,8 +1548,8 @@
     margin-bottom:12px; cursor:pointer;
   }
   .calma-pos-pergunta .btn-saltar{
-    background:none; border:none; color:rgba(255,255,255,0.6);
-    font-size:12.5px; font-weight:600; padding:6px; margin-top:4px;
+    background:none; border:none; color:rgba(255,255,255,0.9);
+    font-size:15px; font-weight:700; padding:12px 20px; margin-top:4px;
   }
 
   /* ===== Progresso do dia (rotina) ===== */
@@ -1467,6 +1580,29 @@
   }
 
   /* ===== Alternador de vista da rotina (dia todo / só agora) ===== */
+  .oculto-ver-mais{ display:none !important; }
+  /* Área dos pais: secções longas recolhidas por defeito. */
+  .secao-pais{ margin-top:22px; border-top:2px solid var(--salva-clara); padding-top:6px; }
+  .secao-pais > summary{ font-size:18px; font-weight:800; color:var(--petroleo); padding:10px 0; cursor:pointer; list-style:none; }
+  .secao-pais > summary::-webkit-details-marker{ display:none; }
+  .secao-pais > summary::after{ content:' ▾'; font-size:14px; opacity:.6; }
+  .secao-pais[open] > summary::after{ content:' ▴'; }
+  /* Etiquetas de nível (Fácil/Médio/Desafio) só para os adultos: escondidas nas listas da criança. */
+  #ecra-escola .etiqueta, #ecra-jogos .etiqueta, #ecra-atividades .etiqueta, #ecra-curiosidades .etiqueta{ display:none; }
+  .linha-acoes-tracado{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .linha-acoes-tracado button{ width:100%; margin:0; }
+  .btn-ver-mais-lista{
+    display:block; width:100%; margin:14px 0 4px; padding:14px;
+    border-radius:16px; border:2px dashed var(--salva-clara); background:transparent;
+    color:var(--texto-suave); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;
+  }
+  .btn-mais-rotina{
+    display:block; width:100%; margin:16px 0 4px; padding:12px;
+    border-radius:16px; border:2px dashed var(--salva-clara); background:transparent;
+    color:var(--texto-suave); font-family:inherit; font-size:14px; font-weight:800; cursor:pointer;
+  }
+  .mais-rotina{ margin-top:10px; }
+  .mais-rotina[hidden]{ display:none; }
   .alternador-vista{
     display:flex;
     gap:8px;
@@ -1493,6 +1629,14 @@
   }
 
   /* ===== Modo Dupla (Jogo da Memória) ===== */
+  /* "Jogar a dois" fica recolhido: por defeito a criança joga sozinha e vê menos opções. */
+  .detalhes-dupla{ margin-bottom:12px; }
+  .detalhes-dupla > summary{
+    list-style:none; cursor:pointer; text-align:center;
+    font-size:13px; font-weight:700; color:var(--texto-suave); padding:8px;
+  }
+  .detalhes-dupla > summary::-webkit-details-marker{ display:none; }
+  .detalhes-dupla[open] > summary{ margin-bottom:4px; }
   .alternador-modo-dupla{
     display:flex;
     gap:8px;
@@ -1705,6 +1849,12 @@
     margin-bottom:14px;
     box-shadow:var(--sombra);
   }
+  .item-generalizacao-fora{ padding:10px 0; border-top:1px solid var(--salva-clara); }
+  .item-generalizacao-fora:first-child{ border-top:none; }
+  .item-generalizacao-fora .ig-topo{ font-weight:700; font-size:13.5px; color:var(--petroleo); }
+  .item-generalizacao-fora .ig-sugestao{ font-size:13px; margin:4px 0 6px; }
+  .item-generalizacao-fora .ig-estado{ font-size:11.5px; color:var(--texto-suave); margin-bottom:6px; }
+  .item-generalizacao-fora button{ font-size:13px; padding:8px 14px; }
   .linha-resumo-semana{
     display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:baseline;
     padding:8px 0; border-top:1px solid var(--salva-clara); font-size:13.5px;
@@ -1901,7 +2051,7 @@
        app, não da janela, em ecrã largo. */
     right:max(16px, calc(50% - 320px + 16px));
     bottom:86px;
-    width:58px; height:58px;
+    width:64px; height:64px;
     border-radius:50%;
     background:var(--petroleo);
     color:#fff;
@@ -1952,6 +2102,8 @@
     display:flex; gap:8px; margin-bottom:16px;
   }
   .frase-caa-acoes button{ flex:1; font-size:13px; padding:10px 8px; }
+  .frase-caa-acoes #btn-falar-caa{ flex:2; font-size:17px; padding:14px 8px; }
+  .frase-caa-acoes button:disabled{ opacity:.35; cursor:default; }
 
   .abas-caa{
     display:flex;
@@ -2350,12 +2502,15 @@
         <p id="aviso-modo-offline" style="display:none;font-size:11.5px;font-weight:700;color:var(--coral-suave);margin:2px 0 0;">📴 Sem ligação — a usar a última sessão guardada</p>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="header-acoes">
       <span id="indicador-sem-ligacao" style="display:none;font-size:12px;font-weight:700;color:var(--coral-suave);white-space:nowrap;" title="Sem ligação à internet — as funcionalidades de IA não estão disponíveis agora">📴 Offline</span>
       <button class="btn-calma" onclick="abrirCalma()">🌿 Calma</button>
+      <div class="header-extras" id="header-extras">
       <button class="btn-texto-maior" id="btn-texto-maior" onclick="alternarTamanhoTexto()" aria-label="Aumentar ou diminuir o tamanho do texto" title="Tamanho do texto">A<span style="font-size:0.7em;">+</span></button>
       <div class="btn-engrenagem" id="btn-area-pais" style="opacity:.75;" title="Área dos pais" aria-label="Área dos pais" role="button" tabindex="0" onclick="document.getElementById('overlay-confirmar-adulto').classList.add('mostrar')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('overlay-confirmar-adulto').classList.add('mostrar');}">👨‍👩‍👧</div>
       <div class="btn-engrenagem" id="btn-engrenagem-videos">⚙️</div>
+      </div>
+      <button class="btn-mais-header" id="btn-mais-header" onclick="alternarExtrasHeader()" aria-label="Mais opções" aria-expanded="false">⋯</button>
     </div>
   </header>
 
@@ -2378,15 +2533,23 @@
           <span class="nome">Escola</span>
           <span class="legenda">Trabalhos de casa</span>
         </div>
-        <div class="cartao c-atividades" onclick="irPara('atividades')" role="button" tabindex="0" aria-label="Atividades — Coisas para fazer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('atividades');}">
-          <div class="icone">🎨</div>
-          <span class="nome">Atividades</span>
-          <span class="legenda">Coisas para fazer</span>
-        </div>
         <div class="cartao c-jogos" onclick="irPara('jogos')" role="button" tabindex="0" aria-label="Jogos — Divertir e aprender" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('jogos');}">
           <div class="icone">🎮</div>
           <span class="nome">Jogos</span>
           <span class="legenda">Divertir e aprender</span>
+        </div>
+        <div class="cartao c-conquistas" onclick="irPara('conquistas')" role="button" tabindex="0" aria-label="As Minhas Estrelas" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('conquistas');}">
+          <div class="icone">⭐</div>
+          <span class="nome">As Minhas Estrelas</span>
+          <span class="legenda"><span id="total-estrelas">0</span> estrelas</span>
+        </div>
+      </div>
+      <button class="btn-mais-inicio" id="btn-mais-inicio" onclick="alternarMaisInicio()" aria-expanded="false">➕ Mais</button>
+      <div class="grelha grelha-mais-inicio" id="grelha-mais-inicio" hidden>
+        <div class="cartao c-atividades" onclick="irPara('atividades')" role="button" tabindex="0" aria-label="Atividades — Coisas para fazer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('atividades');}">
+          <div class="icone">🎨</div>
+          <span class="nome">Atividades</span>
+          <span class="legenda">Coisas para fazer</span>
         </div>
         <div class="cartao c-videos" onclick="irPara('videos')" role="button" tabindex="0" aria-label="Vídeos — Vídeos para ver" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('videos');}">
           <div class="icone">🎬</div>
@@ -2397,11 +2560,6 @@
           <div class="icone">📖</div>
           <span class="nome">Curiosidades</span>
           <span class="legenda">Aprende coisas novas</span>
-        </div>
-        <div class="cartao c-conquistas" onclick="irPara('conquistas')" role="button" tabindex="0" aria-label="As Minhas Estrelas" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('conquistas');}">
-          <div class="icone">⭐</div>
-          <span class="nome">As Minhas Estrelas</span>
-          <span class="legenda"><span id="total-estrelas">0</span> estrelas</span>
         </div>
       </div>
       <div id="mensagem-objetivo-eduardo" style="display:none;"></div>
@@ -2419,13 +2577,16 @@
         </div>
         <div class="barra-fundo"><div class="barra-preenchida" id="progresso-dia-barra" style="width:0%"></div></div>
       </div>
+      <div id="lista-rotina"></div>
+      <button class="btn-mais-rotina" id="btn-mais-rotina" onclick="alternarMaisRotina()" aria-expanded="false">⋯ Mais opções</button>
+      <div class="mais-rotina" id="mais-rotina" hidden>
       <div class="alternador-vista">
         <button class="btn-vista" id="btn-vista-agora" data-vista="agora">👉 Só agora</button>
         <button class="btn-vista" id="btn-vista-dia" data-vista="dia">📋 O dia todo</button>
       </div>
       <button class="btn-secundario" id="btn-ver-semana" style="margin-bottom:8px;">📅 Ver a semana toda</button>
       <button class="btn-secundario" id="btn-sitio-novo" style="margin-bottom:14px;">🧭 Vou a um sítio novo</button>
-      <div id="lista-rotina"></div>
+      </div>
     </section>
 
     <!-- ===================== CALENDÁRIO SEMANAL ===================== -->
@@ -2547,18 +2708,17 @@
       <button class="voltar" onclick="sairDoEcraCaa()">← Voltar</button>
       <div class="titulo-secao">💬 Quero Dizer</div>
       <div class="subtitulo-secao" id="subtitulo-caa">Toca nas imagens para formar uma frase</div>
-      <button class="btn-secundario" id="btn-alternar-pratica-caa" onclick="alternarModoPraticaCaa()" style="width:100%;margin-bottom:12px;">🎯 Modo Treino (sem enviar de verdade)</button>
 
       <div class="frase-caa" id="frase-caa" role="status" aria-live="polite">
         <span class="frase-caa-vazia">Toca numa imagem para começar…</span>
       </div>
       <div class="frase-caa-acoes">
-        <button class="btn-secundario" id="btn-apagar-caa" onclick="apagarUltimoCaa()">⌫ Apagar</button>
-        <button class="btn-secundario" id="btn-limpar-caa" onclick="limparFraseCaa()">🗑️ Limpar</button>
+        <button class="btn-secundario" id="btn-apagar-caa" onclick="apagarUltimoCaa()" disabled>⌫ Apagar</button>
+        <button class="btn-secundario" id="btn-limpar-caa" onclick="limparFraseCaa()" disabled>🗑️ Limpar</button>
         <button class="btn-primario" id="btn-falar-caa" onclick="falarFraseCaa()">🔊 Falar</button>
       </div>
       <div id="sugestao-video-caa" style="display:none;margin-bottom:12px;"></div>
-      <button class="btn-secundario" id="btn-guardar-frase-caa" onclick="guardarFraseAtualComoRapida()" style="width:100%;margin-bottom:14px;">⭐ Guardar esta frase</button>
+      <button class="btn-secundario" id="btn-guardar-frase-caa" onclick="guardarFraseAtualComoRapida()" style="display:none;width:100%;margin-bottom:14px;">⭐ Guardar esta frase</button>
 
       <div id="secao-frases-rapidas-caa" style="display:none;margin-bottom:16px;">
         <div class="subtitulo-secao" style="margin-bottom:6px;">As tuas frases guardadas</div>
@@ -2567,6 +2727,7 @@
 
       <div class="abas-caa" id="abas-caa"></div>
       <div class="grelha-caa" id="grelha-caa"></div>
+      <button class="btn-secundario" id="btn-alternar-pratica-caa" onclick="alternarModoPraticaCaa()" style="width:100%;margin-top:20px;font-size:12.5px;opacity:.8;">🎯 Modo Treino</button>
     </section>
 
     <!-- ===================== CONFIGURAÇÃO (só para pais/cuidador) ===================== -->
@@ -2593,12 +2754,12 @@
       <div class="titulo-secao" style="font-size:18px;">📝 Sobre o utilizador</div>
       <div class="subtitulo-secao">O nome e a idade personalizam a app. As restantes respostas ajudam a IA a adaptar as perguntas do quiz.</div>
       <!-- Aviso de transparência: as respostas a este questionário (dificuldades, perfil
-           sensorial, interesses) são enviadas a serviços de IA de terceiros (Gemini/Claude)
+           sensorial, interesses) são enviadas a serviços de IA de terceiros (Gemini, da Google)
            sempre que se gera conteúdo personalizado (perguntas, histórias sociais, planos).
            O responsável deve poder decidir com essa informação, não descobri-la depois. -->
       <div style="background:var(--areia-clara);border:2px solid var(--salva-clara);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
         <p style="font-size:12.5px;color:var(--texto);margin:0;line-height:1.5;">
-          <strong>⚠️ Sobre estes dados:</strong> as dificuldades específicas e o perfil sensorial que preenches aqui são enviados a um serviço de IA externo (Gemini ou Claude) sempre que geras perguntas, histórias sociais ou planos personalizados nesta app. Não são partilhados fora dessas chamadas.
+          <strong>⚠️ Sobre estes dados:</strong> as dificuldades específicas e o perfil sensorial que preenches aqui são enviados a um serviço de IA externo (Gemini, da Google) sempre que geras perguntas, histórias sociais ou planos personalizados nesta app. Não são partilhados fora dessas chamadas.
         </p>
       </div>
       <div id="resumo-perfil-crianca"></div>
@@ -2609,16 +2770,17 @@
            desligadas aqui uma a uma — a escolha manual vence sempre a sugestão do ano
            (ver escolaItensParaExibir). Útil quando o currículo real da criança difere do
            currículo nacional padrão (percurso adaptado, escola internacional, etc.). ===== -->
-      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">📚 Disciplinas no menu Escola</div>
+      <details class="secao-pais"><summary>📚 Disciplinas no menu Escola</summary>
       <div class="subtitulo-secao">Por omissão seguem o ano escolar do perfil. Podes ajustar aqui uma a uma.</div>
       <div id="lista-disciplinas-config" style="margin-top:10px;"></div>
 
+      </details>
       <!-- ===== Acesso partilhado: dá a outro adulto (o outro progenitor, um terapeuta) acesso a
            este perfil. Os dados da criança (rotina, estrelas, histórico, emoções, CAA, etc.)
            são sincronizados por EduSync (ver script no início do bloco Firebase); quem se
            liga vê e edita o mesmo progresso. O aviso abaixo lista o que é e o que não é
            partilhado. ===== -->
-      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">👥 Acesso partilhado</div>
+      <details class="secao-pais"><summary>👥 Acesso partilhado</summary>
       <div class="subtitulo-secao">Convida outro adulto (o outro pai/mãe, um terapeuta) a ligar-se a este perfil.</div>
       <div style="background:var(--areia-clara);border:2px solid var(--salva-clara);border-radius:12px;padding:12px 14px;margin:10px 0;">
         <p style="font-size:12.5px;color:var(--texto);margin:0;line-height:1.5;">
@@ -2643,13 +2805,15 @@
       </div>
       <p id="msg-codigo-convite" style="font-size:12.5px;margin-top:6px;"></p>
 
+      </details>
       <!-- ===== Encontrar apoio perto: atalho para pesquisar profissionais e clínicas
            especializadas em autismo perto do utilizador, por categoria. Não é um diretório
            próprio — abre uma pesquisa já filtrada num serviço de mapas externo. ===== -->
-      <div class="titulo-secao" style="font-size:18px; margin-top:26px;">📍 Encontrar apoio perto</div>
+      <details class="secao-pais"><summary>📍 Encontrar apoio perto</summary>
       <div class="subtitulo-secao">Pesquisa profissionais e clínicas especializadas perto de ti. Abre uma pesquisa num mapa, fora da app.</div>
       <div id="lista-categorias-apoio" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;"></div>
       <p id="msg-apoio-perto" style="font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
+</details>
       </div>
 
       <div class="painel-aba" data-aba="rotina">
@@ -2684,6 +2848,28 @@
           <div class="d">Cores mais fortes e bordas mais definidas, para melhor legibilidade.</div>
         </div>
         <button class="interruptor" id="interruptor-alto-contraste" onclick="alternarAltoContraste()" aria-label="Ativar ou desativar alto contraste">
+          <div class="bola"></div>
+        </button>
+      </div>
+
+      <div class="linha-definicao" style="display:block;">
+        <div class="txt-def">
+          <div class="t">🎉 Tema das celebrações</div>
+          <div class="d">Escolhe o que o Eduardo mais gosta: os emojis do tema aparecem nas celebrações (confetis e faixa por baixo da mascote). Com Efeitos calmos, aparece só a faixa, parada.</div>
+        </div>
+        <div class="bloco-tema-reforco">
+          <select id="tema-reforco" aria-label="Tema das celebrações"></select>
+          <input type="text" id="tema-reforco-personalizado" placeholder="Escreve 1 a 4 emojis, ex: 🚂🚉" maxlength="24" style="display:none;" aria-label="Emojis personalizados">
+          <div id="previa-tema-reforco" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="linha-definicao">
+        <div class="txt-def">
+          <div class="t">🔤 "Sabias que…" no Traçado</div>
+          <div class="d">Depois de cada letra, a app diz uma curiosidade (ex: "Pato começa com P"). Desliga para ficar só o elogio curto, mais previsível.</div>
+        </div>
+        <button class="interruptor" id="interruptor-curiosidade-letra-tracado" onclick="alternarCuriosidadeLetraTracado()" aria-label="Ativar ou desativar a curiosidade depois de cada letra no Traçado">
           <div class="bola"></div>
         </button>
       </div>
@@ -2723,6 +2909,22 @@
         <button class="interruptor" id="interruptor-ecra-ligado" onclick="alternarEcraLigado()" aria-label="Manter o ecrã ligado durante as atividades">
           <div class="bola"></div>
         </button>
+      </div>
+
+      <div class="linha-definicao" style="display:block;">
+        <div class="txt-def">
+          <div class="t">👀 Pausa de ecrã</div>
+          <div class="d">Depois de algum tempo de uso contínuo, a app sugere uma pausa calma — sempre num momento de mudança (ao acabar uma atividade), nunca a meio. Um aviso discreto surge 2 minutos antes, para não ser surpresa.</div>
+        </div>
+        <div class="bloco-tema-reforco">
+          <select id="select-pausa-ecra" aria-label="Pausa de ecrã: intervalo em minutos">
+            <option value="0">Desligada</option>
+            <option value="15">A cada 15 minutos</option>
+            <option value="20">A cada 20 minutos</option>
+            <option value="30">A cada 30 minutos</option>
+            <option value="45">A cada 45 minutos</option>
+          </select>
+        </div>
       </div>
 
       <div class="linha-definicao" style="align-items:flex-start;">
@@ -2823,7 +3025,7 @@
       <div class="cartao-grafico">
         <div class="t-grafico">🎯 Objetivo Ativo</div>
         <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Escolhe um foco de cada vez — mais fácil de acompanhar do que tentar tudo ao mesmo tempo.</p>
-        <select id="seletor-objetivo-ativo" style="width:100%;padding:10px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);margin-bottom:12px;">
+        <select id="seletor-objetivo-ativo" aria-label="Escolher o objetivo ativo" style="width:100%;padding:10px;border-radius:10px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);margin-bottom:12px;">
           <option value="">Nenhum objetivo escolhido</option>
         </select>
         <div id="cartao-progresso-objetivo-ativo"></div>
@@ -2849,6 +3051,12 @@
         <div id="resumo-semana-linhas"></div>
         <button class="btn-secundario" id="btn-partilhar-resumo-semana" style="margin-top:10px;">📤 Partilhar resumo</button>
         <p id="msg-resumo-semana" style="font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
+      </div>
+
+      <div class="cartao-grafico" id="cartao-generalizacao-fora">
+        <div class="t-grafico">🌱 Levar para fora da app (generalização)</div>
+        <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Quando o Eduardo domina um nível, o passo seguinte é usar a competência noutros sítios e com outras pessoas. Aqui aparecem sugestões para as matérias já consolidadas; marca quando experimentarem.</p>
+        <div id="generalizacao-fora-lista"></div>
       </div>
 
       <div class="cartao-grafico" id="cartao-tendencia-longa" style="display:none;">
@@ -2898,7 +3106,7 @@
         <div id="lista-registo-alimentacao"></div>
         <div style="display:flex;gap:8px;margin-top:12px;">
           <input type="text" id="campo-alimento-nome" placeholder="Ex: brócolos" style="flex:1;min-width:0;padding:10px 12px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-size:14px;">
-          <select id="campo-alimento-resultado" style="padding:10px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-size:13px;">
+          <select id="campo-alimento-resultado" aria-label="Como correu a experiência com o alimento" style="padding:10px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-size:13px;">
             <option value="aceite">😊 Aceitou</option>
             <option value="a_provar">🤏 Provou</option>
             <option value="recusado">🙅 Recusou</option>
@@ -2964,7 +3172,7 @@
           <input type="text" id="add-caa-emoji" placeholder="🙂" maxlength="4" style="width:56px;flex-shrink:0;text-align:center;font-size:22px;padding:10px 4px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--branco);">
           <input type="text" id="add-caa-texto" placeholder="Ex: avó Fernanda" style="flex:1;min-width:0;padding:10px 12px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--branco);font-size:14px;">
         </div>
-        <select id="add-caa-categoria" style="width:100%;padding:10px 12px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--branco);font-size:14px;margin-bottom:10px;"></select>
+        <select id="add-caa-categoria" aria-label="Categoria da nova peça de comunicação" style="width:100%;padding:10px 12px;border-radius:14px;border:2px solid var(--salva-clara);background:var(--branco);font-size:14px;margin-bottom:10px;"></select>
         <button class="btn-primario" id="btn-add-caa" style="width:100%;">Adicionar ao Quadro</button>
         <p id="msg-add-caa" style="font-size:12.5px;color:var(--petroleo);font-weight:700;margin:8px 0 0;min-height:16px;"></p>
         <div id="lista-caa-personalizadas" style="margin-top:12px;"></div>
@@ -3033,7 +3241,6 @@
         <p style="font-size:12.5px;color:var(--texto-suave);margin:0 0 10px;">Analisa os dados de utilização dos últimos dias e sugere uma dica prática — não substitui avaliação profissional.</p>
         <select id="dica-ia-fornecedor" aria-label="Fornecedor de IA" style="margin-bottom:10px;">
           <option value="gemini" selected>Gemini (precisa de chave própria)</option>
-          <option value="claude">Claude (só no ambiente de pré-visualização)</option>
         </select>
         <button class="btn-secundario" id="btn-gerar-dica-ia">✨ Gerar dica sobre a evolução do Eduardo</button>
         <p id="msg-dica-ia" style="font-size:12.5px;color:var(--texto-suave);margin-top:8px;"></p>
@@ -3083,10 +3290,9 @@
       <div class="linha-definicao" style="align-items:flex-start;">
         <div class="txt-def" style="width:100%;">
           <div class="t">Fornecedor de IA</div>
-          <div class="d">Gemini é gratuito e vem selecionado por defeito. Claude fica disponível como alternativa.</div>
+          <div class="d">Gemini é gratuito e precisa de uma chave própria (colada abaixo).</div>
           <select id="ia-fornecedor" style="margin-top:8px;width:100%;padding:10px;border-radius:12px;border:2px solid var(--salva-clara);background:var(--areia-clara);font-family:inherit;font-size:13.5px;color:var(--texto);">
             <option value="gemini" selected>Gemini (gratuito)</option>
-            <option value="claude">Claude (só no ambiente de pré-visualização)</option>
           </select>
         </div>
       </div>
@@ -3314,11 +3520,20 @@
 <div class="overlay-yay" id="overlay-yay" role="alert" aria-live="assertive">
   <canvas id="canvas-confetis"></canvas>
   <video class="emoji-video" autoplay muted playsinline></video><div class="emoji" style="display:none;">🌟</div><img class="emoji emoji-mascote" alt="" style="display:none;">
+  <div id="yay-faixa-tema" aria-hidden="true" style="display:none;"></div>
   <h2 id="yay-titulo">Muito bem!</h2>
   <p id="yay-texto">Ganhaste uma estrela nova.</p>
   <div id="yay-medalha" style="display:none;margin:-10px 0 20px;font-size:14px;font-weight:700;"></div>
   <button onclick="fecharYay()">Continuar</button>
 </div>
+
+<div class="overlay-yay" id="overlay-pausa-ecra" role="dialog" aria-modal="true" aria-labelledby="pausa-ecra-titulo">
+  <h2 id="pausa-ecra-titulo">👀 Hora de descansar os olhos</h2>
+  <p id="pausa-ecra-texto">Já fizeste muita coisa! Vamos fazer uma pausa curta: olha ao longe e respira devagar.</p>
+  <button id="btn-pausa-calma" style="margin-bottom:12px;">🌿 Fazer uma pausa calma</button>
+  <button id="btn-pausa-mais" style="background:transparent;color:white;border:2px solid rgba(255,255,255,.6);">Só mais 5 minutos</button>
+</div>
+<div id="aviso-pausa-breve" role="status" aria-live="polite" style="display:none;">⏳ Daqui a pouco vamos fazer uma pausa</div>
 
 <!-- Modal de PIN: protege o acesso às áreas de pais/cuidador e de administrador,
      que já ficam escondidas atrás de um toque longo, mas o PIN evita que uma
@@ -3495,11 +3710,11 @@
 <div class="overlay-calma" id="overlay-calma">
   <div id="calma-passo-respirar">
     <div class="circulo-respirar" id="circulo-respirar" aria-hidden="true"><span id="circulo-respirar-texto">Inspira</span></div>
-    <p>Inspira devagar enquanto o círculo cresce.<br>Expira devagar enquanto ele encolhe.<br>Está tudo bem. Não há pressa.</p>
+    <p>Está tudo bem.<br>Não há pressa.</p>
     <button onclick="avancarParaAntecedenteCalma()">Já estou melhor</button>
   </div>
   <div id="calma-passo-antecedente" class="calma-pos-pergunta" style="display:none;">
-    <p style="margin-bottom:20px;">Se quiseres, diz o que se passou antes.<br><span style="font-size:12.5px;opacity:.75;">(Isto ajuda a mãe a perceber melhor — não é obrigatório.)</span></p>
+    <p style="margin-bottom:20px;">O que se passou antes?<br><span style="font-size:14px;opacity:.85;">Só se quiseres.</span></p>
     <button class="btn-pos" onclick="registarAntecedenteCalma('barulho')">🔊 Havia barulho</button>
     <button class="btn-pos" onclick="registarAntecedenteCalma('mudanca')">🔄 Algo mudou sem eu esperar</button>
     <button class="btn-pos" onclick="registarAntecedenteCalma('dificil')">😓 A tarefa estava difícil</button>
@@ -3508,9 +3723,9 @@
   </div>
   <div id="calma-passo-pos" class="calma-pos-pergunta" style="display:none;">
     <p style="margin-bottom:20px;">E agora, o que vai acontecer?</p>
-    <button class="btn-pos" onclick="fecharCalma('voltou')">👍 Vou voltar à tarefa</button>
     <button class="btn-pos" onclick="fecharCalma('ajuda')">🤝 Vou pedir ajuda a um adulto</button>
     <button class="btn-pos" onclick="fecharCalmaEAbrirCaa()">💬 Quero mostrar como me sinto</button>
+    <button class="btn-pos" onclick="fecharCalma('voltou')">👍 Vou voltar à tarefa</button>
     <button class="btn-saltar" onclick="fecharCalma(null)">Saltar</button>
   </div>
 </div>
@@ -3557,8 +3772,11 @@
     // conseguir ligar ao Firebase, o Eduardo pode continuar a usar a app localmente.
     if(rodape){
       rodape.innerHTML = `
+        <p class="ob-link-central"><a id="ob-btn-tentar-outra-vez">Tentar outra vez</a></p>
         <p class="ob-link-central"><a id="ob-btn-sem-conta">Continuar sem conta (só neste dispositivo)</a></p>
       `;
+      const btnTentar = document.getElementById('ob-btn-tentar-outra-vez');
+      if(btnTentar) btnTentar.addEventListener('click', ()=>{ location.reload(); });
       const btnSemConta = document.getElementById('ob-btn-sem-conta');
       if(btnSemConta){
         btnSemConta.addEventListener('click', ()=>{
@@ -3642,7 +3860,7 @@
     try{
       if(!window.firebaseAuthApi && !window.utilizadorAtual){
         if(window.tentarEntrarOffline()) return;
-        obMostrarAvisoFirebase('⚠️ Não foi possível ligar ao Firebase. Verifica a tua ligação à internet, ou confirma se já colaste as tuas chaves do Firebase no código (ver instruções no início do bloco <script type="module">).');
+        obMostrarAvisoFirebase('⚠️ Sem ligação neste momento. Verifica a internet e abre a app outra vez, ou continua sem conta.');
       }
     }catch(erroTimeout){
       // Rede de segurança final: mesmo que algo acima falhe de forma inesperada,
@@ -3998,7 +4216,7 @@
       empurrarSujas().catch(() => {});
     }else if(ocultoEm && Date.now() - ocultoEm > 30000){
       ocultoEm = 0;
-      sincronizar().then(r => { if(r && r.aplicou && podeRecarregar()) location.reload(); }).catch(() => {});
+      sincronizar().then(r => { if(r && r.aplicou && podeRecarregar()){ if(window.recarregarQuandoLivre) window.recarregarQuandoLivre(); else location.reload(); } }).catch(() => {});
     }
   });
   window.addEventListener('online', () => { empurrarSujas().catch(() => {}); });
@@ -4304,7 +4522,9 @@
         // Erro na própria ligação de autenticação (ex: projeto mal configurado, rede).
         // Se já houve sessão válida neste dispositivo antes, entra offline em vez de bloquear.
         if(typeof window.tentarEntrarOffline === 'function' && window.tentarEntrarOffline()) return;
-        obMostrarAvisoFirebase('⚠️ Não foi possível ligar à autenticação. Verifica as chaves do Firebase e a tua ligação à internet. (' + (erroAuth && erroAuth.message ? erroAuth.message : 'erro desconhecido') + ')');
+        console.error('Firebase (autenticação):', erroAuth);
+        try{ if(typeof window.registarDiagnostico === 'function') window.registarDiagnostico('firebase-auth', String(erroAuth && erroAuth.message ? erroAuth.message : erroAuth)); }catch(e){}
+        obMostrarAvisoFirebase('⚠️ Não foi possível iniciar sessão neste momento. Verifica a internet e abre a app outra vez, ou continua sem conta.');
       });
     }
   }catch(erroModulo){
@@ -4314,13 +4534,15 @@
     if(typeof window.tentarEntrarOffline === 'function' && window.tentarEntrarOffline()){
       // conseguiu entrar offline — nada mais a fazer aqui
     } else {
-      obMostrarAvisoFirebase('⚠️ Não foi possível carregar o Firebase (sem ligação à internet, ou o endereço está bloqueado). A app precisa de internet para o login funcionar. Detalhe técnico: ' + (erroModulo && erroModulo.message ? erroModulo.message : String(erroModulo)));
+      console.error('Firebase (módulos):', erroModulo);
+      try{ if(typeof window.registarDiagnostico === 'function') window.registarDiagnostico('firebase-modulos', String(erroModulo && erroModulo.message ? erroModulo.message : erroModulo)); }catch(e){}
+      obMostrarAvisoFirebase('⚠️ Sem ligação neste momento. O login precisa de internet: abre a app outra vez, ou continua sem conta.');
     }
   }
 </script>
 
 <script>
-window.APP_VERSION = '1.57.30';
+window.APP_VERSION = '1.57.52';
 
 /* ======================= DADOS ======================= */
 
@@ -4429,6 +4651,7 @@ function renderListaEscola(){
   const pares = escolaItensParaExibir();
   cont.innerHTML = pares.map(({it, indiceOriginal}) => gerarHtmlItemLista(it, indiceOriginal, id)).join('');
   ligarEventosItensLista(id);
+  aplicarVerMaisLista(id, 4);
 }
 
 // Histórias sociais aprovadas pelo pai/cuidador (geradas com IA e revistas, ou escritas à
@@ -4512,7 +4735,7 @@ function gerarHtmlSequencias(){
   const nomeNivel = NIVEIS_SEQUENCIAS[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — o que vem a seguir?</div>
+      <div class="nivel-jogo">O que vem a seguir?</div>
       <div id="alternador-sequencias"></div>
       <div id="indicador-vez-sequencias"></div>
       <div class="pedido-caracteristicas" id="pista-sequencias" style="font-size:34px;letter-spacing:6px;"></div>
@@ -4561,10 +4784,10 @@ function proximaRondaSequencias(){
   const contAlternador = document.getElementById('alternador-sequencias');
   if(contAlternador){
     contAlternador.innerHTML = sequenciasRondaAtual === 0 ? `
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${sequenciasModoDupla ? '' : 'ativo'}" id="btn-sequencias-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${sequenciasModoDupla ? 'ativo' : ''}" id="btn-sequencias-dupla">${iconeDupla()} A Dois</button>
-      </div>
+      </div></details>
     ` : '';
     const btnSozinho = document.getElementById('btn-sequencias-sozinho');
     const btnDupla = document.getElementById('btn-sequencias-dupla');
@@ -4593,7 +4816,7 @@ function renderIndicadorVezSequencias(){
   const cont = document.getElementById('indicador-vez-sequencias');
   if(!cont) return;
   cont.innerHTML = sequenciasModoDupla
-    ? `<div class="vez-modo-dupla ${sequenciasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${sequenciasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${sequenciasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${sequenciasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
 }
 
@@ -4701,7 +4924,7 @@ function gerarHtmlOrdenarRotina(){
   const nomeNivel = NIVEIS_ORDENAR_ROTINA[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — põe as tarefas na ordem certa</div>
+      <div class="nivel-jogo">Põe as tarefas na ordem certa</div>
       <p class="desc">Arrasta os cartões até ficarem na ordem em que acontecem no dia, do primeiro para o último.</p>
       <div id="lista-ordenar-rotina" style="display:flex;flex-direction:column;gap:10px;margin-top:14px;"></div>
       <button class="btn-primario" id="btn-verificar-ordenar-rotina" style="margin-top:16px;">Verificar</button>
@@ -4948,11 +5171,11 @@ function gerarHtmlClassificar(){
   const nomeNivel = NIVEIS_CLASSIFICAR[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="alternador-modo-dupla" id="alternador-classificar">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla" id="alternador-classificar">
         <button class="btn-modo-dupla ${classificarModoDupla ? '' : 'ativo'}" id="btn-classificar-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${classificarModoDupla ? 'ativo' : ''}" id="btn-classificar-dupla">${iconeDupla()} A Dois</button>
-      </div>
-      <div class="nivel-jogo">Nível ${nomeNivel} — toca num item e depois na caixa certa</div>
+      </div></details>
+      <div class="nivel-jogo">Toca num item e depois na caixa certa</div>
       <div class="vez-modo-dupla" id="vez-classificar" style="display:none;"></div>
       <button class="btn-pagina" id="btn-ouvir-classificar" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-classificar" style="margin-bottom:10px;"></div>
@@ -5172,7 +5395,7 @@ function gerarHtmlOpostos(){
   const nomeNivel = NIVEIS_OPOSTOS[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — toca no contrário da pista</div>
+      <div class="nivel-jogo">Toca no contrário da pista</div>
       <div class="pedido-caracteristicas" id="pista-opostos" style="font-size:44px;">🧭</div>
       <button class="btn-pagina" id="btn-ouvir-opostos" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-opostos"></div>
@@ -5335,7 +5558,7 @@ function gerarHtmlEmocoesRosto(){
   const nomeNivel = NIVEIS_EMOCOES_ROSTO[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — como é que esta pessoa se sente?</div>
+      <div class="nivel-jogo">Como é que esta pessoa se sente?</div>
       <div id="alternador-emocoesrosto"></div>
       <div id="indicador-vez-emocoesrosto"></div>
       <div class="pedido-caracteristicas" id="pista-emocoesrosto" style="font-size:17px;line-height:1.5;padding:0 8px;"></div>
@@ -5389,10 +5612,10 @@ function proximaRondaEmocoesRosto(){
   const contAlternador = document.getElementById('alternador-emocoesrosto');
   if(contAlternador){
     contAlternador.innerHTML = emocoesRostoRondaAtual === 0 ? `
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${emocoesRostoModoDupla ? '' : 'ativo'}" id="btn-emocoesrosto-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${emocoesRostoModoDupla ? 'ativo' : ''}" id="btn-emocoesrosto-dupla">${iconeDupla()} A Dois</button>
-      </div>
+      </div></details>
     ` : '';
     const btnSozinho = document.getElementById('btn-emocoesrosto-sozinho');
     const btnDupla = document.getElementById('btn-emocoesrosto-dupla');
@@ -5421,7 +5644,7 @@ function renderIndicadorVezEmocoesRosto(){
   const cont = document.getElementById('indicador-vez-emocoesrosto');
   if(!cont) return;
   cont.innerHTML = emocoesRostoModoDupla
-    ? `<div class="vez-modo-dupla ${emocoesRostoVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${emocoesRostoVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${emocoesRostoVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${emocoesRostoVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
 }
 
@@ -5562,7 +5785,7 @@ function gerarHtmlQueDirias(){
   const nomeNivel = NIVEIS_O_QUE_DIRIAS[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — o que dirias nesta situação?</div>
+      <div class="nivel-jogo">O que dirias nesta situação?</div>
       <div id="alternador-quedirias"></div>
       <div id="indicador-vez-quedirias"></div>
       <div class="pedido-caracteristicas" id="pista-quedirias" style="font-size:17px;line-height:1.5;padding:0 8px;"></div>
@@ -5616,10 +5839,10 @@ function proximaRondaQueDirias(){
   const contAlternador = document.getElementById('alternador-quedirias');
   if(contAlternador){
     contAlternador.innerHTML = queDiriasRondaAtual === 0 ? `
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${queDiriasModoDupla ? '' : 'ativo'}" id="btn-quedirias-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${queDiriasModoDupla ? 'ativo' : ''}" id="btn-quedirias-dupla">${iconeDupla()} A Dois</button>
-      </div>
+      </div></details>
     ` : '';
     const btnSozinho = document.getElementById('btn-quedirias-sozinho');
     const btnDupla = document.getElementById('btn-quedirias-dupla');
@@ -5648,7 +5871,7 @@ function renderIndicadorVezQueDirias(){
   const cont = document.getElementById('indicador-vez-quedirias');
   if(!cont) return;
   cont.innerHTML = queDiriasModoDupla
-    ? `<div class="vez-modo-dupla ${queDiriasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${queDiriasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${queDiriasVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${queDiriasVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
 }
 
@@ -5905,7 +6128,7 @@ function iniciarJogoJuntarLimpar(){
   juntarLimparAlvo = config.alvoLimpar || 12;
   juntarLimparCorAlvo = config.tiposDePeca[Math.floor(Math.random() * config.tiposDePeca.length)];
   const nivelEl = document.getElementById('nivel-jogo-juntar-limpar');
-  if(nivelEl) nivelEl.textContent = `Nível ${config.nome} — limpa ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'a cor pedida'} ${juntarLimparCorAlvo} — grupos de ${juntarLimparMinimoGrupo} ou mais`;
+  if(nivelEl) nivelEl.textContent = `Limpa ${NOMES_COR_JUNTAR_LIMPAR[juntarLimparCorAlvo] || 'a cor pedida'} ${juntarLimparCorAlvo} — grupos de ${juntarLimparMinimoGrupo} ou mais`;
   atualizarProgressoJuntarLimpar();
 
   // Gera a grelha aleatoriamente e depois GARANTE que existe pelo menos um grupo
@@ -5938,13 +6161,14 @@ function iniciarJogoJuntarLimpar(){
 // As posições servem tanto para verificar resolubilidade (ver garantirGrupoJogavelJuntarLimpar)
 // como para destacar visualmente um grupo jogável como dica (ver mostrarDicaJuntarLimpar),
 // sem repetir o flood-fill uma segunda vez só para saber onde ele está.
-function maiorGrupoConectadoPorCor(){
+function gruposConectadosJuntarLimpar(){
   const visitado = Array.from({length: juntarLimparLinhas}, () => Array(juntarLimparColunas).fill(false));
-  const maiorPorCor = {}; // {cor: {tamanho, posicoes: [[l,c], ...]}}
+  const grupos = []; // [{cor, tamanho, posicoes: [[l,c], ...]}] — TODOS os grupos ligados, não só o maior de cada cor
   for(let l = 0; l < juntarLimparLinhas; l++){
     for(let c = 0; c < juntarLimparColunas; c++){
       if(visitado[l][c]) continue;
       const cor = juntarLimparGrelha[l][c];
+      if(cor === null || cor === undefined) { visitado[l][c] = true; continue; }
       // Flood-fill iterativo (pilha), evita risco de estouro de pilha em grelhas maiores
       const pilha = [[l,c]];
       visitado[l][c] = true;
@@ -5961,12 +6185,56 @@ function maiorGrupoConectadoPorCor(){
           pilha.push([vl,vc]);
         }
       }
-      if(!maiorPorCor[cor] || posicoesDesteGrupo.length > maiorPorCor[cor].tamanho){
-        maiorPorCor[cor] = { tamanho: posicoesDesteGrupo.length, posicoes: posicoesDesteGrupo };
-      }
+      grupos.push({ cor, tamanho: posicoesDesteGrupo.length, posicoes: posicoesDesteGrupo });
     }
   }
+  return grupos;
+}
+
+// Maior grupo LIGADO de cada cor (flood-fill). Atenção: "ligado" NÃO quer dizer "arrastável" —
+// ver caminhoArrastavelJuntarLimpar. Mantida para compatibilidade e para a dica.
+function maiorGrupoConectadoPorCor(){
+  const maiorPorCor = {}; // {cor: {tamanho, posicoes: [[l,c], ...]}}
+  gruposConectadosJuntarLimpar().forEach(g => {
+    if(!maiorPorCor[g.cor] || g.tamanho > maiorPorCor[g.cor].tamanho){
+      maiorPorCor[g.cor] = { tamanho: g.tamanho, posicoes: g.posicoes };
+    }
+  });
   return maiorPorCor;
+}
+
+// v1.57.51 — CORREÇÃO DO BLOQUEIO NO NÍVEL DIFÍCIL.
+// O arrasto do dedo só avança para uma peça vizinha da ÚLTIMA tocada (ver
+// adicionarPecaAoArrastoJuntarLimpar): o que se consegue selecionar é um CAMINHO simples,
+// nunca uma forma ramificada. Um grupo ligado em T ou em L com 4 peças tem só caminhos de 3,
+// por isso NÃO oferece nenhuma jogada de 4. A garantia anterior contava peças ligadas
+// (flood-fill) em vez de caminhos, e deixava passar tabuleiros sem nenhuma jogada possível
+// (cerca de 8% das partidas no Difícil, em simulação). Esta função responde à pergunta certa:
+// "existe um caminho arrastável de pelo menos n peças da cor dada?" — devolve-o, ou null.
+// Procura com corte antecipado (para assim que chega a n), por isso é muito barata (n <= 4).
+function caminhoArrastavelJuntarLimpar(cor, n){
+  const L = juntarLimparLinhas, C = juntarLimparColunas, G = juntarLimparGrelha;
+  const caminho = [];
+  const usada = Array.from({length: L}, () => Array(C).fill(false));
+  function dfs(l, c){
+    caminho.push([l,c]);
+    usada[l][c] = true;
+    if(caminho.length >= n) return true;
+    const vizinhos = [[l-1,c],[l+1,c],[l,c-1],[l,c+1]];
+    for(const [a,b] of vizinhos){
+      if(a < 0 || a >= L || b < 0 || b >= C || usada[a][b] || G[a][b] !== cor) continue;
+      if(dfs(a, b)) return true;
+    }
+    caminho.pop();
+    usada[l][c] = false;
+    return false;
+  }
+  for(let l = 0; l < L; l++){
+    for(let c = 0; c < C; c++){
+      if(G[l][c] === cor && dfs(l, c)) return caminho.slice();
+    }
+  }
+  return null;
 }
 
 // Se nenhuma cor tiver um grupo conectado >= juntarLimparMinimoGrupo, planta um bloco
@@ -5984,25 +6252,39 @@ function maiorGrupoConectadoPorCor(){
 // que o objetivo da ronda é sempre possível de cumprir, mesmo que outra cor já tivesse
 // por acaso um grupo grande (o que não ajudaria a cor pedida).
 function garantirGrupoJogavelJuntarLimpar(tiposDePeca){
-  const maiores = maiorGrupoConectadoPorCor();
-  const jaTemGrupoValido = tiposDePeca.some(t => maiores[t] && maiores[t].tamanho >= juntarLimparMinimoGrupo);
-  if(jaTemGrupoValido) return;
+  // v1.57.51: "jogável" = existe um CAMINHO arrastável de >= mínimo peças (não apenas um
+  // conjunto ligado, que pode ser um T/L sem nenhum caminho desse tamanho).
+  const minimo = juntarLimparMinimoGrupo;
+  if(tiposDePeca.some(t => caminhoArrastavelJuntarLimpar(t, minimo))) return;
 
   const corDeReserva = tiposDePeca[Math.floor(Math.random() * tiposDePeca.length)];
-  // Bloco o mais "quadrado" possível (ex: 4 peças -> 2x2; 3 peças -> linha de 3).
-  const larguraBloco = Math.min(juntarLimparColunas, Math.ceil(Math.sqrt(juntarLimparMinimoGrupo)));
-  const alturaBloco = Math.ceil(juntarLimparMinimoGrupo / larguraBloco);
+  // Bloco o mais "quadrado" possível (ex: 4 peças -> 2x2; 3 peças -> L de 3).
+  const larguraBloco = Math.min(juntarLimparColunas, Math.ceil(Math.sqrt(minimo)));
+  const alturaBloco = Math.ceil(minimo / larguraBloco);
   // Linha/coluna de início aleatórias, garantindo que o bloco inteiro cabe dentro da
   // grelha (por isso o intervalo de escolha já subtrai a altura/largura do bloco).
   const linhaInicio = Math.floor(Math.random() * Math.max(1, juntarLimparLinhas - alturaBloco + 1));
   const colunaInicio = Math.floor(Math.random() * Math.max(1, juntarLimparColunas - larguraBloco + 1));
 
   let colocadas = 0;
-  for(let l = linhaInicio; l < juntarLimparLinhas && colocadas < juntarLimparMinimoGrupo; l++){
-    for(let c = colunaInicio; c < juntarLimparColunas && colocadas < juntarLimparMinimoGrupo; c++){
+  for(let l = linhaInicio; l < juntarLimparLinhas && colocadas < minimo; l++){
+    for(let c = colunaInicio; c < juntarLimparColunas && colocadas < minimo; c++){
       juntarLimparGrelha[l][c] = corDeReserva;
       colocadas++;
     }
+  }
+  if(caminhoArrastavelJuntarLimpar(corDeReserva, minimo)) return;
+
+  // Rede de segurança (não deve ser preciso com os blocos acima): uma fila reta de
+  // `minimo` peças é sempre um caminho arrastável.
+  if(juntarLimparColunas >= minimo){
+    const l = Math.floor(Math.random() * juntarLimparLinhas);
+    const c0 = Math.floor(Math.random() * (juntarLimparColunas - minimo + 1));
+    for(let k = 0; k < minimo; k++) juntarLimparGrelha[l][c0 + k] = corDeReserva;
+  } else {
+    const c = Math.floor(Math.random() * juntarLimparColunas);
+    const l0 = Math.floor(Math.random() * Math.max(1, juntarLimparLinhas - minimo + 1));
+    for(let k = 0; k < minimo && l0 + k < juntarLimparLinhas; k++) juntarLimparGrelha[l0 + k][c] = corDeReserva;
   }
 }
 
@@ -6100,23 +6382,26 @@ function maiorCaminhoPercorrivel(posicoes){
 // simplesmente não aparecer por essa causa).
 function mostrarDicaJuntarLimpar(){
   juntarLimparTimeoutDica = null;
-  const maiores = maiorGrupoConectadoPorCor();
+  const minimo = juntarLimparMinimoGrupo;
+  // v1.57.51: considera TODOS os grupos ligados (não só o maior de cada cor — o maior podia
+  // ser um T sem caminho válido enquanto outro, mais pequeno, tinha) e cai no caminho
+  // arrastável garantido se a pesquisa do maior caminho não chegar ao mínimo.
+  const grupos = gruposConectadosJuntarLimpar().filter(g => g.tamanho >= minimo);
 
-  function melhorCaminhoEntre(cores){
+  function melhorCaminhoDaCor(cor){ // cor === null → qualquer cor
     let melhor = null;
-    cores.forEach(cor => {
-      const g = maiores[cor];
-      if(!g || g.tamanho < juntarLimparMinimoGrupo) return;
+    grupos.forEach(g => {
+      if(cor && g.cor !== cor) return;
       const caminho = maiorCaminhoPercorrivel(g.posicoes);
-      if(caminho.length >= juntarLimparMinimoGrupo && (!melhor || caminho.length > melhor.length)){
-        melhor = caminho;
-      }
+      if(caminho.length >= minimo && (!melhor || caminho.length > melhor.length)) melhor = caminho;
     });
     return melhor;
   }
 
-  const melhorCaminho = melhorCaminhoEntre(juntarLimparCorAlvo ? [juntarLimparCorAlvo] : [])
-    || melhorCaminhoEntre(Object.keys(maiores));
+  const corAlvo = juntarLimparCorAlvo;
+  const melhorCaminho = (corAlvo && (melhorCaminhoDaCor(corAlvo) || caminhoArrastavelJuntarLimpar(corAlvo, minimo)))
+    || melhorCaminhoDaCor(null)
+    || Object.keys(CORES_PECA_JUNTAR_LIMPAR).map(t => caminhoArrastavelJuntarLimpar(t, minimo)).find(Boolean);
   if(!melhorCaminho) return; // não deve acontecer (ver garantia acima), mas nunca quebra por segurança
   const cont = document.getElementById('grelha-juntar-limpar');
   if(!cont) return;
@@ -6387,7 +6672,7 @@ function gerarHtmlPuzzleSensorial(){
   const nomeNivel = NIVEIS_PUZZLE_SENSORIAL[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — toca na peça que combina com a pista</div>
+      <div class="nivel-jogo">Toca na peça que combina com a pista</div>
       <div class="pedido-caracteristicas" id="pista-puzzle" style="font-size:56px;">🧩</div>
       <button class="btn-pagina" id="btn-ouvir-puzzle" style="margin-bottom:12px;">🔊 Ouvir</button>
       <div class="grelha-caracteristicas" id="grelha-puzzle"></div>
@@ -6518,7 +6803,7 @@ function gerarHtmlPuzzleEncaixe(){
   const nomeNivel = NIVEIS_PUZZLE_SENSORIAL[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — arrasta cada peça para o lugar certo</div>
+      <div class="nivel-jogo">Arrasta cada peça para o lugar certo</div>
       <p class="desc" style="font-size:13px;">Se preferir, toca na peça e depois toca no lugar.</p>
       <div class="grelha-caracteristicas" id="grelha-zonas-encaixe" style="margin-bottom:18px;"></div>
       <div class="grelha-caracteristicas" id="grelha-pecas-encaixe"></div>
@@ -7221,6 +7506,7 @@ function iniciarSessaoJogos(){
   sessaoJogosAtiva = { indices, posicaoAtual: 0, concluidos: [] };
   renderPercursoSessao();
   irPara('sessao-jogos');
+  posicionarMascotePercurso(0);
 }
 
 // Chamada por fecharYay() quando há uma sessão em curso, em vez do comportamento normal
@@ -7228,12 +7514,19 @@ function iniciarSessaoJogos(){
 function avancarNaSessaoJogos(){
   if(!sessaoJogosAtiva) return false;
   sessaoJogosAtiva.concluidos.push(sessaoJogosAtiva.posicaoAtual);
+  const posAnterior = sessaoJogosAtiva.posicaoAtual;
   sessaoJogosAtiva.posicaoAtual++;
   if(sessaoJogosAtiva.posicaoAtual >= sessaoJogosAtiva.indices.length){
-    concluirSessaoJogos();
+    // Último jogo: a mascote salta para a taça 🏆 no fim do percurso e só depois vem a cena final.
+    renderPercursoSessao();
+    irPara('sessao-jogos');
+    saltarMascotePercurso(posAnterior, sessaoJogosAtiva.indices.length, ()=>{
+      if(sessaoJogosAtiva) concluirSessaoJogos();
+    });
   } else {
     renderPercursoSessao();
     irPara('sessao-jogos');
+    saltarMascotePercurso(posAnterior, sessaoJogosAtiva.posicaoAtual);
   }
   return true;
 }
@@ -7285,6 +7578,10 @@ function animarTrofeuSessao(){
       video.style.display = 'none'; // sem vídeo: fica só a taça
     }
   }
+  const emTema = emojisDoTemaReforco();
+  if(emTema.length){
+    cena.querySelectorAll('.cena-trofeu-brilho').forEach((el, i) => { el.textContent = emTema[i % emTema.length]; });
+  }
   if(!reduzido) cena.classList.add('anima');
   try{ tocarOvacao(); }catch(e){}
 }
@@ -7296,6 +7593,8 @@ function sairDaSessaoJogos(){
     }catch(e){ /* não é crítico */ }
   }
   sessaoJogosAtiva = null;
+  saltoMascoteEmCurso = false;
+  if(mascotePercursoEl){ try{ mascotePercursoEl.getAnimations().forEach(a=>a.cancel()); }catch(e){} }
   irPara('jogos');
 }
 
@@ -7305,16 +7604,19 @@ function renderPercursoSessao(){
   if(!sessaoJogosAtiva) return;
   const cont = document.getElementById('percurso-sessao-nos');
   if(!cont) return;
-  cont.innerHTML = sessaoJogosAtiva.indices.map((idxJogo, pos) => {
+  const nosHtml = sessaoJogosAtiva.indices.map((idxJogo, pos) => {
     const jogo = jogosItens[idxJogo];
     const concluido = sessaoJogosAtiva.concluidos.includes(pos);
     const atual = pos === sessaoJogosAtiva.posicaoAtual;
     const classe = concluido ? 'no-sessao concluido' : (atual ? 'no-sessao atual' : 'no-sessao por-fazer');
     return '<div class="' + classe + '"><div class="no-sessao-icone">' + (concluido ? '✓' : jogo.icone) + '</div><div class="no-sessao-nome">' + jogo.t + '</div></div>';
-  }).join('<div class="no-sessao-ligacao"></div>');
+  });
+  const terminou = sessaoJogosAtiva.posicaoAtual >= sessaoJogosAtiva.indices.length;
+  nosHtml.push('<div class="no-sessao meta' + (terminou ? ' atual' : ' por-fazer') + '"><div class="no-sessao-icone">🏆</div><div class="no-sessao-nome">Troféu</div></div>');
+  cont.innerHTML = nosHtml.join('<div class="no-sessao-ligacao"></div>');
   const tituloEl = document.getElementById('sessao-jogos-titulo');
   if(tituloEl){
-    tituloEl.textContent = 'Sessão de Jogos — ' + (sessaoJogosAtiva.posicaoAtual + 1) + ' de ' + sessaoJogosAtiva.indices.length;
+    tituloEl.textContent = 'Sessão de Jogos — ' + Math.min(sessaoJogosAtiva.posicaoAtual + 1, sessaoJogosAtiva.indices.length) + ' de ' + sessaoJogosAtiva.indices.length;
   }
   const jogoAtual = jogosItens[sessaoJogosAtiva.indices[sessaoJogosAtiva.posicaoAtual]];
   const btnJogar = document.getElementById('btn-jogar-atual-sessao');
@@ -7324,7 +7626,7 @@ function renderPercursoSessao(){
 }
 
 function jogarAtualDaSessao(){
-  if(!sessaoJogosAtiva) return;
+  if(!sessaoJogosAtiva || saltoMascoteEmCurso) return;
   const jogo = jogosItens[sessaoJogosAtiva.indices[sessaoJogosAtiva.posicaoAtual]];
   if(jogo) abrirItemGenerico(jogo, 'sessao-jogos');
 }
@@ -7596,6 +7898,11 @@ let altoContrasteAtivo = false;
 // reduzir — o objetivo do exercício é tolerar a incerteza, não vigiar o relógio.
 // Por omissão fica visível (true), para não mudar o comportamento de quem já usa a app.
 let mostrarTempoEsperar = true;
+let curiosidadeLetraTracadoAtiva = true; // "Sabias que…" depois de cada letra no Traçado (opcional, área dos pais)
+// Chaves de GRUPOS_LETRAS_TRACADO que a criança já traçou até ao fim (mostram ✓ no menu do
+// Traçado). Vive dentro do "estado" da criança (guardarEstado/carregarEstado), por isso é
+// automaticamente por criança, entra no backup e é apagado com "apagar progresso".
+let gruposTracadoConcluidos = [];
 
 // ===================== QUADRO CAA (Comunicação Aumentativa e Alternativa) =====================
 // Pictogramas organizados por categoria, inspirados no vocabulário nuclear típico de CAA
@@ -8120,6 +8427,8 @@ function guardarEstado(){
       modoEscuroAtivo: modoEscuroAtivo,
       altoContrasteAtivo: altoContrasteAtivo,
       mostrarTempoEsperar: mostrarTempoEsperar,
+      curiosidadeLetraTracadoAtiva: curiosidadeLetraTracadoAtiva,
+      gruposTracadoConcluidos: gruposTracadoConcluidos,
       volumeSomApp: volumeSomApp,
       registoCalmaPorBloco: registoCalmaPorBloco,
       registoPosCalma: registoPosCalma,
@@ -8196,6 +8505,8 @@ function carregarEstado(){
     if(typeof estado.modoEscuroAtivo === 'boolean') modoEscuroAtivo = estado.modoEscuroAtivo;
     if(typeof estado.altoContrasteAtivo === 'boolean') altoContrasteAtivo = estado.altoContrasteAtivo;
     if(typeof estado.mostrarTempoEsperar === 'boolean') mostrarTempoEsperar = estado.mostrarTempoEsperar;
+    if(typeof estado.curiosidadeLetraTracadoAtiva === 'boolean') curiosidadeLetraTracadoAtiva = estado.curiosidadeLetraTracadoAtiva;
+    if(Array.isArray(estado.gruposTracadoConcluidos)) gruposTracadoConcluidos = estado.gruposTracadoConcluidos.filter(k => typeof k === 'string');
     // Compatibilidade com o antigo interruptor on/off (versões anteriores da app, antes
     // do slider de volume existir) — nunca é escrita por guardarEstado() nesta versão,
     // só lida aqui para um backup/estado antigo importado continuar a funcionar. A leitura
@@ -8289,6 +8600,14 @@ function alternarEfeitosCalmos(){
   vibrar(20);
   const btn = document.getElementById('interruptor-efeitos-calmos');
   if(btn) btn.classList.toggle('ligado', efeitosCalmosAtivo);
+}
+
+function alternarCuriosidadeLetraTracado(){
+  curiosidadeLetraTracadoAtiva = !curiosidadeLetraTracadoAtiva;
+  guardarEstado();
+  vibrar(20);
+  const btn = document.getElementById('interruptor-curiosidade-letra-tracado');
+  if(btn) btn.classList.toggle('ligado', curiosidadeLetraTracadoAtiva);
 }
 
 function alternarMostrarTempoEsperar(){
@@ -8759,6 +9078,56 @@ function cancelarTemporizadoresJogo(){
   temporizadoresJogo.clear();
 }
 
+function alternarMaisRotina(){
+  const m = document.getElementById('mais-rotina');
+  const b = document.getElementById('btn-mais-rotina');
+  if(!m || !b) return;
+  const abrir = m.hidden;
+  m.hidden = !abrir;
+  b.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  b.textContent = abrir ? '⋯ Menos opções' : '⋯ Mais opções';
+  if(abrir) m.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function alternarMaisInicio(){
+  const g = document.getElementById('grelha-mais-inicio');
+  const b = document.getElementById('btn-mais-inicio');
+  if(!g || !b) return;
+  const abrir = g.hidden;
+  g.hidden = !abrir;
+  b.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  b.textContent = abrir ? '➖ Menos' : '➕ Mais';
+  if(abrir) g.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+let temporizadorExtrasHeader = null;
+function alternarExtrasHeader(){
+  const extras = document.getElementById('header-extras');
+  const btn = document.getElementById('btn-mais-header');
+  if(!extras || !btn) return;
+  const abrir = !extras.classList.contains('aberto');
+  extras.classList.toggle('aberto', abrir);
+  btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  clearTimeout(temporizadorExtrasHeader);
+  if(abrir) temporizadorExtrasHeader = setTimeout(()=>{ extras.classList.remove('aberto'); btn.setAttribute('aria-expanded','false'); }, 10000);
+}
+
+// v1.57.52: recarregar a página (atualização do service worker, ou dados novos vindos de outro
+// aparelho pelo sync) NUNCA a meio de um jogo, atividade, Modo Calma, pausa ou Configuração dos
+// pais — ficava a interromper a criança (ou a apagar o que o adulto estava a escrever).
+// Se estiver ocupada, o recarregamento fica pendente e faz-se quando voltar ao Início.
+window.appOcupada = function(){
+  try{
+    const ativo = document.querySelector('.ecra.ativo');
+    if(ativo && ativo.id !== 'ecra-inicio') return true;
+    return typeof pausaHaOverlayAberto === 'function' && pausaHaOverlayAberto();
+  }catch(e){ return false; }
+};
+window.recarregarQuandoLivre = function(){
+  if(!window.appOcupada()){ location.reload(); return; }
+  window.__recarregarPendente = true;
+};
+
 function irPara(ecra){
   // Se há um quiz por terminar e o destino é diferente do ecrã de detalhe do próprio quiz,
   // confirma antes de sair para não perder o progresso sem querer (ex: toque na barra de baixo).
@@ -8782,6 +9151,11 @@ function irPara(ecra){
   atualizarVisibilidadeBotaoCaa(ecra);
   try{ atualizarLembreteBackup(); }catch(e){ /* ainda a arrancar */ }
   try{ if(typeof atualizarEcraLigado === 'function') atualizarEcraLigado(); }catch(e){ /* ainda a arrancar */ }
+  try{ verificarPausaEcra(); }catch(e){ /* ainda a arrancar */ }
+  if(ecra === 'inicio' && window.__recarregarPendente){
+    window.__recarregarPendente = false;
+    setTimeout(()=>{ if(!window.appOcupada()) location.reload(); else window.__recarregarPendente = true; }, 400);
+  }
 }
 
 // Esconde o botão flutuante do CAA nos ecrãs onde não faz sentido sobrepor
@@ -8805,6 +9179,7 @@ function irParaDetalhe(html, tituloVoltar){
   document.getElementById('main').scrollTop = 0;
   atualizarVisibilidadeBotaoCaa('detalhe');
   try{ if(typeof atualizarEcraLigado === 'function') atualizarEcraLigado(); }catch(e){ /* ainda a arrancar */ }
+  try{ verificarPausaEcra(); }catch(e){ /* ainda a arrancar */ }
 }
 
 // Mostra um pequeno aviso amigável antes de sair de um quiz a meio, com opção de continuar ou sair.
@@ -9002,7 +9377,7 @@ function calcularProximaTransicao(indiceAgora){
 // Modo de vista da rotina: "dia" mostra tudo, "agora" mostra só a tarefa atual + a seguinte.
 // Guardado em localStorage para se manter entre visitas — é uma preferência estável, não do momento.
 const CHAVE_VISTA_ROTINA = chaveCrianca('mundoDoEduardo_vistaRotina_v1');
-let vistaRotina = 'dia';
+let vistaRotina = 'agora'; // por omissão só a tarefa atual (menos informação); a escolha guardada continua a valer
 
 function carregarVistaRotina(){
   try{
@@ -9037,14 +9412,15 @@ function renderSitioNovo(){
   const estiloLabel = 'font-size:13px; font-weight:600; color:var(--texto);';
   cont.innerHTML = `
     <div class="painel">
+      <p style="margin:0 0 12px;font-size:12.5px;font-weight:700;color:var(--texto-suave);">👤 Para um adulto preencher. Depois a criança só vê um resumo simples.</p>
       <label style="${estiloLabel}">Onde vamos?</label>
-      <input type="text" id="campo-sitio-local" placeholder="Ex: ao médico, a uma festa" value="${dadosSitioNovo.local}" style="${estiloInput}">
+      <input type="text" id="campo-sitio-local" placeholder="Ex: ao médico, a uma festa" value="${escaparHtml(dadosSitioNovo.local)}" style="${estiloInput}">
       <label style="${estiloLabel}">Quem vamos encontrar lá?</label>
-      <input type="text" id="campo-sitio-pessoas" placeholder="Ex: o Dr. Silva, os primos" value="${dadosSitioNovo.pessoas}" style="${estiloInput}">
+      <input type="text" id="campo-sitio-pessoas" placeholder="Ex: o Dr. Silva, os primos" value="${escaparHtml(dadosSitioNovo.pessoas)}" style="${estiloInput}">
       <label style="${estiloLabel}">Quanto tempo vamos ficar?</label>
-      <input type="text" id="campo-sitio-duracao" placeholder="Ex: cerca de meia hora" value="${dadosSitioNovo.duracao}" style="${estiloInput}">
+      <input type="text" id="campo-sitio-duracao" placeholder="Ex: cerca de meia hora" value="${escaparHtml(dadosSitioNovo.duracao)}" style="${estiloInput}">
       <label style="${estiloLabel}">Algo importante para saber? (opcional)</label>
-      <input type="text" id="campo-sitio-aviso" placeholder="Ex: pode haver barulho" value="${dadosSitioNovo.avisoExtra}" style="${estiloInput}">
+      <input type="text" id="campo-sitio-aviso" placeholder="Ex: pode haver barulho" value="${escaparHtml(dadosSitioNovo.avisoExtra)}" style="${estiloInput}">
       <button class="btn-primario" id="btn-preparar-sitio-novo">Preparar</button>
     </div>
   `;
@@ -9140,6 +9516,26 @@ function renderRotina(){
       ? `<div class="aviso-transicao" role="status"><span class="icone-aviso">🎉</span><span>O dia de hoje está completo!</span></div>`
       : ''
   ) + rotinaHoje.map((b,i)=>{
+    // v1.57.49: "AGORA" na tarefa de referência e "A SEGUIR" na que vem depois (só se ainda
+    // por fazer) — mesma referência que a vista "Só agora" usa para escolher o que mostrar.
+    const chipRotina = rotulo => `<span class="chip-rotina ${rotulo === 'AGORA' ? 'agora' : 'seguir'}">${rotulo === 'AGORA' ? 'AGORA' : 'A SEGUIR'}</span>`;
+    const refDestaque = (indiceAgora !== -1) ? indiceAgora : rotinaHoje.findIndex(x => !x.feito);
+    let chipHtml = '';
+    if(refDestaque !== -1 && !rotinaHoje.every(x => x.feito)){
+      if(i === refDestaque && !b.feito) chipHtml = chipRotina('AGORA');
+      else if(i === refDestaque + 1 && !b.feito) chipHtml = chipRotina('A SEGUIR');
+    }
+    // Barra de tempo: só na tarefa atual; encolhe até à hora da tarefa seguinte (sem números).
+    let barraTempoHtml = '';
+    if(i === indiceAgora && !b.feito && rotinaHoje[i+1] && /^\d{1,2}:\d{2}$/.test(b.hora) && /^\d{1,2}:\d{2}$/.test(rotinaHoje[i+1].hora)){
+      const paraMin = h => { const [hh,mm] = h.split(':').map(Number); return hh*60 + mm; };
+      const ini = paraMin(b.hora), fim = paraMin(rotinaHoje[i+1].hora);
+      const ag = new Date(), minAgora = ag.getHours()*60 + ag.getMinutes();
+      if(fim > ini){
+        const restante = Math.max(0, Math.min(1, (fim - minAgora) / (fim - ini)));
+        barraTempoHtml = `<div class="barra-tempo-bloco" role="img" aria-label="Tempo até à próxima atividade"><div style="width:${Math.round(restante*100)}%"></div></div>`;
+      }
+    }
     // Em modo "Só agora": mostra apenas a tarefa atual e a seguinte por fazer.
     // Se não houver tarefa "atual" (ex: antes da primeira hora do dia), mostra a próxima por fazer.
     let visivel = true;
@@ -9157,8 +9553,9 @@ function renderRotina(){
       <div class="hora">${b.hora}</div>
       <div class="icone-rotina">${b.icone}</div>
       <div class="info">
-        <div class="t">${i===indiceAgora && !b.feito ? '👉 ' : ''}${escaparHtml(b.t)}${b.escolhaHoje ? ': ' + escaparHtml(b.escolhaHoje) : ''}</div>
+        <div class="t">${chipHtml}${i===indiceAgora && !b.feito ? '👉 ' : ''}${escaparHtml(b.t)}${b.escolhaHoje ? ': ' + escaparHtml(b.escolhaHoje) : ''}</div>
         ${b.opcoes && b.opcoes.length > 0 && !b.escolhaHoje ? `<div class="d">✋ Toca para escolher</div>` : (b.d && !b.feito ? `<div class="d">${escaparHtml(b.d)}</div>` : '')}
+        ${barraTempoHtml}
       </div>
       <button class="btn-ouvir-rotina" data-indice="${i}" aria-label="Ouvir esta tarefa">🔊</button>
       <button class="check-rotina" onclick="toggleRotina(${i})">${b.feito?'✓':''}</button>
@@ -9572,6 +9969,8 @@ function renderLista(id, itens, funcaoClicar){
   acoesLista[id] = funcaoClicar;
   cont.innerHTML = itens.map((it,i)=> gerarHtmlItemLista(it, i, id)).join('');
   ligarEventosItensLista(id);
+  // Atividades e Curiosidades: só os primeiros 4, com "Ver mais" para o resto.
+  if(id === 'lista-atividades' || id === 'lista-videos') aplicarVerMaisLista(id, 4);
 }
 
 // Agrupa jogosItens pela sua categoria (ver CATEGORIAS_JOGOS) e mostra cada grupo com
@@ -9594,6 +9993,44 @@ function renderListaJogosPorCategoria(){
   }).join('');
   cont.innerHTML = html;
   ligarEventosItensLista(id);
+  aplicarVerMaisLista(id, 4);
+}
+
+// Menos informação por ecrã: mostra só os primeiros `limite` itens de uma lista e junta um
+// botão "Ver mais". Títulos de categoria (Jogos) cujos itens ficam todos escondidos também
+// se escondem. Os índices dos itens não mudam, por isso abrir cada item funciona igual.
+function aplicarVerMaisLista(id, limite){
+  const cont = document.getElementById(id);
+  if(!cont) return;
+  const antigo = document.getElementById('btn-ver-mais-' + id);
+  if(antigo) antigo.remove();
+  const filhos = Array.from(cont.children);
+  const ehItem = el => el.classList.contains('lista-item') || el.classList.contains('recompensa');
+  const total = filhos.filter(ehItem).length;
+  if(total <= limite) return;
+  let contados = 0, titulo = null;
+  filhos.forEach(el => {
+    if(ehItem(el)){
+      contados++;
+      if(contados > limite){ el.classList.add('oculto-ver-mais'); if(titulo){ titulo.classList.add('oculto-ver-mais'); titulo = null; } }
+      else titulo = null;
+    } else {
+      titulo = el; // título de categoria: só fica visível se o item seguinte ficar visível
+    }
+  });
+  const btn = document.createElement('button');
+  btn.id = 'btn-ver-mais-' + id;
+  btn.className = 'btn-ver-mais-lista';
+  btn.textContent = '➕ Ver mais (' + (total - limite) + ')';
+  btn.setAttribute('aria-expanded', 'false');
+  btn.addEventListener('click', () => {
+    const aberto = btn.getAttribute('aria-expanded') === 'true';
+    cont.querySelectorAll('[data-vm-escondido]').forEach(el => el.classList.toggle('oculto-ver-mais', aberto));
+    btn.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+    btn.textContent = aberto ? '➕ Ver mais (' + (total - limite) + ')' : '➖ Ver menos';
+  });
+  cont.querySelectorAll('.oculto-ver-mais').forEach(el => el.setAttribute('data-vm-escondido', '1'));
+  cont.insertAdjacentElement('afterend', btn);
 }
 
 function abrirEscola(i){ abrirItemGenerico(escolaItens[i], 'escola'); }
@@ -9798,14 +10235,14 @@ function alternarModoPraticaCaa(){
   if(modoPraticaCaaAtivo){
     ecra.classList.add('modo-pratica');
     btn.classList.add('ativo');
-    btn.textContent = '✅ Em Modo Treino — toca para voltar ao normal';
+    btn.textContent = '✅ Modo Treino ligado — toca para sair';
     subtitulo.textContent = 'Treino livre: as frases aqui não ficam registadas como comunicação real';
     contadorSessoesPraticaCaa++;
     guardarEstado();
   } else {
     ecra.classList.remove('modo-pratica');
     btn.classList.remove('ativo');
-    btn.textContent = '🎯 Modo Treino (sem enviar de verdade)';
+    btn.textContent = '🎯 Modo Treino';
     subtitulo.textContent = 'Toca nas imagens para formar uma frase';
   }
 }
@@ -9905,6 +10342,11 @@ function mostrarSugestaoVideoCaa(textoFrase){
 
 function renderFraseCaa(){
   const cont = document.getElementById('frase-caa');
+  // Só mostra "Guardar frase" e ativa Apagar/Limpar quando já há palavras na frase.
+  const temPalavras = fraseCaaAtual.length > 0;
+  const bGuardar = document.getElementById('btn-guardar-frase-caa');
+  if(bGuardar) bGuardar.style.display = temPalavras ? 'block' : 'none';
+  ['btn-apagar-caa','btn-limpar-caa'].forEach(id => { const b = document.getElementById(id); if(b) b.disabled = !temPalavras; });
   if(fraseCaaAtual.length === 0){
     cont.innerHTML = '<span class="frase-caa-vazia">Toca numa imagem para começar…</span>';
     return;
@@ -9970,7 +10412,6 @@ function renderListaVideosReais(){
       <div class="icone-item" style="background:#F3E3E0">${v.tipo==='youtube' || v.tipo==='vimeo' ? '▶️' : '🎬'}</div>
       <div class="txt">
         <div class="t">${escaparHtml(v.titulo)}</div>
-        <div class="d">${v.tipo==='youtube' ? 'Vídeo do YouTube' : v.tipo==='vimeo' ? 'Vídeo do Vimeo' : 'Ficheiro de vídeo'}</div>
       </div>
       <div class="seta">›</div>
     </div>
@@ -9981,6 +10422,7 @@ function renderListaVideosReais(){
       abrirVideoReal(idx);
     });
   });
+  aplicarVerMaisLista('lista-videos-reais', 4);
 }
 
 function abrirVideoReal(i){
@@ -10711,7 +11153,7 @@ function renderOuvirPergunta(){
         <div class="painel">
           <div class="icone-grande" style="background:var(--salva-clara)">💪</div>
           <h2>Quase lá!</h2>
-          <p class="desc">Tiveste algumas respostas erradas em "${ouvirTitulo}". Podes ouvir a história outra vez e tentar de novo, com calma.</p>
+          <p class="desc">Tiveste algumas respostas erradas em "${escaparHtml(ouvirTitulo)}". Podes ouvir a história outra vez e tentar de novo, com calma.</p>
           <button class="btn-primario" id="btn-ouvir-repetir">Tentar novamente</button>
         </div>
       `, ouvirOrigem);
@@ -10724,7 +11166,7 @@ function renderOuvirPergunta(){
       <div class="painel">
         <div class="icone-grande" style="background:var(--salva-clara)">🎉</div>
         <h2>Terminaste!</h2>
-        <p class="desc">Acertaste tudo em "${ouvirTitulo}". Ouviste e percebeste muito bem a história!</p>
+        <p class="desc">Acertaste tudo em "${escaparHtml(ouvirTitulo)}". Ouviste e percebeste muito bem a história!</p>
       </div>
     `, ouvirOrigem);
     darEstrela('Excelente!', 'Completaste: ' + ouvirTitulo);
@@ -10735,9 +11177,9 @@ function renderOuvirPergunta(){
   irParaDetalhe(`
     <div class="painel" style="text-align:left;">
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
-      <div class="pergunta">${q.p}</div>
+      <div class="pergunta">${escaparHtml(q.p)}</div>
       <button class="btn-secundario" id="btn-reouvir" style="margin-bottom:14px;">🔊 Ouvir a história outra vez</button>
-      ${q.o.map((op,i)=>`<div class="opcao" id="op-ouvir-${i}" data-indice-opcao="${i}">${op}</div>`).join('')}
+      ${q.o.map((op,i)=>`<div class="opcao" id="op-ouvir-${i}" data-indice-opcao="${i}">${escaparHtml(op)}</div>`).join('')}
     </div>
   `, ouvirOrigem);
   document.getElementById('btn-reouvir').addEventListener('click', ()=>{
@@ -11052,24 +11494,23 @@ function renderQuiz(){
   const classesNivel = {1:'et-facil', 2:'et-medio', 3:'et-dificil'};
   const etiquetaNivel = q.nivel ? `<span class="etiqueta ${classesNivel[q.nivel]}">${nomesNivel[q.nivel]}</span>` : '';
   const alternadorInicial = quizIndex === 0 ? `
-    <div class="alternador-modo-dupla">
+    <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
       <button class="btn-modo-dupla ${quizModoDupla ? '' : 'ativo'}" id="btn-quiz-sozinho">${iconeCrianca()} Sozinho</button>
       <button class="btn-modo-dupla ${quizModoDupla ? 'ativo' : ''}" id="btn-quiz-dupla">${iconeDupla()} A Dois</button>
-    </div>
+    </div></details>
   ` : '';
   const indicadorVez = quizModoDupla
-    ? `<div class="vez-modo-dupla ${quizVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${quizVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${quizVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${quizVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
   irParaDetalhe(`
     <div class="painel" style="text-align:left;">
       ${alternadorInicial}
       <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--texto-suave);">Pergunta ${quizIndex + 1} de ${quizAtual.length}</p>
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
-      ${etiquetaNivel ? `<div style="margin-bottom:10px;">${etiquetaNivel}</div>` : ''}
       ${indicadorVez}
-      <div class="pergunta">${q.p}</div>
+      <div class="pergunta">${escaparHtml(q.p)}</div>
       <button class="btn-pagina" id="btn-ouvir-quiz" style="margin-bottom:12px;">🔊 Ouvir</button>
-      ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})" role="button" tabindex="0" aria-label="Opção ${String.fromCharCode(65+i)}: ${op}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();responderQuiz(${i});}"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${op}</div>`).join('')}
+      ${q.o.map((op,i)=>`<div class="opcao" id="op-${i}" onclick="responderQuiz(${i})" role="button" tabindex="0" aria-label="Opção ${String.fromCharCode(65+i)}: ${escaparHtml(op)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();responderQuiz(${i});}"><span class="marca-opcao">${String.fromCharCode(65+i)}</span>${escaparHtml(op)}</div>`).join('')}
       <p id="feedback-quiz" role="status" aria-live="polite" style="min-height:20px;font-size:13.5px;font-weight:700;margin-top:12px;text-align:center;"></p>
     </div>
   `, quizOrigem);
@@ -11169,7 +11610,7 @@ function responderQuiz(i){
       elOpcao.classList.add('errada');
       elOpcao.style.pointerEvents = 'none';
       if(feedback){
-        feedback.textContent = 'Essa não é. Repara bem nas que sobram e tenta outra vez.';
+        feedback.textContent = 'Vamos tentar outra vez. Repara nas que sobram.';
         feedback.style.color = 'var(--coral-suave)';
       }
       vibrar([25,80,25]);
@@ -11191,7 +11632,7 @@ function responderQuiz(i){
       restantes.forEach(op => document.getElementById('op-'+op.idx).classList.add('opcao-destacada'));
       const textoRestantes = restantes.map(op => op.texto).join(', ou ');
       if(feedback){
-        feedback.textContent = `Ainda não é essa. Só falta escolher entre: ${textoRestantes}.`;
+        feedback.textContent = `Quase! Só falta escolher entre: ${textoRestantes}.`;
         feedback.style.color = 'var(--coral-suave)';
       }
       vibrar([25,80,25]);
@@ -11287,11 +11728,11 @@ function gerarHtmlMemoria(){
   const nomeNivel = NIVEIS_MEMORIA[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${memModoDupla ? '' : 'ativo'}" id="btn-memoria-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${memModoDupla ? 'ativo' : ''}" id="btn-memoria-dupla">${iconeDupla()} A Dois</button>
-      </div>
-      <div class="estado-jogo" id="estado-memoria">Nível ${nomeNivel} — encontra todos os pares</div>
+      </div></details>
+      <div class="estado-jogo" id="estado-memoria">Encontra todos os pares</div>
       <div class="vez-modo-dupla" id="vez-modo-dupla" style="display:none;"></div>
       <div class="grelha-memoria" id="grelha-memoria"></div>
     </div>
@@ -11317,6 +11758,9 @@ function iniciarMemoria(){
   memTentativasFalhadasSeguidas = 0;
   const g = document.getElementById('grelha-memoria');
   if(!g) return;
+  // Contador visível desde o início: a criança sabe sempre quantos pares faltam.
+  const estadoMem = document.getElementById('estado-memoria');
+  if(estadoMem) estadoMem.textContent = `Encontra os pares · 0 de ${memTotalPares}`;
   g.innerHTML = memCartas.map((e,i)=>`<div class="carta" id="carta-${i}" onclick="virarCarta(${i})" role="button" tabindex="0" aria-label="Carta ${i+1}, virada para baixo" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();virarCarta(${i});}"></div>`).join('');
 
   const btnSozinho = document.getElementById('btn-memoria-sozinho');
@@ -11399,9 +11843,13 @@ function virarCarta(i){
           : 'Encontraste todos os pares!';
         contadorVitoriasMemoria++;
         agendarJogo(()=> concluirMemoria(), 500);
-      } else if(memModoDupla){
-        // Acertou o par: mantém a mesma vez (regra comum de jogo da memória — quem acerta joga de novo)
-        atualizarIndicadorVez();
+      } else {
+        const estadoMem2 = document.getElementById('estado-memoria');
+        if(estadoMem2) estadoMem2.textContent = `Encontra os pares · ${memPares} de ${memTotalPares}`;
+        if(memModoDupla){
+          // Acertou o par: mantém a mesma vez (regra comum de jogo da memória — quem acerta joga de novo)
+          atualizarIndicadorVez();
+        }
       }
     } else {
       memTentativasFalhadasSeguidas++;
@@ -11539,7 +11987,7 @@ function gerarHtmlCaracteristicas(){
   const nomeNivel = NIVEIS_CARACTERISTICAS[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — toca na forma certa</div>
+      <div class="nivel-jogo">Toca na forma certa</div>
       <div id="alternador-caracteristicas"></div>
       <div id="indicador-vez-caracteristicas"></div>
       <div class="pedido-caracteristicas" id="pedido-caracteristicas">A preparar...</div>
@@ -11648,10 +12096,10 @@ function proximaRondaCaracteristicas(){
   const contAlternador = document.getElementById('alternador-caracteristicas');
   if(contAlternador){
     contAlternador.innerHTML = caractRondaAtual === 0 ? `
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${caractModoDupla ? '' : 'ativo'}" id="btn-caracteristicas-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${caractModoDupla ? 'ativo' : ''}" id="btn-caracteristicas-dupla">${iconeDupla()} A Dois</button>
-      </div>
+      </div></details>
     ` : '';
     const btnSozinho = document.getElementById('btn-caracteristicas-sozinho');
     const btnDupla = document.getElementById('btn-caracteristicas-dupla');
@@ -11678,7 +12126,7 @@ function renderIndicadorVezCaracteristicas(){
   const cont = document.getElementById('indicador-vez-caracteristicas');
   if(!cont) return;
   cont.innerHTML = caractModoDupla
-    ? `<div class="vez-modo-dupla ${caractVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${caractVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${caractVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${caractVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
 }
 
@@ -11845,7 +12293,7 @@ function gerarHtmlDiferente(){
   const nomeNivel = NIVEIS_DIFERENTE[nivel]?.nome || 'Fácil';
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${nomeNivel} — toca na forma que é diferente das outras</div>
+      <div class="nivel-jogo">Toca na forma que é diferente das outras</div>
       <div id="alternador-diferente"></div>
       <div id="indicador-vez-diferente"></div>
       <button class="btn-pagina" id="btn-ouvir-diferente" style="margin-bottom:12px;">🔊 Ouvir</button>
@@ -11932,10 +12380,10 @@ function proximaRondaDiferente(){
   const contAlternador = document.getElementById('alternador-diferente');
   if(contAlternador){
     contAlternador.innerHTML = diferenteRondaAtual === 0 ? `
-      <div class="alternador-modo-dupla">
+      <details class="detalhes-dupla"><summary>👥 Jogar a dois</summary><div class="alternador-modo-dupla">
         <button class="btn-modo-dupla ${diferenteModoDupla ? '' : 'ativo'}" id="btn-diferente-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${diferenteModoDupla ? 'ativo' : ''}" id="btn-diferente-dupla">${iconeDupla()} A Dois</button>
-      </div>
+      </div></details>
     ` : '';
     const btnSozinho = document.getElementById('btn-diferente-sozinho');
     const btnDupla = document.getElementById('btn-diferente-dupla');
@@ -11964,7 +12412,7 @@ function renderIndicadorVezDiferente(){
   const cont = document.getElementById('indicador-vez-diferente');
   if(!cont) return;
   cont.innerHTML = diferenteModoDupla
-    ? `<div class="vez-modo-dupla ${diferenteVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${diferenteVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${obterNomeCrianca()} responder`}</div>`
+    ? `<div class="vez-modo-dupla ${diferenteVezDaMae ? 'vez-mae' : 'vez-eduardo'}">${diferenteVezDaMae ? '👩 Vez da mãe responder' : `${iconeCrianca()} Vez d${generoTexto('','o','a')} ${escaparHtml(obterNomeCrianca())} responder`}</div>`
     : '';
 }
 
@@ -12149,7 +12597,13 @@ const LETRAS_TRACADO = {
   // com raio 33 — mesma posição/tamanho geral que o polígono anterior, mas agora liso.
   // Sentido ANTI-HORÁRIO a partir do topo (0° -> -360°), como se escreve o O à mão e em
   // coerência com o C (que também roda para a esquerda). Antes ia no sentido horário.
-  O: {segmentos:[gerarPontosArco(50, 50, 33, 0, -360, 40)]},
+  // v1.57.40: o O era um círculo em coordenadas 0-100, mas o canvas é 5:4 (altura = 0,8 ×
+  // largura) e o mapeamento x/y é independente, por isso aparecia ACHATADO (mais largo do que
+  // alto) — o O ficava "deitado". Agora é uma elipse compensada: rx=26 (52 de largura) e
+  // ry=38 (76 × 0,8 = 60,8 de altura visual) → cerca de 1,17× mais alto do que largo, em pé,
+  // como um O escrito à mão. Mesmo sentido (anti-horário a partir do topo) e mesmo ponto de
+  // partida (50,12), por isso o progresso e a tolerância não mudam.
+  O: {segmentos:[gerarPontosElipse(50, 50, 26, 38, 0, -360, 40)]},
   // C: começa em cima à direita (canto das "2 horas") e desce pelo lado ESQUERDO em sentido
   // anti-horário, terminando em baixo à direita — é assim que se escreve um C à mão, e é
   // o gesto natural do dedo. Antes o arco ia de 110° a 430° (sentido horário, a começar
@@ -12157,7 +12611,11 @@ const LETRAS_TRACADO = {
   // ponto a partir do início do arco, quem traçava o C do jeito certo ficava preso nos
   // primeiros pontos e a linha nunca completava. Agora: 70° -> -250° (anti-horário),
   // deixando a abertura de 40° centrada à direita.
-  C: {segmentos:[gerarPontosArco(50, 50, 33, 70, -250, 32)]},
+  // v1.57.41: mesma correção do O (v1.57.40) — o C era um arco circular de raio 33 em
+  // coordenadas 0-100 e, com o canvas a 5:4, aparecia achatado (deitado). Agora usa a mesma
+  // elipse compensada do O (rx=26, ry=38), com o mesmo ângulo (70° → -250°) e a mesma
+  // abertura de 40° à direita; só a forma muda, o gesto e o ponto de partida são os mesmos.
+  C: {segmentos:[gerarPontosElipse(50, 50, 26, 38, 70, -250, 32)]},
   V: {segmentos:[[[15,15],[47,85],[80,15]]]},
   X: {segmentos:[[[15,15],[80,85]],[[80,15],[15,85]]]},
   A: {segmentos:[[[20,85],[47,15],[75,85]],[[32,58],[62,58]]]},
@@ -12202,20 +12660,69 @@ const LETRAS_TRACADO = {
   // S e G: forma genuinamente curva ao longo de todo o traço, sem hastes retas — usa
   // suavização Catmull-Rom sobre os mesmos pontos-chave de referência de antes, em vez
   // de arcos de circunferência (a forma do S/G não é circular, é uma curva composta).
-  S: {segmentos:[suavizarCurva([[72,25],[52,15],[30,20],[22,35],[35,50],[65,55],[75,70],[65,82],[35,88],[20,78]], 6)]},
-  G: {segmentos:[suavizarCurva([[72,25],[55,15],[30,25],[20,50],[30,75],[55,85],[75,75],[75,55],[50,55]], 6)]},
-  J: {segmentos:[[[55,15],[55,70],[45,85],[28,85],[20,72]]]},
+  // v1.57.42: o S era uma curva desenhada à mão que, com o canvas a 5:4, ficava demasiado
+  // larga e achatada. Agora são duas meias-elipses empilhadas (bojo de cima anti-horário,
+  // bojo de baixo horário) que se encontram em (50,50) com a mesma tangente — a "barriga"
+  // de cada bojo tem rx=19 / ry=17,5 (≈ 38 × 28 visuais), portanto o S fica com ≈ 0,68 de
+  // largura/altura, como uma letra normal. Mesmo ponto de partida (cima à direita).
+  S: {segmentos:[[...gerarPontosElipse(50, 32.5, 19, 17.5, 50, -180, 22), ...gerarPontosElipse(50, 67.5, 19, 17.5, 0, 230, 22).slice(1)]]},
+  // v1.57.42: o G passa a ser o mesmo arco elíptico do C/O (rx=26, ry=38), a começar em
+  // cima à direita, anti-horário, até ao meio do lado direito — e depois a barra do G para
+  // dentro. Antes era uma curva à mão, achatada e sem barra reconhecível.
+  G: {segmentos:[[...gerarPontosElipse(50, 50, 26, 38, 55, -270, 34), [54,50]]]},
+  // v1.57.42: J com haste alta e gancho redondo (elipse rx=18, ry=20 → ≈ 18 × 16 visuais),
+  // em vez do gancho pequeno e angular de 3 linhas retas.
+  J: {segmentos:[[[58,15],[58,65], ...gerarPontosElipse(40, 65, 18, 20, 90, 250, 16).slice(1)]]},
   K: {segmentos:[[[20,15],[20,85]],[[75,15],[20,50]],[[35,42],[75,85]]]},
   // Q: corpo em arco real (círculo completo) + traço diagonal do "rabo" como segmento
   // à parte.
-  Q: {segmentos:[gerarPontosArco(50, 50, 30, 0, -360, 36),[[55,60],[80,88]]]}, // corpo anti-horário, igual ao O
+  Q: {segmentos:[gerarPontosElipse(50, 50, 26, 38, 0, -360, 40),[[57,68],[76,92]]]}, // corpo anti-horário, igual ao O (v1.57.40: mesma elipse em pé; cauda ajustada)
+  // ===== Letras minúsculas (imprensa) =====
+  // Pauta em unidades 0-100: ascendente y=12, altura-x y=40, base y=80, descendente y=94.
+  // O canvas tem altura = 0.8 x largura, por isso os arcos redondos usam rx = 0.8 x ry para
+  // parecerem círculos. Só entram nas sessões dos grupos de minúsculas (o nome e as palavras
+  // continuam a usar só maiúsculas A-Z).
+  l: {segmentos:[[[50,12],[50,80]]]},
+  i: {segmentos:[[[50,40],[50,80]],[[50,17],[50,25]]]},
+  t: {segmentos:[suavizarCurva([[46,18],[46,68],[52,79],[64,77]], 5),[[32,40],[62,40]]]},
+  j: {segmentos:[suavizarCurva([[54,40],[54,86],[46,93],[34,90]], 5),[[54,17],[54,25]]]},
+  v: {segmentos:[[[32,40],[50,80],[68,40]]]},
+  x: {segmentos:[[[34,40],[66,80]],[[66,40],[34,80]]]},
+  z: {segmentos:[[[34,40],[66,40],[34,80],[66,80]]]},
+  w: {segmentos:[[[20,40],[35,80],[50,50],[65,80],[80,40]]]},
+  y: {segmentos:[[[34,40],[52,78]],[[68,40],[44,94]]]},
+  k: {segmentos:[[[34,12],[34,80]],[[64,40],[36,62],[66,80]]]},
+  o: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 0, -360, 32)]},
+  c: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 55, -235, 26)]},
+  e: {segmentos:[[[34,60],[66,60], ...gerarPontosElipse(50, 60, 16, 20, 90, -215, 26).slice(1)]]},
+  a: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 55, -305, 30),[[66,40],[66,80]]]},
+  b: {segmentos:[[[34,12],[34,80]],gerarPontosElipse(50, 60, 16, 20, 300, 660, 30)]},
+  d: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 55, -305, 30),[[66,12],[66,80]]]},
+  p: {segmentos:[[[34,40],[34,94]],gerarPontosElipse(50, 60, 16, 20, 300, 660, 30)]},
+  q: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 55, -305, 30),[[66,40],[66,94]]]},
+  g: {segmentos:[gerarPontosElipse(50, 60, 16, 20, 55, -305, 30),suavizarCurva([[66,40],[66,84],[58,93],[42,92]], 6)]},
+  n: {segmentos:[[[34,40],[34,80]],[...gerarPontosElipse(50, 58, 16, 18, 270, 450, 14),[66,80]]]},
+  h: {segmentos:[[[34,12],[34,80]],[...gerarPontosElipse(50, 58, 16, 18, 270, 450, 14),[66,80]]]},
+  m: {segmentos:[[[24,40],[24,80]],[...gerarPontosElipse(37, 58, 13, 18, 270, 450, 12),[50,80]],[...gerarPontosElipse(63, 58, 13, 18, 270, 450, 12),[76,80]]]},
+  r: {segmentos:[[[36,40],[36,80]],suavizarCurva([[36,58],[42,46],[54,41],[64,43]], 6)]},
+  u: {segmentos:[[[34,40],[34,62],...gerarPontosElipse(50, 62, 16, 18, 270, 90, 14).slice(1),[66,40]],[[66,40],[66,80]]]},
+  // v1.57.43: o s minúsculo era uma curva à mão, larga e achatada (o mesmo problema que o S
+  // tinha). Agora são duas meias-elipses empilhadas na zona da altura-x (y 40-80), com a
+  // mesma construção do S maiúsculo: rx=12 / ry=10 por bojo → ≈ 24 visuais de largura por
+  // 32 de altura. Mesmo ponto de partida (cima à direita) e mesmo sentido.
+  s: {segmentos:[[...gerarPontosElipse(50, 50, 12, 10, 50, -180, 20), ...gerarPontosElipse(50, 70, 12, 10, 0, 230, 20).slice(1)]]},
+  f: {segmentos:[suavizarCurva([[64,20],[56,12],[46,14],[42,26],[42,80]], 6),[[30,40],[58,40]]]},
   // ===== Números 0-9 =====
   // Mesmo formato das letras (pontos 0-100, vários segmentos quando é preciso levantar o
   // dedo). Sentido de escrita à mão: 0, 6, 8 e o laço do 9 rodam para a esquerda (anti-horário)
   // a partir de cima, como o O e o C; 2, 3 e 5 começam à esquerda/topo e seguem para a direita.
   // O 4 tem dois traços (diagonal+travessa, depois a haste). Só entram nas sessões dos
   // grupos de números — nunca no nome nem nas palavras (que filtram só A-Z).
-  '0': {segmentos:[gerarPontosElipse(50, 50, 26, 35, 0, -360, 36)]},
+  // v1.57.41: o 0 tinha rx=26/ry=35 (52×28 de "altura visual" após o rácio 0,8 → quase igual
+  // ao O). Um 0 escrito é mais estreito e da altura das letras: rx=22, ry=38 → 44 de largura
+  // por 60,8 de altura (mesma altura do O, cerca de 1,4× mais alto do que largo), para se
+  // distinguir do O como acontece na escrita à mão. Mesmo sentido e ponto de partida.
+  '0': {segmentos:[gerarPontosElipse(50, 50, 22, 38, 0, -360, 40)]},
   '1': {segmentos:[[[30,32],[52,15],[52,85]]]},
   '2': {segmentos:[[...gerarPontosArco(50, 36, 24, 285, 505, 18), [22,85], [78,85]]]},
   '3': {segmentos:[suavizarCurva([[27,26],[40,16],[58,16],[68,28],[60,42],[44,49],[62,55],[72,68],[64,82],[46,86],[30,80],[24,72]], 6)]},
@@ -12224,7 +12731,10 @@ const LETRAS_TRACADO = {
   '6': {segmentos:[suavizarCurva([[66,22],[48,15],[31,28],[24,55],[30,78],[50,86],[70,76],[70,58],[52,50],[34,58],[30,68]], 6)]},
   '7': {segmentos:[[[22,15],[78,15],[40,85]]]},
   '8': {segmentos:[suavizarCurva([[62,24],[50,15],[36,22],[34,36],[50,50],[66,62],[68,76],[50,86],[32,76],[34,62],[50,50],[66,36],[64,24]], 6)]},
-  '9': {segmentos:[[...gerarPontosArco(50, 34, 19, 90, -270, 30), ...suavizarCurva([[69,34],[67,56],[54,76],[32,85]], 6).slice(1)]]},
+  // v1.57.42: o bojo do 9 (círculo de raio 19 em coordenadas 0-100) ficava pequeno e mais
+  // largo do que alto; passa a elipse rx=19 / ry=23 (≈ 19 × 18 visuais, redondo) e a cauda
+  // desce a partir do ponto onde o bojo fecha.
+  '9': {segmentos:[[...gerarPontosElipse(50, 38, 19, 23, 90, -270, 32), ...suavizarCurva([[69,38],[67,60],[55,78],[33,85]], 6).slice(1)]]},
 };
 const ORDEM_LETRAS_TRACADO = ['L','T','I','O','C','V','X'];
 
@@ -12245,6 +12755,13 @@ const GRUPOS_LETRAS_TRACADO = {
   numRetos:   { nome: 'Números 1',    icone: '🔢', tipo: 'numeros', letras: ['1','7','4'] },
   numCurvos:  { nome: 'Números 2',    icone: '🔢', tipo: 'numeros', letras: ['0','2','3','5'] },
   numLacos:   { nome: 'Números 3',    icone: '🔢', tipo: 'numeros', letras: ['6','9','8'] },
+  // Minúsculas, pelo mesmo critério de gesto (tipo:'minusculas' → aparecem por baixo das maiúsculas).
+  minRetas:     { nome: 'Retas e pontos', icone: '📏', tipo: 'minusculas', letras: ['l','i','t','j'] },
+  minDiagonais: { nome: 'Diagonais',      icone: '📐', tipo: 'minusculas', letras: ['v','x','z','w','y','k'] },
+  minRedondas:  { nome: 'Redondas',       icone: '⭕', tipo: 'minusculas', letras: ['o','c','e','a'] },
+  minHaste:     { nome: 'Com haste',      icone: '🅿️', tipo: 'minusculas', letras: ['b','d','p','q','g'] },
+  minArcos:     { nome: 'Arcos',          icone: '🌈', tipo: 'minusculas', letras: ['n','h','m','r','u'] },
+  minSinuosas:  { nome: 'Sinuosas',       icone: '🐍', tipo: 'minusculas', letras: ['s','f'] },
 };
 
 // Fichas temáticas de vocabulário para o traçado — em vez de só desenhar letras soltas
@@ -12333,6 +12850,21 @@ function obterFichaPalavrasCaa(){
   };
 }
 
+const HTML_MARCA_GRUPO_FEITO = '<span class="grupo-feito" role="img" aria-label="concluído">✓</span>';
+
+// Regista que o grupo em curso foi traçado até ao fim, guarda no estado da criança e põe o ✓
+// no botão já desenhado (o menu não é reconstruído ao voltar de uma sessão). Não faz nada
+// se não estamos num grupo ou se já estava marcado.
+function marcarGrupoTracadoConcluido(chaveGrupo){
+  if(!chaveGrupo || !GRUPOS_LETRAS_TRACADO[chaveGrupo] || gruposTracadoConcluidos.includes(chaveGrupo)) return;
+  gruposTracadoConcluidos.push(chaveGrupo);
+  guardarEstado();
+  const btn = document.querySelector('[data-grupo-tracado="' + chaveGrupo + '"]');
+  if(btn && !btn.querySelector('.grupo-feito')){
+    btn.querySelector('span[style]').insertAdjacentHTML('beforebegin', HTML_MARCA_GRUPO_FEITO);
+  }
+}
+
 let tracadoModoNome = false; // true quando a sessão atual é "Traça o Meu Nome"
 let tracadoGrupoAtual = null; // chave de GRUPOS_LETRAS_TRACADO em curso, ou null
 let tracadoOrdemAtual = ORDEM_LETRAS_TRACADO; // sequência de letras da sessão em curso
@@ -12369,29 +12901,45 @@ function gerarHtmlTracado(){
     `<button class="btn-tema-tracado" data-tema-tracado="${chave}">${tema.icone} ${tema.nome}</button>`
   ).join('');
   const htmlBotaoGrupo = ([chave, g]) =>
-    `<button class="btn-tema-tracado" data-grupo-tracado="${chave}">${g.icone} ${g.nome}<span style="display:block;font-size:11px;font-weight:600;opacity:.7;letter-spacing:1px;margin-top:2px;">${g.letras.join(' ')}</span></button>`;
-  const botoesGrupos = Object.entries(GRUPOS_LETRAS_TRACADO).filter(([,g]) => g.tipo !== 'numeros').map(htmlBotaoGrupo).join('');
-  const botoesNumeros = Object.entries(GRUPOS_LETRAS_TRACADO).filter(([,g]) => g.tipo === 'numeros').map(htmlBotaoGrupo).join('');
+    `<button class="btn-tema-tracado" data-grupo-tracado="${chave}">${g.icone} ${g.nome}${gruposTracadoConcluidos.includes(chave) ? HTML_MARCA_GRUPO_FEITO : ''}<span style="display:block;font-size:11px;font-weight:600;opacity:.7;letter-spacing:1px;margin-top:2px;">${g.letras.join(' ')}</span></button>`;
+  const botoesDoTipo = tipo => Object.entries(GRUPOS_LETRAS_TRACADO).filter(([,g]) => g.tipo === tipo).map(htmlBotaoGrupo).join('');
+  const botoesGrupos = botoesDoTipo(undefined);       // maiúsculas (grupos sem "tipo")
+  const botoesNumeros = botoesDoTipo('numeros');
+  const botoesMinusculas = botoesDoTipo('minusculas');
   return `
     <div class="painel">
       <div class="nivel-jogo" id="nivel-jogo-tracado">Desenha por cima da linha com o dedo</div>
-      <p class="aviso-novo-tracado" id="aviso-novo-tracado" style="display:none;"></p>
+      <div id="menu-tracado">
       ${nomeCrianca ? `<button class="btn-secundario" id="btn-tracar-nome" style="margin-bottom:10px;">✏️ Traçar o meu nome: ${escaparHtml(nomeCrianca)}</button>` : ''}
-      ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras (do quadro de comunicação)</button>` : ''}
-      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Letras por tipo de traço</p>
-      <div class="grelha-temas-tracado">${botoesGrupos}</div>
-      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Números</p>
-      <div class="grelha-temas-tracado">${botoesNumeros}</div>
-      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Palavras</p>
-      <div class="grelha-temas-tracado">${botoesTemas}</div>
+      <div class="menu-tracado-abas" role="tablist">
+        <button class="btn-aba-tracado" data-painel-tracado="letras" aria-expanded="false"><span class="ic">🔤</span>Letras</button>
+        <button class="btn-aba-tracado" data-painel-tracado="numeros" aria-expanded="false"><span class="ic">🔢</span>Números</button>
+        <button class="btn-aba-tracado" data-painel-tracado="palavras" aria-expanded="false"><span class="ic">💬</span>Palavras</button>
+      </div>
+      <div class="painel-tracado" id="painel-tracado-letras" hidden>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Maiúsculas</p>
+        <div class="grelha-temas-tracado">${botoesGrupos}</div>
+        <p style="margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Minúsculas</p>
+        <div class="grelha-temas-tracado">${botoesMinusculas}</div>
+      </div>
+      <div class="painel-tracado" id="painel-tracado-numeros" hidden><div class="grelha-temas-tracado">${botoesNumeros}</div></div>
+      <div class="painel-tracado" id="painel-tracado-palavras" hidden>
+        ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras</button>` : ''}
+        <div class="grelha-temas-tracado">${botoesTemas}</div>
+      </div>
+      </div>
+      <button class="btn-secundario" id="btn-mudar-tracado" style="display:none;margin-bottom:12px;">↩ Escolher outra coisa</button>
       <div class="letras-feitas" id="letras-feitas-tracado"></div>
       <div class="canvas-tracado-wrap">
+        <p class="aviso-novo-tracado" id="aviso-novo-tracado" role="status" style="display:none;"></p>
         <canvas id="canvas-tracado-desenho"></canvas>
         <canvas id="canvas-tracado"></canvas>
         <div class="curiosidade-letra-tracado" id="curiosidade-letra-tracado" aria-live="polite" style="display:none;"></div>
       </div>
-      <button class="btn-pagina" id="btn-ouvir-tracado" style="margin-bottom:10px;">🔊 Ouvir</button>
-      <button class="btn-secundario" id="btn-recomecar-tracado">↺ Recomeçar esta letra</button>
+      <div class="linha-acoes-tracado">
+        <button class="btn-pagina" id="btn-ouvir-tracado">🔊 Ouvir</button>
+        <button class="btn-secundario" id="btn-recomecar-tracado">↺ Recomeçar</button>
+      </div>
     </div>
   `;
 }
@@ -12427,6 +12975,34 @@ function iniciarTracado(){
   });
   document.querySelectorAll('[data-tema-tracado]').forEach(btn => {
     btn.addEventListener('click', () => iniciarTracadoDoTema(btn.dataset.temaTracado));
+  });
+  // Menu simplificado: só um painel aberto de cada vez; ao escolher, fecha e leva ao desenho.
+  const fecharPaineisTracado = () => {
+    document.querySelectorAll('.painel-tracado').forEach(p => { p.hidden = true; });
+    document.querySelectorAll('.btn-aba-tracado').forEach(b => { b.classList.remove('ativo'); b.setAttribute('aria-expanded','false'); });
+  };
+  document.querySelectorAll('[data-painel-tracado]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const painel = document.getElementById('painel-tracado-' + btn.dataset.painelTracado);
+      const vaiAbrir = painel.hidden;
+      fecharPaineisTracado();
+      if(vaiAbrir){ painel.hidden = false; btn.classList.add('ativo'); btn.setAttribute('aria-expanded','true'); }
+    });
+  });
+  // Depois de escolher, o menu sai da frente: o desenho sobe e fica um só botão para voltar.
+  const menuTracado = document.getElementById('menu-tracado');
+  const btnMudarTracado = document.getElementById('btn-mudar-tracado');
+  if(btnMudarTracado) btnMudarTracado.addEventListener('click', () => {
+    if(menuTracado) menuTracado.style.display = '';
+    btnMudarTracado.style.display = 'none';
+  });
+  document.querySelectorAll('.painel-tracado button, #btn-tracar-nome').forEach(btn => {
+    btn.addEventListener('click', () => {
+      fecharPaineisTracado();
+      if(menuTracado) menuTracado.style.display = 'none';
+      if(btnMudarTracado) btnMudarTracado.style.display = 'block';
+      setTimeout(() => { const c = document.getElementById('canvas-tracado'); if(c) c.scrollIntoView({behavior:'smooth', block:'center'}); }, 60);
+    });
   });
 }
 
@@ -12540,7 +13116,7 @@ function configurarBotaoOuvirTracado(){
       btnOuvir.textContent = '🔊 Ouvir';
     } else {
       btnOuvir.textContent = '⏸ A ouvir...';
-      narrar('Vamos escrever ' + (/^\d$/.test(letra) ? 'o número ' : 'a letra ') + letra + '. Desenha por cima da linha.', ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
+      narrar('Vamos escrever ' + (/^\d$/.test(letra) ? 'o número ' : 'a letra ') + letra + (/^[a-z]$/.test(letra) ? ' minúscula' : '') + '. Desenha por cima da linha.', ()=>{ btnOuvir.textContent = '🔊 Ouvir'; });
     }
   };
 }
@@ -12959,6 +13535,7 @@ const ultimaPalavraCuriosidadeTracado = {}; // letra -> última palavra usada (p
 // nome, fichas de palavras, ou letra sem palavra no banco).
 function curiosidadeDaLetraTracado(letra){
   if(tracadoModoNome || tracadoTemaAtual) return null;
+  letra = letra.toUpperCase(); // as minúsculas usam o mesmo banco de palavras das maiúsculas
   const opcoes = PALAVRAS_CURIOSIDADE_LETRA[letra];
   if(!opcoes || opcoes.length === 0) return null;
   const outras = opcoes.filter(o => o.palavra !== ultimaPalavraCuriosidadeTracado[letra]);
@@ -13006,7 +13583,7 @@ function concluirLetraTracado(){
     // Depois do elogio, a curiosidade da letra (ver curiosidadeDaLetraTracado). Se o
     // Eduardo já saiu do jogo enquanto o elogio falava (o canvas deixou de existir), não
     // começa uma fala nova fora de contexto — só segue o fluxo normal.
-    const cur = document.getElementById('canvas-tracado-desenho') ? curiosidadeDaLetraTracado(letra) : null;
+    const cur = (curiosidadeLetraTracadoAtiva && document.getElementById('canvas-tracado-desenho')) ? curiosidadeDaLetraTracado(letra) : null;
     if(!cur){ avancar(); return; }
     mostrarCuriosidadeLetraTracado(cur);
     narrar(cur.fala, avancar);
@@ -13027,6 +13604,7 @@ function concluirJogoTracado(){
     : grupo
       ? `Traçaste "${grupo.nome}" — ${tracadoOrdemAtual.join(', ')}`
       : 'Traçaste todas as letras — ' + tracadoOrdemAtual.join(', ');
+  if(grupo) marcarGrupoTracadoConcluido(tracadoGrupoAtual);
   darEstrela('Excelente trabalho!', texto, tracadoModoNome ? 2 : 1);
 }
 
@@ -13114,7 +13692,15 @@ function renderLojaRecompensas(){
       indiceMaisProxima = i;
     }
   });
-  cont.innerHTML = recompensasLista.map((r,i)=>{
+  // Ordem de apresentação: primeiro as que já dá para trocar, depois as mais próximas.
+  // O índice ORIGINAL (i) mantém-se em data-indice-resgate, por isso trocar continua certo.
+  const ordemLoja = recompensasLista.map((r,i)=>i).sort((a,b)=>{
+    const fa = Math.max(0, recompensasLista[a].custo - disponiveis);
+    const fb = Math.max(0, recompensasLista[b].custo - disponiveis);
+    return fa - fb;
+  });
+  cont.innerHTML = ordemLoja.map(i=>{
+    const r = recompensasLista[i];
     const pct = Math.min(100, Math.round((disponiveis / r.custo) * 100));
     const podeResgatar = disponiveis >= r.custo;
     const falta = r.custo - disponiveis;
@@ -13148,6 +13734,7 @@ function renderLojaRecompensas(){
       confirmarRemocao(btn, ()=> resgatarRecompensa(idx));
     });
   });
+  aplicarVerMaisLista('lista-loja-recompensas', 3);
 }
 
 // Repõe o vídeo da mascote (.emoji-video) visível e reinicia a sua reprodução, e volta a
@@ -13214,6 +13801,7 @@ function mostrarMascoteParadaOverlayYay(videoEl){
   return videoEl;
 }
 function reiniciarMascoteOverlayYay(){
+  try{ aplicarTemaReforcoOverlay(); }catch(e){}
   const videoEl = document.querySelector('#overlay-yay .emoji-video');
   const emojiEl = document.querySelector('#overlay-yay div.emoji');
   const imgEl = document.querySelector('#overlay-yay img.emoji-mascote');
@@ -13262,9 +13850,9 @@ function renderConfigRecompensas(){
   if(!cont) return;
   cont.innerHTML = recompensasLista.map((r,i)=>`
     <div class="recompensa-config-linha">
-      <input type="text" value="${r.t.replace(/"/g,'&quot;')}" placeholder="Nome da recompensa" data-campo="t" data-i="${i}">
-      <input type="number" min="1" value="${r.custo}" data-campo="custo" data-i="${i}">
-      <button onclick="removerRecompensa(${i})" aria-label="Remover recompensa">✕</button>
+      <input type="text" value="${escaparHtml(r.t)}" placeholder="Nome da recompensa" aria-label="Nome da recompensa ${i+1}" data-campo="t" data-i="${i}">
+      <input type="number" min="1" value="${escaparHtml(r.custo)}" aria-label="Custo em estrelas${r.t ? ' — ' + escaparHtml(r.t) : ' da recompensa ' + (i+1)}" data-campo="custo" data-i="${i}">
+      <button onclick="removerRecompensa(${i})" aria-label="Remover recompensa${r.t ? ' ' + escaparHtml(r.t) : ' ' + (i+1)}">✕</button>
     </div>
   `).join('');
 }
@@ -13405,6 +13993,71 @@ function mostrarBrilhoSuave(){
   setTimeout(()=>{ emoji.style.textShadow = 'none'; emoji.style.filter = 'none'; }, 900);
 }
 
+// ===== v1.57.47 — Tema das celebrações (reforçador personalizável) =====
+// Os pais escolhem o interesse do Eduardo; os emojis do tema entram nos confetis e numa
+// faixa parada por baixo da mascote (esta funciona também com Efeitos calmos, sem movimento).
+// A recompensa em si (estrelas, troféus, loja) não muda — só o "embrulho" visual.
+const TEMAS_REFORCO = {
+  padrao:      { nome:'⭐ Padrão (sem tema)', emojis:[] },
+  comboios:    { nome:'🚂 Comboios',          emojis:['🚂','🚃','🚉','🚆'] },
+  carros:      { nome:'🚗 Carros e camiões',  emojis:['🚗','🚓','🚒','🚌','🚚'] },
+  animais:     { nome:'🐾 Animais',           emojis:['🐶','🐱','🐼','🦁','🐸'] },
+  dinossauros: { nome:'🦖 Dinossauros',       emojis:['🦖','🦕','🌋','🥚'] },
+  espaco:      { nome:'🚀 Espaço',            emojis:['🚀','🪐','🌙','⭐'] },
+  mar:         { nome:'🐠 Mar',               emojis:['🐠','🐬','🐙','🐚'] },
+  futebol:     { nome:'⚽ Futebol',           emojis:['⚽','🥅','🏟️','🏆'] },
+  personalizado:{ nome:'✏️ Escolher emojis', emojis:[] },
+};
+function extrairEmojisSeguros(texto){
+  // Só emojis (nada de letras/HTML), no máximo 4 — o valor é depois usado em innerHTML/canvas.
+  const re = /\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier}|\u200D\p{Extended_Pictographic})*/gu;
+  return (String(texto || '').match(re) || []).slice(0, 4);
+}
+function lerTemaReforco(){
+  try{
+    const v = JSON.parse(localStorage.getItem(CHAVE_TEMA_REFORCO) || '{}');
+    const tema = TEMAS_REFORCO[v.tema] ? v.tema : 'padrao';
+    return { tema, personalizado: extrairEmojisSeguros((v.personalizado || []).join('')) };
+  }catch(e){ return { tema:'padrao', personalizado:[] }; }
+}
+function guardarTemaReforco(tema, personalizadoTexto){
+  const dados = { tema: TEMAS_REFORCO[tema] ? tema : 'padrao', personalizado: extrairEmojisSeguros(personalizadoTexto) };
+  try{ localStorage.setItem(CHAVE_TEMA_REFORCO, JSON.stringify(dados)); }catch(e){}
+}
+function emojisDoTemaReforco(){
+  const t = lerTemaReforco();
+  return t.tema === 'personalizado' ? t.personalizado : (TEMAS_REFORCO[t.tema].emojis || []);
+}
+// Faixa por baixo da mascote (5 emojis do tema). Escondida quando não há tema.
+function aplicarTemaReforcoOverlay(){
+  const faixa = document.getElementById('yay-faixa-tema');
+  if(!faixa) return;
+  const emojis = emojisDoTemaReforco();
+  if(!emojis.length){ faixa.style.display = 'none'; faixa.textContent = ''; return; }
+  faixa.textContent = Array.from({length:5}, (_,i) => emojis[i % emojis.length]).join('');
+  faixa.style.display = 'block';
+}
+function iniciarDefinicaoTemaReforco(){
+  const sel = document.getElementById('tema-reforco');
+  const inp = document.getElementById('tema-reforco-personalizado');
+  const previa = document.getElementById('previa-tema-reforco');
+  if(!sel || !inp || !previa) return;
+  sel.innerHTML = Object.entries(TEMAS_REFORCO).map(([k,t]) => '<option value="' + k + '">' + escaparHtml(t.nome) + '</option>').join('');
+  const atual = lerTemaReforco();
+  sel.value = atual.tema;
+  inp.value = atual.personalizado.join('');
+  const atualizar = () => {
+    inp.style.display = sel.value === 'personalizado' ? 'block' : 'none';
+    guardarTemaReforco(sel.value, inp.value);
+    const em = emojisDoTemaReforco();
+    previa.textContent = em.length ? Array.from({length:5}, (_,i) => em[i % em.length]).join('') : '';
+  };
+  sel.addEventListener('change', atualizar);
+  inp.addEventListener('input', atualizar);
+  atualizar();
+}
+document.addEventListener('DOMContentLoaded', iniciarDefinicaoTemaReforco);
+
 function dispararConfetis(){
   if(movimentoReduzidoAtivo()){
     mostrarBrilhoSuave();
@@ -13420,15 +14073,18 @@ function dispararConfetis(){
   ctx.scale(dpr, dpr);
 
   const cores = ['#D98E73','#E8C468','#8FAE9A','#5C8C90','#B497C7','#ffffff'];
+  const emojisTema = emojisDoTemaReforco();
   const total = 70;
   const peças = [];
   for(let i=0;i<total;i++){
+    const ehEmoji = emojisTema.length > 0 && i % 3 === 0; // ~1 em cada 3 peças é um emoji do tema
     peças.push({
+      emoji: ehEmoji ? emojisTema[Math.floor(Math.random()*emojisTema.length)] : null,
       x: Math.random()*larg,
       y: -20 - Math.random()*alt*0.5,
       vx: (Math.random()-0.5)*1.6,
       vy: 2 + Math.random()*2.5,
-      tam: 5 + Math.random()*5,
+      tam: (i % 3 === 0 && emojisTema.length) ? 22 + Math.random()*10 : 5 + Math.random()*5,
       cor: cores[Math.floor(Math.random()*cores.length)],
       rot: Math.random()*Math.PI*2,
       vrot: (Math.random()-0.5)*0.2
@@ -13446,7 +14102,12 @@ function dispararConfetis(){
       ctx.rotate(p.rot);
       ctx.fillStyle = p.cor;
       ctx.globalAlpha = t > duracaoMs - 500 ? Math.max(0, (duracaoMs - t)/500) : 1;
-      ctx.fillRect(-p.tam/2, -p.tam/2, p.tam, p.tam*0.6);
+      if(p.emoji){
+        ctx.font = p.tam + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(p.emoji, 0, 0);
+      } else {
+        ctx.fillRect(-p.tam/2, -p.tam/2, p.tam, p.tam*0.6);
+      }
       ctx.restore();
     });
     if(t < duracaoMs){
@@ -13656,7 +14317,7 @@ function mostrarMedalhaNoOverlay(medalhasNovas){
 }
 function fecharYay(){
   document.getElementById('overlay-yay').classList.remove('mostrar');
-  if(avancarNaSessaoJogos()) return; // já tratou da navegação (próximo jogo ou conclusão)
+  if(avancarNaSessaoJogos()){ try{ verificarPausaEcra(); }catch(e){} return; } // já tratou da navegação (próximo jogo ou conclusão)
   irPara('inicio');
 }
 
@@ -13685,7 +14346,7 @@ function gerarHtmlEsperar(){
   const config = NIVEIS_ESPERAR[nivel] || NIVEIS_ESPERAR[1];
   return `
     <div class="painel">
-      <div class="nivel-jogo">Nível ${config.nome} — respira enquanto esperas</div>
+      <div class="nivel-jogo">Respira enquanto esperas</div>
       <p class="desc">Vamos treinar esperar com calma. Respira devagar enquanto o tempo passa — não há problema nenhum em esperar.</p>
       <div class="circulo-respirar-claro" id="circulo-respirar-esperar">Respira</div>
       ${mostrarTempoEsperar
@@ -13751,6 +14412,7 @@ function concluirEsperar(){
 
 /* ======================= MODO CALMA ======================= */
 function abrirCalma(){
+  try{ reiniciarContagemPausaEcra(); }catch(e){} // usar o Modo Calma já é uma pausa
   contadorUsosCalma++;
   const indiceAgora = calcularIndiceAgora();
   const nomeBloco = indiceAgora !== -1 ? rotinaHoje[indiceAgora].t : 'Sem tarefa associada';
@@ -13895,9 +14557,10 @@ function configurarToqueLongoCalma(){
 }
 
 /* ======================= PIN de acesso à área parental/admin =======================
-   Usa um hash simples (não é criptografia forte) só para não deixar o PIN em texto
-   legível no localStorage — adequado ao nível de proteção necessário aqui (evitar
-   que uma criança entre por acidente ou curiosidade), não para dados sensíveis.
+   v1.57.31: o PIN é guardado com PBKDF2-SHA256 + sal aleatório (crypto.subtle), em vez do
+   antigo hash de 32 bits. Continua a ser proteção pensada para impedir que uma criança entre
+   por acidente ou curiosidade — um PIN de 4 dígitos nunca resiste a alguém com acesso técnico
+   ao aparelho. PINs antigos continuam a funcionar e são convertidos na primeira entrada certa.
    Dois PINs independentes: um para a área da mãe/cuidador (rotina, questionário,
    dicas) e outro para a área de administração técnica (vídeos, IA, backup) — assim
    cada acesso fica protegido mesmo que a outra pessoa saiba o seu próprio PIN. */
@@ -13905,12 +14568,34 @@ const CHAVE_PIN_CONFIG = 'mundoDoEduardo_pinHashConfig_v1';
 const CHAVE_PIN_ADMIN = 'mundoDoEduardo_pinHashAdmin_v1';
 let pinDestinoPendente = null; // 'config' ou 'gestaoVideos' — para onde ir depois de validar
 
-function hashPin(pin){
-  let h = 0;
-  for(let i = 0; i < pin.length; i++){
-    h = ((h << 5) - h + pin.charCodeAt(i)) | 0;
+// hashPin(pin)             -> hash novo (sal novo), para guardar.
+// hashPin(pin, guardado)   -> hash de "pin" com os mesmos parâmetros do valor guardado, pronto a
+//                             comparar com "guardado" (também percebe o formato antigo, só números).
+// Formato novo: "pbkdf2$<iterações>$<sal em base64>$<hash em base64>".
+const PIN_PBKDF2_ITERACOES = 100000;
+async function hashPin(pin, guardado){
+  const semCrypto = !(window.crypto && window.crypto.subtle);
+  const guardadoAntigo = !!guardado && String(guardado).indexOf('pbkdf2$') !== 0;
+  if(semCrypto || guardadoAntigo){
+    // Formato antigo (só para validar PINs já guardados, ou em contextos sem crypto.subtle).
+    let h = 0;
+    for(let i = 0; i < pin.length; i++){
+      h = ((h << 5) - h + pin.charCodeAt(i)) | 0;
+    }
+    return String(h);
   }
-  return String(h);
+  const paraBase64 = (u8) => btoa(String.fromCharCode.apply(null, u8));
+  let iteracoes = PIN_PBKDF2_ITERACOES, sal;
+  if(guardado){
+    const partes = String(guardado).split('$');
+    iteracoes = parseInt(partes[1], 10) || PIN_PBKDF2_ITERACOES;
+    sal = Uint8Array.from(atob(partes[2]), c => c.charCodeAt(0));
+  }else{
+    sal = crypto.getRandomValues(new Uint8Array(16));
+  }
+  const chave = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: iteracoes }, chave, 256);
+  return 'pbkdf2$' + iteracoes + '$' + paraBase64(sal) + '$' + paraBase64(new Uint8Array(bits));
 }
 
 function chavePinParaDestino(destino){
@@ -14496,71 +15181,84 @@ function mostrarAjudaEsqueciPin(){
   document.getElementById('overlay-ajuda-pin').classList.add('mostrar');
 }
 
-function confirmarPin(){
-  const input = document.getElementById('input-pin');
-  const valor = (input.value || '').trim();
-  const erro = document.getElementById('erro-pin');
+let pinAVerificar = false; // evita contar duas vezes se o botão for tocado em duplicado enquanto o PIN é verificado
+async function confirmarPin(){
+  if(pinAVerificar) return;
+  pinAVerificar = true;
+  try{
+    const input = document.getElementById('input-pin');
+    const valor = (input.value || '').trim();
+    const erro = document.getElementById('erro-pin');
 
-  if(!/^\d{4}$/.test(valor)){
-    erro.textContent = 'O PIN deve ter exatamente 4 números.';
-    return;
-  }
+    if(!/^\d{4}$/.test(valor)){
+      erro.textContent = 'O PIN deve ter exatamente 4 números.';
+      return;
+    }
 
-  const pinGuardado = obterPinGuardado(pinDestinoPendente);
+    const pinGuardado = obterPinGuardado(pinDestinoPendente);
 
-  if(!pinGuardado){
-    // Primeira utilização: pede o PIN duas vezes para ninguém ficar trancado por um erro de digitação.
-    if(pinPrimeiroValor === null){
-      pinPrimeiroValor = valor;
+    if(!pinGuardado){
+      // Primeira utilização: pede o PIN duas vezes para ninguém ficar trancado por um erro de digitação.
+      if(pinPrimeiroValor === null){
+        pinPrimeiroValor = valor;
+        input.value = '';
+        erro.textContent = '';
+        document.getElementById('pin-subtitulo').textContent = 'Repete o mesmo PIN para confirmar.';
+        input.focus();
+        return;
+      }
+      if(valor !== pinPrimeiroValor){
+        pedirPin();
+        document.getElementById('erro-pin').textContent = 'Os PINs não coincidem. Começa de novo.';
+        return;
+      }
+      pinPrimeiroValor = null;
+      // Este PIN passa a ser o PIN da área a partir de agora.
+      // Guardado numa chave própria, independente do PIN da outra área.
+      try{
+        localStorage.setItem(chavePinParaDestino(pinDestinoPendente), await hashPin(valor));
+      }catch(e){
+        // Sem suporte a localStorage: deixa entrar mesmo assim nesta sessão,
+        // para não bloquear o acesso por completo.
+      }
+      prosseguirAposPin();
+      return;
+    }
+
+    const bloqueio = lerBloqueioPin(pinDestinoPendente);
+    if(bloqueio.ate && bloqueio.ate > Date.now()){
+      const seg = Math.ceil((bloqueio.ate - Date.now()) / 1000);
+      erro.textContent = `Demasiadas tentativas. Aguarda ${seg > 60 ? Math.ceil(seg / 60) + ' min' : seg + ' s'}.`;
       input.value = '';
-      erro.textContent = '';
-      document.getElementById('pin-subtitulo').textContent = 'Repete o mesmo PIN para confirmar.';
-      input.focus();
       return;
     }
-    if(valor !== pinPrimeiroValor){
-      pedirPin();
-      document.getElementById('erro-pin').textContent = 'Os PINs não coincidem. Começa de novo.';
-      return;
-    }
-    pinPrimeiroValor = null;
-    // Este PIN passa a ser o PIN da área a partir de agora.
-    // Guardado numa chave própria, independente do PIN da outra área.
-    try{
-      localStorage.setItem(chavePinParaDestino(pinDestinoPendente), hashPin(valor));
-    }catch(e){
-      // Sem suporte a localStorage: deixa entrar mesmo assim nesta sessão,
-      // para não bloquear o acesso por completo.
-    }
-    prosseguirAposPin();
-    return;
-  }
 
-  const bloqueio = lerBloqueioPin(pinDestinoPendente);
-  if(bloqueio.ate && bloqueio.ate > Date.now()){
-    const seg = Math.ceil((bloqueio.ate - Date.now()) / 1000);
-    erro.textContent = `Demasiadas tentativas. Aguarda ${seg > 60 ? Math.ceil(seg / 60) + ' min' : seg + ' s'}.`;
-    input.value = '';
-    return;
-  }
-
-  if(hashPin(valor) === pinGuardado){
-    guardarBloqueioPin(pinDestinoPendente, {});
-    prosseguirAposPin();
-  }else{
-    const falhas = (bloqueio.falhas || 0) + 1;
-    const novo = { falhas };
-    if(falhas % PIN_FALHAS_ATE_BLOQUEIO === 0){
-      const nivel = Math.floor(falhas / PIN_FALHAS_ATE_BLOQUEIO) - 1;      // 0,1,2…
-      const espera = Math.min(60 * Math.pow(2, nivel), 15 * 60) * 1000;   // 1, 2, 4… até 15 min
-      novo.ate = Date.now() + espera;
-      erro.textContent = `Demasiadas tentativas. Aguarda ${Math.round(espera / 60000)} min.`;
+    let correto = false;
+    try{ correto = (await hashPin(valor, pinGuardado)) === pinGuardado; }catch(e){ correto = false; }
+    if(correto){
+      // Migração: PIN no formato antigo passa ao formato novo na primeira entrada certa.
+      if(pinGuardado.indexOf('pbkdf2$') !== 0 && window.crypto && window.crypto.subtle){
+        try{ localStorage.setItem(chavePinParaDestino(pinDestinoPendente), await hashPin(valor)); }catch(e){}
+      }
+      guardarBloqueioPin(pinDestinoPendente, {});
+      prosseguirAposPin();
     }else{
-      erro.textContent = 'PIN incorreto. Tenta novamente.';
+      const falhas = (bloqueio.falhas || 0) + 1;
+      const novo = { falhas };
+      if(falhas % PIN_FALHAS_ATE_BLOQUEIO === 0){
+        const nivel = Math.floor(falhas / PIN_FALHAS_ATE_BLOQUEIO) - 1;      // 0,1,2…
+        const espera = Math.min(60 * Math.pow(2, nivel), 15 * 60) * 1000;   // 1, 2, 4… até 15 min
+        novo.ate = Date.now() + espera;
+        erro.textContent = `Demasiadas tentativas. Aguarda ${Math.round(espera / 60000)} min.`;
+      }else{
+        erro.textContent = 'PIN incorreto. Tenta novamente.';
+      }
+      guardarBloqueioPin(pinDestinoPendente, novo);
+      input.value = '';
+      input.focus();
     }
-    guardarBloqueioPin(pinDestinoPendente, novo);
-    input.value = '';
-    input.focus();
+  }finally{
+    pinAVerificar = false;
   }
 }
 
@@ -14621,6 +15319,8 @@ function abrirConfigSemPin(){
   if(interruptorModoEscuro) interruptorModoEscuro.classList.toggle('ligado', modoEscuroAtivo);
   const interruptorAltoContraste = document.getElementById('interruptor-alto-contraste');
   if(interruptorAltoContraste) interruptorAltoContraste.classList.toggle('ligado', altoContrasteAtivo);
+  const interruptorCuriosidadeLetra = document.getElementById('interruptor-curiosidade-letra-tracado');
+  if(interruptorCuriosidadeLetra) interruptorCuriosidadeLetra.classList.toggle('ligado', curiosidadeLetraTracadoAtiva);
   const interruptorTempoEsperar = document.getElementById('interruptor-mostrar-tempo-esperar');
   if(interruptorTempoEsperar) interruptorTempoEsperar.classList.toggle('ligado', mostrarTempoEsperar);
   const sliderSom = document.getElementById('slider-volume-som');
@@ -14712,6 +15412,7 @@ const dicasParaPais = [
 
 function renderEvolucaoParental(){
   try{ renderResumoSemana(); }catch(e){ /* nunca deve impedir o resto da área dos pais */ }
+  try{ renderGeneralizacaoFora(); }catch(e){ /* idem */ }
   renderSeletorObjetivoAtivo();
   renderCartaoObjetivoAtivo();
   renderMudancasNotadas();
@@ -15018,6 +15719,64 @@ function configurarFormularioAlimentacao(){
     renderRegistoAlimentacao();
   });
 }
+
+// ===== v1.57.46 — Generalização fora da app (área dos pais) =====
+// Reutiliza as sugestões de GENERALIZACAO_QUIZ (as mesmas que o Eduardo vê na vitória
+// limpa) e os nomes de NOMES_MATERIA_PARENTAL. Só oferece a sugestão para matérias em que
+// já subiu de nível (nível ≥ 2): antes disso a competência ainda está a ser aprendida e
+// pedir para a usar fora da app seria cedo. O registo "Experimentámos" conta também como
+// comportamento do dia (entra no resumo semanal para o terapeuta).
+function lerGeneralizacaoFora(){
+  try{
+    const v = JSON.parse(localStorage.getItem(CHAVE_GENERALIZACAO_FORA) || '{}');
+    return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+  }catch(e){ return {}; }
+}
+function marcarGeneralizacaoFeita(chave){
+  if(!GENERALIZACAO_QUIZ[chave]) return;
+  const dados = lerGeneralizacaoFora();
+  const atual = dados[chave] || { vezes: 0, ultima: null };
+  dados[chave] = { vezes: (atual.vezes || 0) + 1, ultima: dataHojeChave() };
+  try{ localStorage.setItem(CHAVE_GENERALIZACAO_FORA, JSON.stringify(dados)); }catch(e){}
+  registarComportamentoHoje('generalizou_fora');
+  renderGeneralizacaoFora();
+}
+function renderGeneralizacaoFora(){
+  const cont = document.getElementById('generalizacao-fora-lista');
+  if(!cont) return;
+  const dados = lerGeneralizacaoFora();
+  const candidatas = Object.keys(GENERALIZACAO_QUIZ).filter(k => obterNivelAtual(k) >= 2);
+  if(!candidatas.length){
+    cont.innerHTML = '<p style="font-size:13px;color:var(--texto-suave);margin:0;">Ainda sem matérias consolidadas. Quando o Eduardo subir de nível num jogo, aparece aqui uma sugestão para experimentarem fora da app.</p>';
+    return;
+  }
+  // as que nunca foram experimentadas (ou há mais tempo) vêm primeiro
+  candidatas.sort((x, y) => ((dados[x] && dados[x].ultima) || '').localeCompare((dados[y] && dados[y].ultima) || ''));
+  const hoje = dataHojeChave();
+  cont.innerHTML = candidatas.map(k => {
+    const d = dados[k];
+    let estado = 'Ainda não experimentado.';
+    if(d && d.ultima){
+      const dias = Math.round((Date.parse(hoje) - Date.parse(d.ultima)) / 86400000);
+      estado = 'Experimentado ' + d.vezes + (d.vezes === 1 ? ' vez' : ' vezes') + ' · última ' + (dias <= 0 ? 'hoje' : dias === 1 ? 'ontem' : 'há ' + dias + ' dias');
+    }
+    const nome = NOMES_MATERIA_PARENTAL[k] || k;
+    return '<div class="item-generalizacao-fora">' +
+      '<div class="ig-topo">' + escaparHtml(nome) + ' · nível ' + escaparHtml(NOMES_NIVEL_PARENTAL[obterNivelAtual(k)] || obterNivelAtual(k)) + '</div>' +
+      '<div class="ig-sugestao">' + escaparHtml(GENERALIZACAO_QUIZ[k]) + '</div>' +
+      '<div class="ig-estado">' + escaparHtml(estado) + '</div>' +
+      '<button class="btn-secundario" data-generalizacao-feita="' + escaparHtml(k) + '">✓ Experimentámos</button>' +
+    '</div>';
+  }).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const cont = document.getElementById('generalizacao-fora-lista');
+  if(!cont) return;
+  cont.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-generalizacao-feita]');
+    if(b) marcarGeneralizacaoFeita(b.dataset.generalizacaoFeita);
+  });
+});
 
 // Rótulo e emoji de cada comportamento-alvo, para leitura rápida pelos pais — os IDs
 // internos ('caa_espontaneo' etc.) vêm de registarComportamentoHoje, chamada nos 3
@@ -15523,6 +16282,7 @@ function calcularResumoSemana(){
       calma: soma(dias, d => d.comportamentos && d.comportamentos.pediu_calma),
       caa: soma(dias, d => d.comportamentos && d.comportamentos.caa_espontaneo),
       emocoes: soma(dias, d => d.comportamentos && d.comportamentos.emocao_registada),
+      generalizacoes: soma(dias, d => d.comportamentos && d.comportamentos.generalizou_fora),
       porMateria,
     };
   };
@@ -15547,6 +16307,7 @@ function linhasResumoSemana(r){
     { t:'Vezes que usou o Modo Calma', a:String(a.calma), b:String(b.calma), v:seta(a.calma, b.calma) },
     { t:'Frases espontâneas no CAA', a:String(a.caa), b:String(b.caa), v:seta(a.caa, b.caa) },
     { t:'Emoções identificadas', a:String(a.emocoes), b:String(b.emocoes), v:seta(a.emocoes, b.emocoes) },
+    { t:'Atividades fora da app (generalização)', a:String(a.generalizacoes), b:String(b.generalizacoes), v:seta(a.generalizacoes, b.generalizacoes) },
   ];
   // Matérias com pelo menos 3 perguntas em cada semana: % sem pista, esta semana vs anterior
   const materias = Object.keys(a.porMateria).filter(m => b.porMateria[m] && a.porMateria[m].total >= 3 && b.porMateria[m].total >= 3);
@@ -18452,11 +19213,14 @@ function configurarBotaoReset(){
 // A chave da API Gemini e os PINs de acesso ficam de fora de propósito: exportar isto
 // num ficheiro que pode ser partilhado ou reenviado seria um risco de segurança
 // desnecessário. Ao restaurar um backup, ambos os PINs têm de ser definidos de novo.
+// v1.57.46 — Generalização fora da app: {matéria: {vezes, ultima:'AAAA-MM-DD'}}.
+const CHAVE_GENERALIZACAO_FORA = chaveCrianca('edukids_generalizacaoFora_v1');
+const CHAVE_TEMA_REFORCO = chaveCrianca('edukids_temaReforco_v1'); // v1.57.47
 const CHAVES_BACKUP = [
   CHAVE_ESTADO, CHAVE_ROTINA, CHAVE_HISTORICO, CHAVE_VIDEOS_REAIS,
   CHAVE_ESCALA_TEXTO, CHAVE_VISTA_ROTINA, CHAVE_QUESTIONARIO_EDUARDO, CHAVE_BANCO_PERGUNTAS,
   CHAVE_HISTORIAS_SOCIAIS, CHAVE_CAA_PERSONALIZADO, CHAVE_FRASES_GUARDADAS_CAA,
-  CHAVE_DISCIPLINAS_MANUAL,
+  CHAVE_DISCIPLINAS_MANUAL, CHAVE_GENERALIZACAO_FORA, CHAVE_TEMA_REFORCO,
 ];
 
 // Nome da criança ativa em formato seguro para nomes de ficheiro: sem acentos, minúsculas,
@@ -18468,6 +19232,93 @@ function nomeParaFicheiro(){
   const slug = String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
   return slug || 'crianca';
+}
+
+// ===== v1.57.50 — Pausa de ecrã =====
+// Conta só o tempo de uso ativo (app visível e com toques nos últimos 90 s). Ao atingir o
+// limite, a pausa fica "pendente" e só aparece numa mudança natural (mudar de ecrã ou fechar
+// uma celebração), nunca a meio de uma atividade — interromper a meio é o que mais
+// desregula. 2 minutos antes aparece um aviso discreto, para o fim ser previsível.
+// Desligada por omissão: são os pais que ativam nas Definições.
+const CHAVE_PAUSA_ECRA_MIN = 'edukids_pausaEcraMin_v1';
+let pausaEcraMin = 0;
+let pausaSegundosAtivos = 0;
+let pausaPendente = false;
+let pausaUltimaInteracao = Date.now();
+let pausaOcultoDesde = null;
+function pausaLimiteSeg(){ return pausaEcraMin * 60; }
+function carregarPausaEcra(){
+  try{ const v = Number(localStorage.getItem(CHAVE_PAUSA_ECRA_MIN)); pausaEcraMin = [0,15,20,30,45].includes(v) ? v : 0; }catch(e){ pausaEcraMin = 0; }
+  const sel = document.getElementById('select-pausa-ecra');
+  if(sel) sel.value = String(pausaEcraMin);
+}
+function reiniciarContagemPausaEcra(){
+  pausaSegundosAtivos = 0; pausaPendente = false;
+  const av = document.getElementById('aviso-pausa-breve'); if(av) av.style.display = 'none';
+}
+function pausaHaOverlayAberto(){
+  return !!document.querySelector('#overlay-calma.mostrar, #overlay-yay.mostrar, #overlay-pausa-ecra.mostrar, #overlay-pin.mostrar, #overlay-perfil.mostrar');
+}
+function mostrarPausaEcra(){
+  if(pausaHaOverlayAberto()) return;
+  pausaPendente = false;
+  const av = document.getElementById('aviso-pausa-breve'); if(av) av.style.display = 'none';
+  const ov = document.getElementById('overlay-pausa-ecra');
+  if(!ov) return;
+  ov.classList.add('mostrar');
+  const b = document.getElementById('btn-pausa-calma'); if(b) b.focus();
+  try{ vibrar([25,50,25]); }catch(e){}
+}
+// Chamada nos momentos de mudança natural (irPara, irParaDetalhe, fecharYay)
+function verificarPausaEcra(){
+  if(pausaEcraMin > 0 && pausaPendente) mostrarPausaEcra();
+}
+function passoPausaEcra(){
+  if(pausaEcraMin <= 0) return;
+  const ativo = document.visibilityState === 'visible' && (Date.now() - pausaUltimaInteracao) < 90000;
+  if(!ativo) return;
+  pausaSegundosAtivos += 15;
+  const limite = pausaLimiteSeg();
+  const av = document.getElementById('aviso-pausa-breve');
+  if(pausaSegundosAtivos >= limite){
+    pausaPendente = true;
+    if(av) av.style.display = 'none';
+    // Rede de segurança: 5 min extra sem nenhuma mudança natural → mostra na mesma
+    if(pausaSegundosAtivos >= limite + 300) mostrarPausaEcra();
+  } else if(av){
+    av.style.display = ((limite - pausaSegundosAtivos) <= 120 && !pausaHaOverlayAberto()) ? 'block' : 'none';
+  }
+}
+function iniciarPausaEcra(){
+  carregarPausaEcra();
+  ['pointerdown','keydown','touchstart'].forEach(ev =>
+    document.addEventListener(ev, () => { pausaUltimaInteracao = Date.now(); }, { capture:true, passive:true }));
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden'){ pausaOcultoDesde = Date.now(); }
+    else {
+      if(pausaOcultoDesde && Date.now() - pausaOcultoDesde > 5*60*1000) reiniciarContagemPausaEcra(); // já descansou
+      pausaUltimaInteracao = Date.now();
+    }
+  });
+  const sel = document.getElementById('select-pausa-ecra');
+  if(sel) sel.addEventListener('change', () => {
+    pausaEcraMin = Number(sel.value) || 0;
+    try{ localStorage.setItem(CHAVE_PAUSA_ECRA_MIN, String(pausaEcraMin)); }catch(e){}
+    reiniciarContagemPausaEcra();
+  });
+  const bCalma = document.getElementById('btn-pausa-calma');
+  if(bCalma) bCalma.addEventListener('click', () => {
+    document.getElementById('overlay-pausa-ecra').classList.remove('mostrar');
+    reiniciarContagemPausaEcra();
+    abrirCalma();
+  });
+  const bMais = document.getElementById('btn-pausa-mais');
+  if(bMais) bMais.addEventListener('click', () => {
+    document.getElementById('overlay-pausa-ecra').classList.remove('mostrar');
+    pausaPendente = false;
+    pausaSegundosAtivos = Math.max(0, pausaLimiteSeg() - 300); // volta a sugerir daqui a 5 min
+  });
+  setInterval(passoPausaEcra, 15000);
 }
 
 // ===== v1.57.22 — Lembrete de backup (para os pais) =====
@@ -18667,6 +19518,7 @@ function configurarAcessoGestaoVideos(){
 /* ======================= INICIALIZAÇÃO ======================= */
 carregarEscalaTexto();
 carregarVelocidadeVoz();
+try{ iniciarPausaEcra(); }catch(e){ console.error('pausa de ecrã:', e); }
 carregarTomVoz();
 carregarVozEscolhida();
 carregarRotinaPersonalizada();
@@ -18712,7 +19564,8 @@ document.getElementById('btn-guardar-videos').addEventListener('click', guardarV
 document.getElementById('btn-vista-agora').addEventListener('click', ()=> definirVistaRotina('agora'));
 document.getElementById('btn-vista-dia').addEventListener('click', ()=> definirVistaRotina('dia'));
 document.getElementById('btn-ver-semana').addEventListener('click', ()=>{ renderSemana(); irPara('semana'); });
-document.getElementById('btn-sitio-novo').addEventListener('click', ()=>{ renderSitioNovo(); irPara('sitio-novo'); });
+// Se um adulto já preencheu os detalhes, a criança vê logo o resumo simples; o formulário só abre pelo "Mudar os detalhes" (ou se ainda não há nada).
+document.getElementById('btn-sitio-novo').addEventListener('click', ()=>{ if(dadosSitioNovo && dadosSitioNovo.local){ renderChecklistSitioNovo(); } else { renderSitioNovo(); } irPara('sitio-novo'); });
 configurarFormularioAlimentacao();
 document.getElementById('ia-fornecedor').addEventListener('change', alternarBlocoChaveGemini);
 document.getElementById('seletor-objetivo-ativo').addEventListener('change', (e) => {
@@ -18912,6 +19765,16 @@ function autoVerificarApp(){
       add('ok', 'Perfil da criança legível');
     }catch(e){ add('erro', 'Perfil da criança com JSON inválido'); }
 
+    // 11b) Campos de formulário e diálogos com nome acessível (v1.57.44)
+    const semNome = Array.from(document.querySelectorAll('input, select, textarea')).filter(c => {
+      if(c.type === 'hidden' || c.type === 'file') return false;
+      return !(c.getAttribute('aria-label') || c.getAttribute('aria-labelledby') || c.title || c.placeholder || c.closest('label') ||
+        (c.id && document.querySelector('label[for="' + c.id + '"]')));
+    });
+    add(semNome.length ? 'aviso' : 'ok', semNome.length ? semNome.length + ' campos sem nome acessível' : 'Campos com nome acessível', semNome.slice(0, 5).map(c => c.id || c.name || c.type).join(', '));
+    const dialogosSemRole = ['overlay-pin','overlay-perfil','overlay-confirmar-adulto'].filter(id => { const e = document.getElementById(id); return e && e.getAttribute('role') !== 'dialog'; });
+    add(dialogosSemRole.length ? 'aviso' : 'ok', dialogosSemRole.length ? 'Diálogos sem role="dialog"' : 'Diálogos com role="dialog"', dialogosSemRole.join(', '));
+
     // 12) Espaço em localStorage
     let bytes = 0;
     for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); bytes += (k.length + (localStorage.getItem(k) || '').length) * 2; }
@@ -19018,6 +19881,107 @@ protegerArmazenamento().then(ok=>{
       }
     }catch(err){}
   });
+})();
+
+// ===== v1.57.44 — Acessibilidade: diálogos e campos de formulário =====
+// 1) Os overlays (PIN, perfil, confirmação de adulto, sugestão, Modo Calma…) passam a ser
+//    diálogos reais para leitores de ecrã e teclado: role="dialog" + aria-modal, foco movido
+//    para dentro ao abrir, Tab preso lá dentro, Escape a cancelar (exceto no Modo Calma, que
+//    não tem "cancelar" de propósito) e foco devolvido a quem o abriu ao fechar.
+// 2) Campos sem <label> (o título fica num <div class="t"> ao lado) ganham aria-labelledby
+//    a apontar para esse título — dinâmico, por isso acompanha o nome da criança.
+const OVERLAYS_DIALOGO = ['overlay-calma','overlay-perfil','overlay-pin','overlay-ajuda-pin','overlay-confirmar-adulto','overlay-sugestao-calmos'];
+let ultimoFocoAntesDoDialogo = null;
+function overlayAbertoAgora(){
+  for(const id of OVERLAYS_DIALOGO){
+    const el = document.getElementById(id);
+    if(el && el.classList.contains('mostrar')) return el;
+  }
+  return null;
+}
+function elementosFocaveis(raiz){
+  return Array.from(raiz.querySelectorAll('button, [href], input:not([type=hidden]), select, textarea, [tabindex]:not([tabindex="-1"])'))
+    .filter(e => !e.disabled && e.offsetParent !== null);
+}
+function prepararDialogosAcessiveis(){
+  OVERLAYS_DIALOGO.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el || el.dataset.a11yPronto) return;
+    el.dataset.a11yPronto = '1';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    const h = el.querySelector('h3, h2');
+    if(h){ if(!h.id) h.id = id + '-titulo'; el.setAttribute('aria-labelledby', h.id); }
+    else el.setAttribute('aria-label', id === 'overlay-calma' ? 'Modo Calma' : 'Diálogo');
+    new MutationObserver(() => {
+      if(el.classList.contains('mostrar')){
+        if(!el.contains(document.activeElement)) ultimoFocoAntesDoDialogo = document.activeElement;
+        setTimeout(() => {
+          const pin = el.querySelector('input[type=password]');
+          const alvo = pin || h || el;
+          if(!pin && !alvo.hasAttribute('tabindex')) alvo.setAttribute('tabindex', '-1');
+          try{ alvo.focus({ preventScroll: true }); }catch(e){}
+        }, 50);
+      } else if(ultimoFocoAntesDoDialogo && document.contains(ultimoFocoAntesDoDialogo) && !overlayAbertoAgora()){
+        try{ ultimoFocoAntesDoDialogo.focus({ preventScroll: true }); }catch(e){}
+        ultimoFocoAntesDoDialogo = null;
+      }
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+}
+document.addEventListener('keydown', ev => {
+  const ov = overlayAbertoAgora();
+  if(!ov) return;
+  if(ev.key === 'Tab'){
+    const f = elementosFocaveis(ov);
+    if(!f.length){ ev.preventDefault(); return; }
+    const primeiro = f[0], ultimo = f[f.length - 1];
+    if(ev.shiftKey && (document.activeElement === primeiro || !ov.contains(document.activeElement))){ ev.preventDefault(); ultimo.focus(); }
+    else if(!ev.shiftKey && (document.activeElement === ultimo || !ov.contains(document.activeElement))){ ev.preventDefault(); primeiro.focus(); }
+  } else if(ev.key === 'Escape' && ov.id !== 'overlay-calma'){
+    const cancelar = Array.from(ov.querySelectorAll('button')).find(b => /cancelar|fechar|agora não|percebi|voltar/i.test(b.textContent));
+    if(cancelar){ ev.preventDefault(); cancelar.click(); }
+  }
+});
+
+let contadorRotulosAuto = 0;
+function associarRotulosFormularios(raiz){
+  try{
+    const base = (raiz && raiz.querySelectorAll) ? raiz : document;
+    base.querySelectorAll('input, select, textarea').forEach(campo => {
+      if(campo.type === 'hidden' || campo.type === 'file') return;
+      if(campo.hasAttribute('aria-label') || campo.hasAttribute('aria-labelledby') || campo.closest('label')) return;
+      if(campo.id && document.querySelector('label[for="' + campo.id + '"]')) return;
+      let no = campo;
+      for(let nivel = 0; nivel < 3 && no && no !== document.body; nivel++){
+        let irmao = no.previousElementSibling, outroCampo = false;
+        while(irmao){
+          if(irmao.matches('input, select, textarea') || irmao.querySelector('input, select, textarea')) outroCampo = true;
+          if(!outroCampo && irmao.classList.contains('t') && irmao.textContent.trim()){
+            if(!irmao.id) irmao.id = 'rot-auto-' + (++contadorRotulosAuto);
+            campo.setAttribute('aria-labelledby', irmao.id);
+            return;
+          }
+          irmao = irmao.previousElementSibling;
+        }
+        no = no.parentElement;
+      }
+    });
+  }catch(e){ /* melhoria opcional: nunca deve partir a app */ }
+}
+window.associarRotulosFormularios = associarRotulosFormularios;
+prepararDialogosAcessiveis();
+associarRotulosFormularios();
+(function observarFormulariosDinamicos(){
+  if(typeof MutationObserver === 'undefined' || !document.body) return;
+  let agendado = false;
+  const temCampos = n => n.nodeType === 1 && (n.matches('input, select, textarea') || n.querySelector('input, select, textarea'));
+  new MutationObserver(muts => {
+    if(agendado) return;
+    if(!muts.some(m => Array.from(m.addedNodes).some(temCampos))) return; // só reage quando entram campos novos
+    agendado = true;
+    requestAnimationFrame(() => { agendado = false; associarRotulosFormularios(); });
+  }).observe(document.body, { childList: true, subtree: true });
 })();
 
 aplicarSaudacaoPersonalizada();
@@ -19516,7 +20480,7 @@ window.aoEntrarNaApp = async function(user){
       // sincronização continua em segundo plano e recarrega no fim, se trouxer algo novo.
       const pSync = window.EduSync.sincronizar();
       const rs = await Promise.race([pSync, new Promise(res => setTimeout(() => res(null), 8000))]);
-      const aoTerminar = r => { if(r && r.aplicou && window.EduSync.podeRecarregar()) location.reload(); };
+      const aoTerminar = r => { if(r && r.aplicou && window.EduSync.podeRecarregar()) window.recarregarQuandoLivre(); };
       if(rs === null){ pSync.then(aoTerminar).catch(() => {}); }
       else if(rs.aplicou && window.EduSync.podeRecarregar()){ location.reload(); return; }
     }
@@ -19709,10 +20673,108 @@ if('serviceWorker' in navigator){
       if(!jaTinhaControlo){ jaTinhaControlo = true; return; }
       if(recarregou) return;
       recarregou = true;
-      location.reload();
+      window.recarregarQuandoLivre();
     });
   });
 }
+
+// ===== v1.57.31/32 — Mascote que salta para o jogo seguinte (v1.57.32: e para a taça 🏆 no fim) na Sessão de Jogos =====
+// A mascote (o mesmo vídeo já no ficheiro, copiado sob demanda) fica em cima do jogo atual do
+// percurso e, quando a criança termina um jogo, salta em arco para o nó seguinte.
+// Efeitos calmos / movimento reduzido: sem salto — a mascote aparece parada no nó seguinte.
+let mascotePercursoEl = null;
+let saltoMascoteEmCurso = false;
+
+function obterMascotePercurso(){
+  if(mascotePercursoEl) return mascotePercursoEl;
+  const el = document.createElement('div');
+  el.className = 'mascote-percurso';
+  el.setAttribute('aria-hidden', 'true');
+  const orig = document.querySelector('.ob-mascote-video');
+  const src = orig && orig.getAttribute('src');
+  if(src){
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.setAttribute('src', src);
+    el.appendChild(v);
+    el._video = v;
+  } else {
+    el.classList.add('emoji'); el.textContent = '🌟'; // sem vídeo: cai para o emoji
+  }
+  mascotePercursoEl = el;
+  return el;
+}
+
+function ajustarVideoMascotePercurso(reduzido){
+  const v = mascotePercursoEl && mascotePercursoEl._video;
+  if(!v) return;
+  if(reduzido){
+    const fixar = ()=>{ try{ v.pause(); v.currentTime = 1.0; }catch(e){} };
+    if(v.readyState >= 2) fixar(); else v.addEventListener('loadeddata', fixar, {once:true});
+  } else {
+    const p = v.play(); if(p && p.catch) p.catch(()=>{});
+  }
+}
+
+// Posição (relativa ao percurso) para a mascote ficar "de pé" em cima do nó `pos`.
+function medirPosMascotePercurso(pos){
+  const cont = document.getElementById('percurso-sessao-nos');
+  const icone = cont && cont.querySelectorAll('.no-sessao-icone')[pos];
+  if(!icone) return null;
+  const c = cont.getBoundingClientRect(), i = icone.getBoundingClientRect();
+  const m = obterMascotePercurso();
+  const t = m.offsetWidth || (i.width * 1.5); // tamanho real (varia com o ecrã)
+  return { x: i.left - c.left + i.width/2 - t/2, y: i.top - c.top - t + t * 0.1, t };
+}
+
+function posicionarMascotePercurso(pos){
+  const cont = document.getElementById('percurso-sessao-nos');
+  if(!cont || !sessaoJogosAtiva) return;
+  const m = obterMascotePercurso();
+  if(m.parentNode !== cont) cont.appendChild(m); // renderPercursoSessao() limpa o contentor
+  const p = medirPosMascotePercurso(pos);
+  if(!p) return;
+  try{ m.getAnimations().forEach(a=>a.cancel()); }catch(e){}
+  m.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px)';
+  ajustarVideoMascotePercurso(movimentoReduzidoAtivo());
+}
+
+function saltarMascotePercurso(de, para, aoTerminar){
+  const fim = ()=>{ if(aoTerminar) aoTerminar(); };
+  if(!sessaoJogosAtiva) return;
+  posicionarMascotePercurso(de);
+  const m = mascotePercursoEl, a = medirPosMascotePercurso(de), b = medirPosMascotePercurso(para);
+  if(!m || !a || !b){ fim(); return; }
+  if(movimentoReduzidoAtivo() || !m.animate){ posicionarMascotePercurso(para); if(aoTerminar) setTimeout(fim, 900); return; }
+  saltoMascoteEmCurso = true;
+  setTimeout(()=>{ saltoMascoteEmCurso = false; }, 2400); // rede de segurança
+  setTimeout(()=>{ // pequena pausa para se ver o ✓ no jogo acabado de completar
+    if(!sessaoJogosAtiva){ saltoMascoteEmCurso = false; return; }
+    const T = (p, sx, sy) => 'translate(' + p.x + 'px,' + p.y + 'px) scale(' + sx + ',' + sy + ')';
+    const topo = { x:(a.x + b.x)/2, y:Math.min(a.y, b.y) - a.t * 0.9 };
+    const anim = m.animate([
+      { transform:T(a,1,1), offset:0 },
+      { transform:T(a,1.12,.84), offset:.16, easing:'ease-out' },   // agacha
+      { transform:T(topo,.94,1.1), offset:.55, easing:'ease-in' },  // no ar
+      { transform:T(b,1.14,.84), offset:.88 },                      // aterra
+      { transform:T(b,1,1), offset:1 }
+    ], { duration:1000, fill:'forwards' });
+    anim.onfinish = ()=>{
+      saltoMascoteEmCurso = false;
+      if(!sessaoJogosAtiva) return;
+      posicionarMascotePercurso(para);
+      const nos = document.querySelectorAll('#percurso-sessao-nos .no-sessao-icone');
+      if(nos[para]) nos[para].classList.add('pop');
+      if(aoTerminar) setTimeout(fim, 700); // deixa ver a mascote na taça antes da cena final
+    };
+    anim.oncancel = ()=>{ saltoMascoteEmCurso = false; };
+  }, 450);
+}
+
+window.addEventListener('resize', ()=>{
+  if(sessaoJogosAtiva && !saltoMascoteEmCurso) posicionarMascotePercurso(sessaoJogosAtiva.posicaoAtual);
+});
+
 </script>
 </body>
 </html>
