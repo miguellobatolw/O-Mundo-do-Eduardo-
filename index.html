@@ -4542,7 +4542,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.57.52';
+window.APP_VERSION = '1.57.54';
 
 /* ======================= DADOS ======================= */
 
@@ -6493,6 +6493,24 @@ function configurarArrastoJuntarLimpar(cont){
   cont.addEventListener('pointercancel', terminarArrasto);
 }
 
+// v1.57.53: mostra quantas peças já leva o arrasto em curso ("2 de 4 peças"), no mesmo
+// elemento de estado que o jogo já usa para o resultado. Antes, soltar o dedo com peças a
+// menos só vibrava, sem dizer porquê. Tom sempre neutro/positivo — neste jogo não há "erro".
+// Sem argumento mostra o contador do arrasto atual; com `soltou` explica, com calma, o que faltou.
+function atualizarContadorArrastoJuntarLimpar(soltou){
+  const estadoEl = document.getElementById('estado-juntar-limpar');
+  if(!estadoEl) return;
+  const n = juntarLimparArrastoAtual.length;
+  const minimo = juntarLimparMinimoGrupo;
+  if(soltou){
+    estadoEl.textContent = `Precisas de ${minimo} peças da mesma cor, juntas. Tenta outra vez!`;
+  } else if(n < minimo){
+    estadoEl.textContent = `${n} de ${minimo} peças`;
+  } else {
+    estadoEl.textContent = `${n} peças — já podes largar o dedo!`;
+  }
+}
+
 // Adiciona uma peça ao grupo em formação, só se for adjacente à última peça do arrasto
 // (cima/baixo/esquerda/direita, não diagonal) e da mesma cor que a primeira peça tocada.
 // Voltar a passar por cima de uma peça já no meio do caminho não faz nada (evita
@@ -6509,6 +6527,7 @@ function adicionarPecaAoArrastoJuntarLimpar(botaoPeca){
   if(juntarLimparArrastoAtual.length === 0){
     juntarLimparArrastoAtual.push([l,c]);
     botaoPeca.classList.add('selecionada-arrasto');
+    atualizarContadorArrastoJuntarLimpar();
     return;
   }
 
@@ -6521,6 +6540,7 @@ function adicionarPecaAoArrastoJuntarLimpar(botaoPeca){
 
   juntarLimparArrastoAtual.push([l,c]);
   botaoPeca.classList.add('selecionada-arrasto');
+  atualizarContadorArrastoJuntarLimpar();
   vibrar(10); // feedback tátil discreto a cada peça que entra no grupo, sem som (o som fica para o resultado final)
 }
 
@@ -6535,6 +6555,10 @@ function soltarArrastoJuntarLimpar(){
   juntarLimparArrastoAtual = [];
 
   if(grupo.length < juntarLimparMinimoGrupo){
+    // Um simples toque (1 peça) não é uma tentativa de jogada: limpa a mensagem em vez de "explicar".
+    // (O arrasto já foi limpo acima; o modo `soltou` do contador não precisa dele.)
+    if(grupo.length > 1) atualizarContadorArrastoJuntarLimpar(true);
+    else { const el = document.getElementById('estado-juntar-limpar'); if(el) el.textContent = ''; }
     vibrar(15); // feedback tátil suave de "ainda não", sem som de erro nem penalização
     return;
   }
@@ -9200,10 +9224,12 @@ function confirmarSairDoQuiz(aoConfirmarSaida){
 
 /* ======================= DATA / SAUDAÇÃO ======================= */
 function atualizarData(){
-  const dias = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
-  const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  const agora = new Date();
-  document.getElementById('data-hoje').textContent = dias[agora.getDay()] + ", " + agora.getDate() + " de " + meses[agora.getMonth()];
+  // v1.57.54: usa o formato pt-PT do próprio browser ("terça-feira, 29 de setembro") — em
+  // português europeu dias da semana e meses escrevem-se em minúsculas. Também dispensa as
+  // listas de nomes que esta função repetia (já existe NOMES_DIAS_SEMANA para a rotina).
+  const el = document.getElementById('data-hoje');
+  if(!el) return;
+  el.textContent = new Date().toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 }
 
 /* ======================= ROTINA ======================= */
