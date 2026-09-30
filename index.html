@@ -1067,17 +1067,18 @@
   .btn-tema-tracado:active{
     background:var(--salva-clara);
   }
-  .menu-tracado-abas{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .menu-tracado-abas{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px; }
   .btn-aba-tracado{
     display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:14px 6px; border-radius:16px; border:2px solid var(--salva-clara);
+    padding:12px 2px; border-radius:16px; border:2px solid var(--salva-clara);
     background:var(--branco); color:var(--texto); font-family:inherit;
-    font-size:15px; font-weight:800; cursor:pointer;
+    font-size:14px; font-weight:800; cursor:pointer;
   }
   .btn-aba-tracado .ic{ font-size:26px; }
   .btn-aba-tracado.ativo{ background:var(--petroleo); color:#fff; border-color:var(--petroleo); }
   .painel-tracado{ margin-bottom:12px; }
   .painel-tracado[hidden]{ display:none; }
+  #btn-continuar-tracado[hidden]{ display:none; }
 
   /* ===== Quiz ===== */
   .pergunta{ font-size:16px; font-weight:700; margin-bottom:16px; line-height:1.4; }
@@ -1581,6 +1582,14 @@
 
   /* ===== Alternador de vista da rotina (dia todo / só agora) ===== */
   .oculto-ver-mais{ display:none !important; }
+  .pict-instrucao{ font-size:1.5em; line-height:1; margin-right:8px; vertical-align:middle; }
+  /* Modo "Só o essencial": só esconde o que é acessório; nada é apagado nem desligado. */
+  body.modo-essencial nav .nav-btn[data-nav="escola"],
+  body.modo-essencial nav .nav-btn[data-nav="curiosidades"],
+  body.modo-essencial #btn-mais-inicio, body.modo-essencial #grelha-mais-inicio,
+  body.modo-essencial #btn-mais-rotina, body.modo-essencial #mais-rotina,
+  body.modo-essencial .btn-ver-mais-lista,
+  body.modo-essencial .detalhes-dupla{ display:none !important; }
   /* Área dos pais: secções longas recolhidas por defeito. */
   .secao-pais{ margin-top:22px; border-top:2px solid var(--salva-clara); padding-top:6px; }
   .secao-pais > summary{ font-size:18px; font-weight:800; color:var(--petroleo); padding:10px 0; cursor:pointer; list-style:none; }
@@ -2522,6 +2531,8 @@
       <div class="nome-app">EduKids</div>
       <div class="titulo-secao">O que vamos fazer?</div>
       <div class="subtitulo-secao">Escolhe uma atividade</div>
+      <div class="aviso-transicao" id="aviso-parar-agora" role="status" style="display:none;"><span class="icone-aviso">🌿</span><span>Está bem. Paramos por agora. Podes voltar quando quiseres.</span></div>
+      <div id="cartao-primeiro-depois-inicio"></div>
       <div class="grelha">
         <div class="cartao c-rotina" onclick="irPara('rotina')" role="button" tabindex="0" aria-label="O Meu Dia — Horário de hoje" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irPara('rotina');}">
           <div class="icone">📅</div>
@@ -2636,6 +2647,7 @@
       <div class="titulo-secao" id="sessao-jogos-titulo">Sessão de Jogos</div>
       <div class="subtitulo-secao">Completa cada jogo do percurso, um de cada vez</div>
       <div class="percurso-sessao" id="percurso-sessao-nos"></div>
+      <div id="aviso-sessao-jogos" style="margin-top:16px;"></div>
       <button class="btn-primario" id="btn-jogar-atual-sessao" onclick="jogarAtualDaSessao()" style="margin-top:20px;">Jogar</button>
     </section>
 
@@ -2697,6 +2709,7 @@
     <section class="ecra" id="ecra-detalhe">
       <button class="voltar" id="voltar-detalhe">← Voltar</button>
       <div id="conteudo-detalhe"></div>
+      <button class="btn-secundario" id="btn-parar-por-agora" onclick="pararPorAgora()" style="display:none;margin-top:18px;width:100%;">⏸ Parar por agora</button>
     </section>
 
     <!-- ===================== QUADRO CAA (Comunicação Aumentativa e Alternativa) ===================== -->
@@ -2822,6 +2835,25 @@
       <div class="titulo-secao" style="font-size:18px;">🗓️ Configuração da Rotina</div>
       <div class="subtitulo-secao">Ajusta os horários e tarefas do dia</div>
 
+      <div class="linha-definicao" style="align-items:flex-start;">
+        <div class="txt-def" style="width:100%;">
+          <div class="t">📅 Variações da rotina por dia da semana</div>
+          <div class="d">Para dias que têm sempre algo diferente (ex: natação às terças). Adiciona um bloco extra que só aparece nesse dia — sem precisar de editar a rotina normal.</div>
+          <div id="lista-variacoes-semana" style="margin-top:8px;"></div>
+          <button class="btn-secundario" id="btn-add-variacao-semana" style="margin-top:2px;">+ Adicionar variação</button>
+        </div>
+      </div>
+
+      <div id="lista-config"></div>
+      <button class="btn-secundario" id="btn-add-bloco" style="margin-top:6px;">+ Adicionar bloco</button>
+      <button class="btn-primario" id="btn-guardar-config" style="margin-top:14px;">Guardar alterações</button>
+      <p id="msg-config" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
+      </div>
+
+      <div class="painel-aba" data-aba="definicoes">
+      <div class="titulo-secao" style="font-size:18px;">⚙️ Definições</div>
+      <div class="subtitulo-secao">Aparência, sons, voz, celebrações e como a app se comporta.</div>
+
       <div class="linha-definicao">
         <div class="txt-def">
           <div class="t">🌿 Efeitos calmos</div>
@@ -2864,6 +2896,30 @@
         </div>
       </div>
 
+      <div class="linha-definicao" style="display:block;">
+        <div class="txt-def">
+          <div class="t">🎉 Intensidade das celebrações</div>
+          <div class="d">Normal: confetis, faixa de emojis e ovação. Suave: só um brilho e um som curto. Nenhuma: só a mensagem e a estrela, sem brilho nem som.</div>
+        </div>
+        <div class="bloco-tema-reforco">
+          <select id="select-intensidade-celebracao" aria-label="Intensidade das celebrações" onchange="definirIntensidadeCelebracao(this.value)">
+            <option value="normal">Normal</option>
+            <option value="suave">Suave</option>
+            <option value="nenhuma">Nenhuma</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="linha-definicao">
+        <div class="txt-def">
+          <div class="t">🎯 Só o essencial</div>
+          <div class="d">Mostra menos: a barra de baixo fica com Início, O Dia e Jogos, e desaparecem "Mais", "Ver mais" e "Jogar a dois". O Calma e o acesso à área dos pais mantêm-se sempre.</div>
+        </div>
+        <button class="interruptor" id="interruptor-modo-essencial" onclick="alternarModoEssencial()" aria-label="Ativar ou desativar o modo Só o essencial">
+          <div class="bola"></div>
+        </button>
+      </div>
+
       <div class="linha-definicao">
         <div class="txt-def">
           <div class="t">🔤 "Sabias que…" no Traçado</div>
@@ -2882,15 +2938,6 @@
         <button class="interruptor" id="interruptor-mostrar-tempo-esperar" onclick="alternarMostrarTempoEsperar()" aria-label="Mostrar ou esconder o tempo no jogo Esperar">
           <div class="bola"></div>
         </button>
-      </div>
-
-      <div class="linha-definicao" style="align-items:flex-start;">
-        <div class="txt-def" style="width:100%;">
-          <div class="t">📅 Variações da rotina por dia da semana</div>
-          <div class="d">Para dias que têm sempre algo diferente (ex: natação às terças). Adiciona um bloco extra que só aparece nesse dia — sem precisar de editar a rotina normal.</div>
-          <div id="lista-variacoes-semana" style="margin-top:8px;"></div>
-          <button class="btn-secundario" id="btn-add-variacao-semana" style="margin-top:2px;">+ Adicionar variação</button>
-        </div>
       </div>
 
       <div class="linha-definicao" id="linha-instalar-app" style="align-items:flex-start;">
@@ -3008,10 +3055,6 @@
         </div>
       </div>
 
-      <div id="lista-config"></div>
-      <button class="btn-secundario" id="btn-add-bloco" style="margin-top:6px;">+ Adicionar bloco</button>
-      <button class="btn-primario" id="btn-guardar-config" style="margin-top:14px;">Guardar alterações</button>
-      <p id="msg-config" style="text-align:center;font-size:12.5px;color:var(--texto-suave);margin-top:10px;"></p>
       </div>
 
       <div class="painel-aba" data-aba="evolucao">
@@ -4542,7 +4585,7 @@
 </script>
 
 <script>
-window.APP_VERSION = '1.57.54';
+window.APP_VERSION = '1.57.55';
 
 /* ======================= DADOS ======================= */
 
@@ -6102,7 +6145,7 @@ function gerarHtmlJuntarLimpar(){
   return `
     <div class="painel">
       <div class="nivel-jogo" id="nivel-jogo-juntar-limpar">A preparar...</div>
-      <p class="desc">Arrasta o dedo por peças da mesma cor que estejam juntas — quanto maior o grupo, melhor!</p>
+      <p class="desc">Arrasta o dedo por peças da mesma cor que estejam juntas.</p>
       <div class="frasco-juntar-limpar" id="frasco-juntar-limpar" role="img" aria-label="Frasco a encher com as peças já limpas">
         <div class="frasco-bolas" id="frasco-bolas-juntar-limpar"></div>
       </div>
@@ -7525,9 +7568,49 @@ function gerarSequenciaSessao(){
   return embaralhados.slice(0, Math.min(numJogosPorSessao, jogosItens.length));
 }
 
+// A sessão em curso fica guardada (só para o próprio dia), para que "Parar por agora" — ou fechar
+// a app — não obrigue a começar de novo com jogos diferentes. É apagada ao concluir ou ao sair.
+const CHAVE_SESSAO_EM_CURSO = chaveCrianca('mundoDoEduardo_sessaoJogosEmCurso_v1');
+function guardarSessaoEmCurso(){
+  try{
+    if(sessaoJogosAtiva) localStorage.setItem(CHAVE_SESSAO_EM_CURSO, JSON.stringify({ dia: dataHojeChave(), sessao: sessaoJogosAtiva }));
+    else localStorage.removeItem(CHAVE_SESSAO_EM_CURSO);
+  }catch(e){ /* não é crítico */ }
+}
+// Repõe a sessão guardada se for de hoje e ainda coerente com a lista de jogos atual.
+function restaurarSessaoEmCurso(){
+  if(sessaoJogosAtiva) return true;
+  try{
+    const bruto = localStorage.getItem(CHAVE_SESSAO_EM_CURSO);
+    if(!bruto) return false;
+    const g = JSON.parse(bruto);
+    const ss = g && g.sessao;
+    const valida = g && g.dia === dataHojeChave() && ss && Array.isArray(ss.indices) && Array.isArray(ss.concluidos)
+      && Number.isInteger(ss.posicaoAtual) && ss.posicaoAtual >= 0 && ss.posicaoAtual < ss.indices.length
+      && ss.indices.every(i => Number.isInteger(i) && jogosItens[i]);
+    if(!valida){ localStorage.removeItem(CHAVE_SESSAO_EM_CURSO); return false; }
+    sessaoJogosAtiva = { indices: ss.indices, posicaoAtual: ss.posicaoAtual, concluidos: ss.concluidos };
+    return true;
+  }catch(e){ return false; }
+}
+// O botão do ecrã Jogos diz "Continuar" quando há uma sessão a meio.
+function atualizarBotaoSessaoJogos(){
+  const btn = document.getElementById('btn-iniciar-sessao-jogos');
+  if(!btn) return;
+  btn.textContent = restaurarSessaoEmCurso() ? '▶ Continuar a Sessão de Jogos' : '🧭 Começar uma Sessão de Jogos';
+}
+
 function iniciarSessaoJogos(){
+  if(restaurarSessaoEmCurso()){
+    // Já há uma sessão a meio: retoma-a (mesmos jogos, mesma posição) em vez de criar outra.
+    renderPercursoSessao();
+    irPara('sessao-jogos');
+    posicionarMascotePercurso(sessaoJogosAtiva.posicaoAtual);
+    return;
+  }
   const indices = gerarSequenciaSessao();
   sessaoJogosAtiva = { indices, posicaoAtual: 0, concluidos: [] };
+  guardarSessaoEmCurso();
   renderPercursoSessao();
   irPara('sessao-jogos');
   posicionarMascotePercurso(0);
@@ -7540,6 +7623,7 @@ function avancarNaSessaoJogos(){
   sessaoJogosAtiva.concluidos.push(sessaoJogosAtiva.posicaoAtual);
   const posAnterior = sessaoJogosAtiva.posicaoAtual;
   sessaoJogosAtiva.posicaoAtual++;
+  if(sessaoJogosAtiva.posicaoAtual < sessaoJogosAtiva.indices.length) guardarSessaoEmCurso();
   if(sessaoJogosAtiva.posicaoAtual >= sessaoJogosAtiva.indices.length){
     // Último jogo: a mascote salta para a taça 🏆 no fim do percurso e só depois vem a cena final.
     renderPercursoSessao();
@@ -7561,6 +7645,7 @@ function concluirSessaoJogos(){
     localStorage.setItem(CHAVE_SESSAO_JOGOS, JSON.stringify({ ultimaSessaoIndices: indicesFeitos }));
   }catch(e){ /* não é crítico */ }
   sessaoJogosAtiva = null;
+  guardarSessaoEmCurso();
   contadorTrofeus++;
   const medalhasNovas = verificarMedalhas();
   guardarEstado();
@@ -7617,6 +7702,7 @@ function sairDaSessaoJogos(){
     }catch(e){ /* não é crítico */ }
   }
   sessaoJogosAtiva = null;
+  guardarSessaoEmCurso();
   saltoMascoteEmCurso = false;
   if(mascotePercursoEl){ try{ mascotePercursoEl.getAnimations().forEach(a=>a.cancel()); }catch(e){} }
   irPara('jogos');
@@ -7642,6 +7728,8 @@ function renderPercursoSessao(){
   if(tituloEl){
     tituloEl.textContent = 'Sessão de Jogos — ' + Math.min(sessaoJogosAtiva.posicaoAtual + 1, sessaoJogosAtiva.indices.length) + ' de ' + sessaoJogosAtiva.indices.length;
   }
+  const avisoSessao = document.getElementById('aviso-sessao-jogos');
+  if(avisoSessao) avisoSessao.innerHTML = htmlAvisoFaltaPouco(sessaoJogosAtiva.indices.length - sessaoJogosAtiva.posicaoAtual, 'jogo', 'jogos');
   const jogoAtual = jogosItens[sessaoJogosAtiva.indices[sessaoJogosAtiva.posicaoAtual]];
   const btnJogar = document.getElementById('btn-jogar-atual-sessao');
   if(btnJogar && jogoAtual){
@@ -7922,6 +8010,8 @@ let altoContrasteAtivo = false;
 // reduzir — o objetivo do exercício é tolerar a incerteza, não vigiar o relógio.
 // Por omissão fica visível (true), para não mudar o comportamento de quem já usa a app.
 let mostrarTempoEsperar = true;
+let intensidadeCelebracao = 'normal'; // 'normal' | 'suave' | 'nenhuma' — só afeta as celebrações (área dos pais)
+let modoEssencialAtivo = false; // "Só o essencial": menos botões e escolhas visíveis (área dos pais)
 let curiosidadeLetraTracadoAtiva = true; // "Sabias que…" depois de cada letra no Traçado (opcional, área dos pais)
 // Chaves de GRUPOS_LETRAS_TRACADO que a criança já traçou até ao fim (mostram ✓ no menu do
 // Traçado). Vive dentro do "estado" da criança (guardarEstado/carregarEstado), por isso é
@@ -8166,6 +8256,7 @@ function renderFrasesRapidasCaa(){
 const ABAS_CONFIG = [
   {id:'perfil', nome:'📝 Perfil'},
   {id:'rotina', nome:'🗓️ Rotina'},
+  {id:'definicoes', nome:'⚙️ Definições'},
   {id:'evolucao', nome:'📈 Evolução'},
   {id:'terapeuta', nome:'🩺 Terapeuta'},
   {id:'recompensas', nome:'🎁 Recompensas'},
@@ -8452,6 +8543,8 @@ function guardarEstado(){
       altoContrasteAtivo: altoContrasteAtivo,
       mostrarTempoEsperar: mostrarTempoEsperar,
       curiosidadeLetraTracadoAtiva: curiosidadeLetraTracadoAtiva,
+      modoEssencialAtivo: modoEssencialAtivo,
+      intensidadeCelebracao: intensidadeCelebracao,
       gruposTracadoConcluidos: gruposTracadoConcluidos,
       volumeSomApp: volumeSomApp,
       registoCalmaPorBloco: registoCalmaPorBloco,
@@ -8530,6 +8623,8 @@ function carregarEstado(){
     if(typeof estado.altoContrasteAtivo === 'boolean') altoContrasteAtivo = estado.altoContrasteAtivo;
     if(typeof estado.mostrarTempoEsperar === 'boolean') mostrarTempoEsperar = estado.mostrarTempoEsperar;
     if(typeof estado.curiosidadeLetraTracadoAtiva === 'boolean') curiosidadeLetraTracadoAtiva = estado.curiosidadeLetraTracadoAtiva;
+    if(typeof estado.modoEssencialAtivo === 'boolean') modoEssencialAtivo = estado.modoEssencialAtivo;
+    if(['normal','suave','nenhuma'].includes(estado.intensidadeCelebracao)) intensidadeCelebracao = estado.intensidadeCelebracao;
     if(Array.isArray(estado.gruposTracadoConcluidos)) gruposTracadoConcluidos = estado.gruposTracadoConcluidos.filter(k => typeof k === 'string');
     // Compatibilidade com o antigo interruptor on/off (versões anteriores da app, antes
     // do slider de volume existir) — nunca é escrita por guardarEstado() nesta versão,
@@ -8593,6 +8688,26 @@ function aplicarClasseMovimentoReduzido(){
 
 function aplicarClasseModoEscuro(){
   document.body.classList.toggle('modo-escuro', modoEscuroAtivo);
+}
+
+function aplicarClasseModoEssencial(){
+  document.body.classList.toggle('modo-essencial', modoEssencialAtivo);
+}
+
+function definirIntensidadeCelebracao(valor){
+  if(!['normal','suave','nenhuma'].includes(valor)) return;
+  intensidadeCelebracao = valor;
+  guardarEstado();
+  vibrar(20);
+}
+
+function alternarModoEssencial(){
+  modoEssencialAtivo = !modoEssencialAtivo;
+  aplicarClasseModoEssencial();
+  guardarEstado();
+  vibrar(20);
+  const btn = document.getElementById('interruptor-modo-essencial');
+  if(btn) btn.classList.toggle('ligado', modoEssencialAtivo);
 }
 
 function aplicarClasseAltoContraste(){
@@ -9167,7 +9282,8 @@ function irPara(ecra){
   document.querySelectorAll('.ecra').forEach(e=>e.classList.remove('ativo'));
   document.getElementById('ecra-'+ecra).classList.add('ativo');
   if(ecra === 'loja-recompensas') renderLojaRecompensas();
-  if(ecra === 'inicio') renderMensagemObjetivoEduardo();
+  if(ecra === 'inicio'){ renderMensagemObjetivoEduardo(); renderCartaoPrimeiroDepoisInicio(); }
+  if(ecra === 'jogos') atualizarBotaoSessaoJogos();
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
   const btn = document.querySelector('.nav-btn[data-nav="'+ecra+'"]');
   if(btn) btn.classList.add('ativo');
@@ -9193,6 +9309,58 @@ function atualizarVisibilidadeBotaoCaa(ecra){
   btnCaa.style.display = escondeEm.includes(ecra) ? 'none' : 'flex';
 }
 
+// Pictogramas nas instruções dos jogos: um símbolo à esquerda de cada instrução (ex.: "👆 Toca na
+// forma certa"), pelo verbo, para a criança perceber o que fazer mesmo sem ler tudo. Uma só função,
+// aplicada automaticamente a qualquer .nivel-jogo que apareça no ecrã de detalhe (jogos novos e
+// textos atualizados a meio incluídos), sem mexer nas 13 instruções uma a uma.
+const PICTOGRAMAS_INSTRUCAO = [
+  [/^toca/i, '👆'], [/^arrasta/i, '👉'], [/^desenha/i, '✏️'], [/^limpa/i, '🧹'],
+  [/^respira/i, '🌬️'], [/^p[õo]e/i, '🔢'], [/^encontra/i, '🔍'],
+  [/^o que vem/i, '➡️'], [/^o que dirias/i, '💬'], [/^como é que/i, '🙂'],
+];
+function aplicarPictogramasInstrucao(){
+  document.querySelectorAll('#conteudo-detalhe .nivel-jogo').forEach(el => {
+    if(el.querySelector(':scope > .pict-instrucao')) return;
+    const texto = (el.textContent || '').trim();
+    const par = PICTOGRAMAS_INSTRUCAO.find(([re]) => re.test(texto));
+    if(!par) return;
+    const span = document.createElement('span');
+    span.className = 'pict-instrucao';
+    span.setAttribute('aria-hidden', 'true');
+    span.textContent = par[1];
+    el.insertBefore(span, el.firstChild);
+  });
+}
+
+// "Parar por agora": saída calma de qualquer jogo ou quiz, sem pergunta de confirmação e sem
+// penalização (não conta como erro nem retira estrelas). A Sessão de Jogos, se houver, mantém o
+// percurso e as posições já concluídas. Reutiliza a saída normal (irPara) — só dispensa a confirmação.
+function pararPorAgora(){
+  guardarQuizPausado();
+  if(quizEmCurso) quizPausadoAgora = true;
+  quizEmCurso = false;
+  cancelarTemporizadoresJogo();
+  pararNarracao();
+  irPara('inicio');
+  const aviso = document.getElementById('aviso-parar-agora');
+  if(aviso){
+    aviso.style.display = 'flex';
+    setTimeout(()=>{ aviso.style.display = 'none'; }, 8000);
+  }
+}
+// O botão só aparece dentro de um jogo/quiz (nunca em histórias, rotina, etc.).
+function atualizarBotaoPararPorAgora(){
+  const btn = document.getElementById('btn-parar-por-agora');
+  if(!btn) return;
+  const dentroDeJogo = !!document.querySelector('#conteudo-detalhe .nivel-jogo, #conteudo-detalhe .progresso-quiz, #conteudo-detalhe .grelha-memoria');
+  btn.style.display = dentroDeJogo ? 'block' : 'none';
+}
+// Uma só ligação ao ecrã de detalhe para os retoques automáticos (pictogramas + botão de parar).
+function aoAtualizarEcraDetalhe(){
+  aplicarPictogramasInstrucao();
+  atualizarBotaoPararPorAgora();
+}
+
 function irParaDetalhe(html, tituloVoltar){
   if(tituloVoltar !== 'atividades'){ pararSomAtivo(); } // mantém o som se ainda estivermos dentro de Atividades
   tocarSomClique();
@@ -9203,7 +9371,9 @@ function irParaDetalhe(html, tituloVoltar){
   document.getElementById('main').scrollTop = 0;
   atualizarVisibilidadeBotaoCaa('detalhe');
   try{ if(typeof atualizarEcraLigado === 'function') atualizarEcraLigado(); }catch(e){ /* ainda a arrancar */ }
-  try{ verificarPausaEcra(); }catch(e){ /* ainda a arrancar */ }
+  // A pausa de ecrã NÃO é verificada aqui: o ecrã de detalhe é usado a cada pergunta e a cada jogo,
+  // e interromper a meio de uma tarefa é o oposto de um momento de mudança natural. Continua a
+  // aparecer ao mudar de secção (irPara), depois da celebração (fecharYay) e pela rede de segurança.
 }
 
 // Mostra um pequeno aviso amigável antes de sair de um quiz a meio, com opção de continuar ou sair.
@@ -9520,6 +9690,46 @@ function renderSemana(){
   }).join('');
 }
 
+// Aviso "está quase a acabar", igual em todo o lado (mesmo formato e mesma cor do aviso de
+// transição da rotina): só aparece quando faltam 1 ou 2 passos, para a criança prever o fim.
+function htmlAvisoFaltaPouco(restantes, singular, plural){
+  if(!(restantes >= 1 && restantes <= 2)) return '';
+  const texto = restantes === 1 ? `Falta 1 ${singular}` : `Faltam ${restantes} ${plural}`;
+  return `<div class="aviso-transicao" role="status"><span class="icone-aviso">⏳</span><span>${texto}</span></div>`;
+}
+
+// Tarefa de referência da rotina: a que está a decorrer ou, se não houver, a próxima por fazer.
+// Única fonte para a lista da rotina (chips e vista "Só agora") e para o cartão do Início.
+function indiceReferenciaRotina(indiceAgora){
+  return (indiceAgora !== -1) ? indiceAgora : rotinaHoje.findIndex(x => !x.feito);
+}
+
+// Cartão "Primeiro → Depois" no Início. Reutiliza o visual e o ecrã do Primeiro/Depois que já
+// existiam na rotina (abrirPrimeiroDepois); não cria um segundo ecrã nem um segundo estilo.
+function renderCartaoPrimeiroDepoisInicio(){
+  const cont = document.getElementById('cartao-primeiro-depois-inicio');
+  if(!cont) return;
+  const ref = (rotinaHoje.length > 0 && !rotinaHoje.every(x => x.feito)) ? indiceReferenciaRotina(calcularIndiceAgora()) : -1;
+  if(ref === -1){ cont.innerHTML = ''; return; }
+  const atual = rotinaHoje[ref];
+  const seguinte = rotinaHoje[ref+1] || null;
+  const nomeBloco = b => escaparHtml(b.t) + (b.escolhaHoje ? ': ' + escaparHtml(b.escolhaHoje) : '');
+  cont.innerHTML = `
+    <div class="primeiro-depois" role="button" tabindex="0" aria-label="Primeiro ${escaparHtml(atual.t)}, depois ${seguinte ? escaparHtml(seguinte.t) : 'fim do dia'}" onclick="abrirPrimeiroDepois(${ref})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirPrimeiroDepois(${ref});}">
+      <div class="pd-bloco">
+        <div class="pd-etiqueta">Primeiro</div>
+        <div class="pd-icone">${atual.icone}</div>
+        <div class="pd-texto">${nomeBloco(atual)}</div>
+      </div>
+      <div class="pd-seta">→</div>
+      <div class="pd-bloco ${seguinte ? '' : 'pd-vazio'}">
+        <div class="pd-etiqueta">Depois</div>
+        <div class="pd-icone">${seguinte ? seguinte.icone : '🌙'}</div>
+        <div class="pd-texto">${seguinte ? nomeBloco(seguinte) : 'Fim do dia'}</div>
+      </div>
+    </div>`;
+}
+
 function renderRotina(){
   const cont = document.getElementById('lista-rotina');
   const indiceAgora = calcularIndiceAgora();
@@ -9545,7 +9755,7 @@ function renderRotina(){
     // v1.57.49: "AGORA" na tarefa de referência e "A SEGUIR" na que vem depois (só se ainda
     // por fazer) — mesma referência que a vista "Só agora" usa para escolher o que mostrar.
     const chipRotina = rotulo => `<span class="chip-rotina ${rotulo === 'AGORA' ? 'agora' : 'seguir'}">${rotulo === 'AGORA' ? 'AGORA' : 'A SEGUIR'}</span>`;
-    const refDestaque = (indiceAgora !== -1) ? indiceAgora : rotinaHoje.findIndex(x => !x.feito);
+    const refDestaque = indiceReferenciaRotina(indiceAgora);
     let chipHtml = '';
     if(refDestaque !== -1 && !rotinaHoje.every(x => x.feito)){
       if(i === refDestaque && !b.feito) chipHtml = chipRotina('AGORA');
@@ -9569,8 +9779,7 @@ function renderRotina(){
       if(rotinaHoje.every(x => x.feito)){
         visivel = false; // já foi mostrada a mensagem de dia completo acima
       } else {
-        const proximaPorFazer = rotinaHoje.findIndex(x => !x.feito);
-        const referencia = indiceAgora !== -1 ? indiceAgora : proximaPorFazer;
+        const referencia = indiceReferenciaRotina(indiceAgora);
         visivel = (i === referencia || i === referencia + 1);
       }
     }
@@ -9616,6 +9825,7 @@ function renderRotina(){
     });
   });
   renderProgressoDia();
+  renderCartaoPrimeiroDepoisInicio();
 }
 
 // Dá um aviso discreto (vibração curta, e voz se a app estiver no ecrã "O Meu Dia")
@@ -11383,7 +11593,67 @@ function registarLatenciaResposta(chave){
   registoLatenciaPorMateria[chave].n += 1;
 }
 
+// Quiz pausado com "Parar por agora": guarda a pergunta em que ficou (só do próprio dia) para a
+// criança poder continuar de onde parou, ou recomeçar se preferir. Sem pressão: são duas escolhas.
+const CHAVE_QUIZ_PAUSADO = chaveCrianca('mundoDoEduardo_quizPausado_v1');
+let quizPausadoAgora = false; // trava temporizadores pendentes que voltariam ao quiz depois de parar
+function lerQuizPausadoTodos(){
+  try{ return JSON.parse(localStorage.getItem(CHAVE_QUIZ_PAUSADO) || '{}') || {}; }catch(e){ return {}; }
+}
+function guardarQuizPausado(){
+  if(!quizEmCurso || !quizAtual || quizIndex >= quizAtual.length) return;
+  const todos = lerQuizPausadoTodos();
+  todos[quizChave] = { dia: dataHojeChave(), titulo: quizTitulo, origem: quizOrigem, perguntas: quizAtual, indice: quizIndex,
+    acertosSeguidos: quizAcertosSeguidos, teveErro: quizTeveErro, dificeisSeguidas: quizPerguntasDificeisSeguidas };
+  try{ localStorage.setItem(CHAVE_QUIZ_PAUSADO, JSON.stringify(todos)); }catch(e){ /* não é crítico */ }
+}
+function limparQuizPausado(chave){
+  const todos = lerQuizPausadoTodos();
+  if(!(chave in todos)) return;
+  delete todos[chave];
+  try{ localStorage.setItem(CHAVE_QUIZ_PAUSADO, JSON.stringify(todos)); }catch(e){}
+}
+function lerQuizPausado(chave){
+  const g = lerQuizPausadoTodos()[chave];
+  const valido = g && g.dia === dataHojeChave() && Array.isArray(g.perguntas) && Number.isInteger(g.indice) && g.indice > 0 && g.indice < g.perguntas.length;
+  if(!valido){ if(g) limparQuizPausado(chave); return null; }
+  return g;
+}
+
 function iniciarQuiz(chave, titulo, origem){
+  const pausado = lerQuizPausado(chave);
+  if(!pausado){ comecarQuizDoInicio(chave, titulo, origem); return; }
+  irParaDetalhe(`
+    <div class="painel">
+      <div class="icone-grande" style="background:var(--salva-clara)">▶️</div>
+      <h2>Continuamos?</h2>
+      <p class="desc">Paraste na pergunta ${pausado.indice + 1} de ${pausado.perguntas.length}.</p>
+      <button class="btn-primario" id="btn-quiz-continuar">▶ Continuar de onde parei</button>
+      <button class="btn-secundario" id="btn-quiz-recomecar" style="margin-top:10px;">↺ Começar do início</button>
+    </div>
+  `, origem);
+  document.getElementById('btn-quiz-continuar').addEventListener('click', ()=>{
+    quizPausadoAgora = false;
+    quizAtual = pausado.perguntas;
+    quizIndex = pausado.indice;
+    quizTitulo = pausado.titulo || titulo;
+    quizOrigem = pausado.origem || origem;
+    quizChave = chave;
+    quizAcertosSeguidos = pausado.acertosSeguidos || 0;
+    quizTeveErro = !!pausado.teveErro;
+    quizPerguntasDificeisSeguidas = pausado.dificeisSeguidas || 0;
+    quizTentativasNaPergunta = 0;
+    quizEmCurso = true;
+    renderQuiz();
+  });
+  document.getElementById('btn-quiz-recomecar').addEventListener('click', ()=>{
+    limparQuizPausado(chave);
+    comecarQuizDoInicio(chave, titulo, origem);
+  });
+}
+
+function comecarQuizDoInicio(chave, titulo, origem){
+  quizPausadoAgora = false;
   quizAtual = montarQuizProgressivo(chave);
   quizIndex = 0;
   quizTitulo = titulo;
@@ -11425,8 +11695,10 @@ function renderCartaoGeneralizacao(chave){
 }
 
 function renderQuiz(){
+  if(quizPausadoAgora) return; // um temporizador pendente não pode puxar de volta para o quiz depois de "Parar por agora"
   pararNarracao();
   if(quizIndex >= quizAtual.length){
+    limparQuizPausado(quizChave);
     quizEmCurso = false; // chegou ao fim (com ou sem erro): já não há progresso para perder ao sair
     const nivelDaSessao = quizAtual[0] ? quizAtual[0].nivel : 1;
     const nomesNivel = {1:'Fácil', 2:'Médio', 3:'Desafio'};
@@ -11533,6 +11805,7 @@ function renderQuiz(){
       ${alternadorInicial}
       <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--texto-suave);">Pergunta ${quizIndex + 1} de ${quizAtual.length}</p>
       <div class="progresso-quiz"><div class="barra" style="width:${pct}%"></div></div>
+      ${htmlAvisoFaltaPouco(quizAtual.length - quizIndex, 'pergunta', 'perguntas')}
       ${indicadorVez}
       <div class="pergunta">${escaparHtml(q.p)}</div>
       <button class="btn-pagina" id="btn-ouvir-quiz" style="margin-bottom:12px;">🔊 Ouvir</button>
@@ -11758,6 +12031,7 @@ function gerarHtmlMemoria(){
         <button class="btn-modo-dupla ${memModoDupla ? '' : 'ativo'}" id="btn-memoria-sozinho">${iconeCrianca()} Sozinho</button>
         <button class="btn-modo-dupla ${memModoDupla ? 'ativo' : ''}" id="btn-memoria-dupla">${iconeDupla()} A Dois</button>
       </div></details>
+      <div id="aviso-fim-memoria"></div>
       <div class="estado-jogo" id="estado-memoria">Encontra todos os pares</div>
       <div class="vez-modo-dupla" id="vez-modo-dupla" style="display:none;"></div>
       <div class="grelha-memoria" id="grelha-memoria"></div>
@@ -11872,6 +12146,8 @@ function virarCarta(i){
       } else {
         const estadoMem2 = document.getElementById('estado-memoria');
         if(estadoMem2) estadoMem2.textContent = `Encontra os pares · ${memPares} de ${memTotalPares}`;
+        const avisoMem = document.getElementById('aviso-fim-memoria');
+        if(avisoMem) avisoMem.innerHTML = htmlAvisoFaltaPouco(memTotalPares - memPares, 'par', 'pares');
         if(memModoDupla){
           // Acertou o par: mantém a mesma vez (regra comum de jogo da memória — quem acerta joga de novo)
           atualizarIndicadorVez();
@@ -12887,8 +13163,24 @@ function marcarGrupoTracadoConcluido(chaveGrupo){
   guardarEstado();
   const btn = document.querySelector('[data-grupo-tracado="' + chaveGrupo + '"]');
   if(btn && !btn.querySelector('.grupo-feito')){
-    btn.querySelector('span[style]').insertAdjacentHTML('beforebegin', HTML_MARCA_GRUPO_FEITO);
+    btn.insertAdjacentHTML('beforeend', HTML_MARCA_GRUPO_FEITO);
   }
+  atualizarBotaoContinuarTracado();
+}
+
+// Próximo grupo por fazer, pela ordem em que estão definidos (maiúsculas → números → minúsculas).
+// Devolve null quando todos estão concluídos.
+function obterProximoGrupoTracado(){
+  return Object.keys(GRUPOS_LETRAS_TRACADO).find(k => !gruposTracadoConcluidos.includes(k)) || null;
+}
+
+// Mostra no botão "Continuar" o próximo grupo por fazer (ou esconde-o se já não há nenhum).
+function atualizarBotaoContinuarTracado(){
+  const btn = document.getElementById('btn-continuar-tracado');
+  if(!btn) return;
+  const chave = obterProximoGrupoTracado();
+  btn.hidden = !chave;
+  if(chave) btn.textContent = '▶ Continuar: ' + GRUPOS_LETRAS_TRACADO[chave].icone + ' ' + GRUPOS_LETRAS_TRACADO[chave].nome;
 }
 
 let tracadoModoNome = false; // true quando a sessão atual é "Traça o Meu Nome"
@@ -12927,7 +13219,7 @@ function gerarHtmlTracado(){
     `<button class="btn-tema-tracado" data-tema-tracado="${chave}">${tema.icone} ${tema.nome}</button>`
   ).join('');
   const htmlBotaoGrupo = ([chave, g]) =>
-    `<button class="btn-tema-tracado" data-grupo-tracado="${chave}">${g.icone} ${g.nome}${gruposTracadoConcluidos.includes(chave) ? HTML_MARCA_GRUPO_FEITO : ''}<span style="display:block;font-size:11px;font-weight:600;opacity:.7;letter-spacing:1px;margin-top:2px;">${g.letras.join(' ')}</span></button>`;
+    `<button class="btn-tema-tracado" data-grupo-tracado="${chave}" aria-label="${g.nome}: ${g.letras.join(' ')}">${g.icone} ${g.nome}${gruposTracadoConcluidos.includes(chave) ? HTML_MARCA_GRUPO_FEITO : ''}</button>`;
   const botoesDoTipo = tipo => Object.entries(GRUPOS_LETRAS_TRACADO).filter(([,g]) => g.tipo === tipo).map(htmlBotaoGrupo).join('');
   const botoesGrupos = botoesDoTipo(undefined);       // maiúsculas (grupos sem "tipo")
   const botoesNumeros = botoesDoTipo('numeros');
@@ -12937,17 +13229,15 @@ function gerarHtmlTracado(){
       <div class="nivel-jogo" id="nivel-jogo-tracado">Desenha por cima da linha com o dedo</div>
       <div id="menu-tracado">
       ${nomeCrianca ? `<button class="btn-secundario" id="btn-tracar-nome" style="margin-bottom:10px;">✏️ Traçar o meu nome: ${escaparHtml(nomeCrianca)}</button>` : ''}
+      <button class="btn-primario" id="btn-continuar-tracado" style="margin-bottom:12px;" hidden></button>
       <div class="menu-tracado-abas" role="tablist">
-        <button class="btn-aba-tracado" data-painel-tracado="letras" aria-expanded="false"><span class="ic">🔤</span>Letras</button>
-        <button class="btn-aba-tracado" data-painel-tracado="numeros" aria-expanded="false"><span class="ic">🔢</span>Números</button>
+        <button class="btn-aba-tracado" data-painel-tracado="letras" aria-expanded="false"><span class="ic">🔠</span>ABC</button>
+        <button class="btn-aba-tracado" data-painel-tracado="minusculas" aria-expanded="false"><span class="ic">🔡</span>abc</button>
+        <button class="btn-aba-tracado" data-painel-tracado="numeros" aria-expanded="false"><span class="ic">🔢</span>123</button>
         <button class="btn-aba-tracado" data-painel-tracado="palavras" aria-expanded="false"><span class="ic">💬</span>Palavras</button>
       </div>
-      <div class="painel-tracado" id="painel-tracado-letras" hidden>
-        <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Maiúsculas</p>
-        <div class="grelha-temas-tracado">${botoesGrupos}</div>
-        <p style="margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--texto-suave);">Minúsculas</p>
-        <div class="grelha-temas-tracado">${botoesMinusculas}</div>
-      </div>
+      <div class="painel-tracado" id="painel-tracado-letras" hidden><div class="grelha-temas-tracado">${botoesGrupos}</div></div>
+      <div class="painel-tracado" id="painel-tracado-minusculas" hidden><div class="grelha-temas-tracado">${botoesMinusculas}</div></div>
       <div class="painel-tracado" id="painel-tracado-numeros" hidden><div class="grelha-temas-tracado">${botoesNumeros}</div></div>
       <div class="painel-tracado" id="painel-tracado-palavras" hidden>
         ${fichaCaa ? `<button class="btn-secundario" id="btn-tracar-palavras-caa" style="margin-bottom:10px;">💬 As Minhas Palavras</button>` : ''}
@@ -12994,6 +13284,12 @@ function iniciarTracado(){
   document.getElementById('btn-recomecar-tracado').addEventListener('click', desenharLetraAtualTracado);
   const btnNome = document.getElementById('btn-tracar-nome');
   if(btnNome) btnNome.addEventListener('click', iniciarTracadoDoNome);
+  atualizarBotaoContinuarTracado();
+  const btnContinuar = document.getElementById('btn-continuar-tracado');
+  if(btnContinuar) btnContinuar.addEventListener('click', () => {
+    const chave = obterProximoGrupoTracado();
+    if(chave) iniciarTracadoDoGrupo(chave);
+  });
   const btnPalavrasCaa = document.getElementById('btn-tracar-palavras-caa');
   if(btnPalavrasCaa) btnPalavrasCaa.addEventListener('click', () => iniciarTracadoDoTema(CHAVE_TEMA_TRACADO_CAA));
   document.querySelectorAll('[data-grupo-tracado]').forEach(btn => {
@@ -13022,7 +13318,7 @@ function iniciarTracado(){
     if(menuTracado) menuTracado.style.display = '';
     btnMudarTracado.style.display = 'none';
   });
-  document.querySelectorAll('.painel-tracado button, #btn-tracar-nome').forEach(btn => {
+  document.querySelectorAll('.painel-tracado button, #btn-tracar-nome, #btn-continuar-tracado').forEach(btn => {
     btn.addEventListener('click', () => {
       fecharPaineisTracado();
       if(menuTracado) menuTracado.style.display = 'none';
@@ -13841,7 +14137,7 @@ function reiniciarMascoteOverlayYay(){
   if(!garantirVideoMascoteOverlay(videoEl)){
     return mostrarEmojiEstaticoOverlayYay();
   }
-  if(movimentoReduzidoAtivo()){
+  if(movimentoReduzidoAtivo() || intensidadeCelebracao !== 'normal'){
     return mostrarMascoteParadaOverlayYay(videoEl);
   }
   videoEl.dataset.parado = '0';
@@ -14059,7 +14355,7 @@ function aplicarTemaReforcoOverlay(){
   const faixa = document.getElementById('yay-faixa-tema');
   if(!faixa) return;
   const emojis = emojisDoTemaReforco();
-  if(!emojis.length){ faixa.style.display = 'none'; faixa.textContent = ''; return; }
+  if(!emojis.length || intensidadeCelebracao !== 'normal'){ faixa.style.display = 'none'; faixa.textContent = ''; return; }
   faixa.textContent = Array.from({length:5}, (_,i) => emojis[i % emojis.length]).join('');
   faixa.style.display = 'block';
 }
@@ -14085,7 +14381,8 @@ function iniciarDefinicaoTemaReforco(){
 document.addEventListener('DOMContentLoaded', iniciarDefinicaoTemaReforco);
 
 function dispararConfetis(){
-  if(movimentoReduzidoAtivo()){
+  if(intensidadeCelebracao === 'nenhuma') return;
+  if(intensidadeCelebracao === 'suave' || movimentoReduzidoAtivo()){
     mostrarBrilhoSuave();
     return;
   }
@@ -14217,9 +14514,10 @@ function tocarVozMultidao(ctx, tempo, duracao, freqBase, volume){
   osc.stop(tempo + duracao + 0.05);
 }
 function tocarOvacao(){
+  if(intensidadeCelebracao === 'nenhuma') return;
   // Em "Efeitos calmos", troca a ovação (multidão + palmas) por um som curto e suave,
   // para não sobrecarregar quem tem sensibilidade auditiva.
-  if(movimentoReduzidoAtivo()){
+  if(intensidadeCelebracao === 'suave' || movimentoReduzidoAtivo()){
     tocarSomAcerto();
     return;
   }
@@ -14322,7 +14620,7 @@ function darEstrela(titulo, texto, quantidade){
   if(emojiEl){
     emojiEl.classList.remove('brilho-continuo');
     void emojiEl.offsetWidth; // força o browser a "esquecer" a animação anterior antes de reaplicar
-    if(!movimentoReduzidoAtivo()){
+    if(!movimentoReduzidoAtivo() && intensidadeCelebracao === 'normal'){
       emojiEl.classList.add('brilho-continuo');
     }
   }
@@ -15345,6 +15643,10 @@ function abrirConfigSemPin(){
   if(interruptorModoEscuro) interruptorModoEscuro.classList.toggle('ligado', modoEscuroAtivo);
   const interruptorAltoContraste = document.getElementById('interruptor-alto-contraste');
   if(interruptorAltoContraste) interruptorAltoContraste.classList.toggle('ligado', altoContrasteAtivo);
+  const selIntensidade = document.getElementById('select-intensidade-celebracao');
+  if(selIntensidade) selIntensidade.value = intensidadeCelebracao;
+  const interruptorEssencial = document.getElementById('interruptor-modo-essencial');
+  if(interruptorEssencial) interruptorEssencial.classList.toggle('ligado', modoEssencialAtivo);
   const interruptorCuriosidadeLetra = document.getElementById('interruptor-curiosidade-letra-tracado');
   if(interruptorCuriosidadeLetra) interruptorCuriosidadeLetra.classList.toggle('ligado', curiosidadeLetraTracadoAtiva);
   const interruptorTempoEsperar = document.getElementById('interruptor-mostrar-tempo-esperar');
@@ -19312,6 +19614,8 @@ function passoPausaEcra(){
     // Rede de segurança: 5 min extra sem nenhuma mudança natural → mostra na mesma
     if(pausaSegundosAtivos >= limite + 300) mostrarPausaEcra();
   } else if(av){
+    const faltaMin = Math.max(1, Math.ceil((limite - pausaSegundosAtivos) / 60));
+    av.textContent = faltaMin === 1 ? '⏳ Falta cerca de 1 minuto para a pausa' : `⏳ Faltam cerca de ${faltaMin} minutos para a pausa`;
     av.style.display = ((limite - pausaSegundosAtivos) <= 120 && !pausaHaOverlayAberto()) ? 'block' : 'none';
   }
 }
@@ -19568,6 +19872,11 @@ carregarVistaRotina();
 aplicarClasseMovimentoReduzido();
 aplicarClasseModoEscuro();
 aplicarClasseAltoContraste();
+aplicarClasseModoEssencial();
+(function(){
+  const alvo = document.getElementById('conteudo-detalhe');
+  if(alvo && window.MutationObserver) new MutationObserver(aoAtualizarEcraDetalhe).observe(alvo, {childList:true, subtree:true, characterData:true});
+})();
 atualizarData();
 renderRotina();
 atualizarHistoricoHoje(); // garante um registo do dia de hoje mesmo antes de qualquer interação
